@@ -137,7 +137,7 @@ export function Hero() {
           </div>
 
           <motion.div
-            className="glass-panel absolute -left-4 top-16 hidden rounded-2xl px-4 py-3 shadow-[var(--shadow-soft)] sm:block"
+            className="glass-panel absolute -left-5 top-1/3 hidden rounded-2xl px-4 py-3 shadow-[var(--shadow-soft)] sm:block"
             animate={{ y: [0, -12, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           >
