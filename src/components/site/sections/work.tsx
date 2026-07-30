@@ -129,7 +129,7 @@ export function Performance() {
       className="relative scroll-mt-28 overflow-hidden border-y border-hairline bg-navy py-24 text-navy-foreground lg:py-32"
     >
       <div className="grid-lines pointer-events-none absolute inset-0 opacity-[0.08]" />
-      <div className="pointer-events-none absolute -right-24 top-1/4 h-96 w-96 rounded-none bg-emerald/20 blur-3xl" />
+      
 
       <div className="mx-auto w-[min(1200px,92vw)]">
         <Reveal className="max-w-3xl">

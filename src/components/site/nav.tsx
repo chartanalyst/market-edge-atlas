@@ -126,14 +126,14 @@ export function SiteNav() {
 
 
         {open ? (
-          <div className="glass-panel mt-2 rounded-none p-3 lg:hidden">
-            <div className="grid gap-1">
+          <div className="mb-3 border border-border bg-card lg:hidden">
+            <div className="grid">
               {links.map((l) => (
                 <a
                   key={l.label}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-none px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  className="border-b border-hairline px-4 py-3 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   {l.label}
                 </a>
@@ -141,7 +141,7 @@ export function SiteNav() {
               <a
                 href="/#contact"
                 onClick={() => setOpen(false)}
-                className="mt-1 rounded-none bg-navy px-3 py-2.5 text-center text-sm font-semibold text-navy-foreground"
+                className="bg-navy px-4 py-3 text-center font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground"
               >
                 Book a consultation
               </a>
@@ -166,7 +166,7 @@ export function BackToTop() {
       <a
         href="/cv-technical-market-analyst.txt"
         download
-        className="glass-panel hidden items-center gap-2 rounded-none px-4 py-2.5 text-sm font-medium shadow-[var(--shadow-soft)] transition-transform hover:-translate-y-0.5 sm:inline-flex"
+        className="hidden items-center gap-2 border border-border bg-card px-4 py-2.5 font-mono text-[0.7rem] uppercase tracking-[0.14em] transition-all hover:shadow-[4px_4px_0_0_var(--emerald)] sm:inline-flex"
       >
         <Download className="h-4 w-4 text-emerald" />
         Download CV
@@ -176,7 +176,7 @@ export function BackToTop() {
         animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0.7, y: show ? 0 : 12 }}
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Back to top"
-        className="grid h-11 w-11 place-items-center rounded-none bg-navy text-navy-foreground shadow-[var(--shadow-lift)]"
+        className="grid h-11 w-11 place-items-center border border-border bg-navy text-navy-foreground"
         style={{ pointerEvents: show ? "auto" : "none" }}
       >
         <ArrowUp className="h-4 w-4" />
