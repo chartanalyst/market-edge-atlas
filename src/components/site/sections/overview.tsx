@@ -6,7 +6,7 @@ import { AreaChart } from "@/components/site/charts";
 export function About() {
   return (
     <section id="about" className="relative scroll-mt-28 py-24 lg:py-32">
-      <div className="mx-auto grid w-[min(1200px,92vw)] gap-14 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="mx-auto grid w-[min(1320px,94vw)] gap-14 lg:grid-cols-[0.95fr_1.05fr]">
         <div>
           <SectionHeading
             eyebrow="About"
@@ -35,7 +35,7 @@ export function About() {
               { t: "Risk-first", d: "Invalidation defined before position sizing." },
               { t: "Multi-market", d: "Cross-asset confirmation on every directional call." },
             ].map((i) => (
-              <div key={i.t} className="rounded-2xl border border-hairline bg-surface/60 p-5">
+              <div key={i.t} className="border border-border bg-surface p-5">
                 <p className="font-display text-sm font-semibold">{i.t}</p>
                 <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{i.d}</p>
               </div>
@@ -44,7 +44,7 @@ export function About() {
         </div>
 
         <Reveal delay={0.12} className="relative">
-          <div className="sticky top-28 rounded-3xl border border-hairline bg-card p-7 shadow-[var(--shadow-soft)]">
+          <div className="sticky top-28 border border-border bg-card p-7">
             <p className="eyebrow">What makes the analysis different</p>
             <ul className="mt-7 grid gap-6">
               {[
@@ -79,7 +79,7 @@ export function About() {
               ))}
             </ul>
 
-            <div className="mt-8 rounded-2xl border border-hairline bg-surface/60 p-4">
+            <div className="mt-8 border border-border bg-surface p-4">
               <div className="flex items-center justify-between">
                 <p className="eyebrow text-[0.6rem]">Cumulative R · published ideas</p>
                 <p className="num text-sm font-semibold text-emerald">+148R</p>
@@ -99,8 +99,8 @@ export function About() {
 
 export function Markets() {
   return (
-    <section id="markets" className="scroll-mt-28 border-y border-hairline bg-surface/50 py-24 lg:py-32">
-      <div className="mx-auto w-[min(1200px,92vw)]">
+    <section id="markets" className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <SectionHeading
           eyebrow="Markets covered"
           title="Five asset classes, one analytical framework."
@@ -113,9 +113,9 @@ export function Markets() {
             return (
               <StaggerItem key={m.name} className={i === 0 ? "lg:col-span-2" : undefined}>
                 <TiltCard className="h-full">
-                  <article className="surface-card group flex h-full flex-col rounded-3xl p-7">
+                  <article className="surface-card group flex h-full flex-col p-7">
                     <div className="flex items-start justify-between gap-4">
-                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-emerald-soft text-accent-foreground transition-transform duration-500 group-hover:scale-110">
+                      <span className="grid h-12 w-12 shrink-0 place-items-center border border-emerald bg-transparent text-emerald transition-transform duration-500 group-hover:scale-110">
                         <Icon className="h-5 w-5" />
                       </span>
                       <span className="num text-[0.65rem] uppercase tracking-widest text-muted-foreground">

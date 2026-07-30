@@ -44,7 +44,7 @@ function InsightsPage() {
 
   return (
     <main className="pt-32">
-      <section className="mx-auto w-[min(1200px,92vw)]">
+      <section className="mx-auto w-[min(1320px,94vw)]">
         <Reveal>
           <div className="flex items-center gap-3">
             <span className="h-px w-8 bg-emerald" />
@@ -65,7 +65,7 @@ function InsightsPage() {
                 key={c}
                 onClick={() => setCat(c)}
                 className={cn(
-                  "rounded-full border px-4 py-2 text-xs font-semibold transition-all",
+                  "border px-4 py-2 text-xs font-semibold transition-all",
                   cat === c
                     ? "border-navy bg-navy text-navy-foreground"
                     : "border-hairline text-muted-foreground hover:border-emerald hover:text-emerald",
@@ -75,7 +75,7 @@ function InsightsPage() {
               </button>
             ))}
           </div>
-          <label className="flex items-center gap-2 rounded-full border border-hairline bg-card px-4 py-2.5">
+          <label className="flex items-center gap-2 border border-border bg-card px-4 py-2.5">
             <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
             <input
               value={query}
@@ -89,9 +89,9 @@ function InsightsPage() {
 
         {featured ? (
           <Reveal delay={0.14} className="mt-12">
-            <article className="surface-card grid gap-8 rounded-3xl p-8 lg:grid-cols-[1.2fr_1fr] lg:p-12">
+            <article className="surface-card grid gap-8 p-8 lg:grid-cols-[1.2fr_1fr] lg:p-12">
               <div>
-                <span className="rounded-full bg-emerald-soft px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
+                <span className="border border-emerald bg-transparent px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
                   {featured.category}
                 </span>
                 <h2 className="mt-6 text-balance text-2xl font-semibold leading-snug sm:text-3xl">
@@ -105,13 +105,13 @@ function InsightsPage() {
                   <span>{featured.readTime}</span>
                 </div>
               </div>
-              <div className="grid-lines rounded-2xl border border-hairline bg-surface/50 p-8">
+              <div className="grid-lines border border-border bg-surface p-8">
                 <p className="eyebrow">In this note</p>
                 <ul className="mt-5 grid gap-3 text-sm text-muted-foreground">
                   {["Higher-timeframe context", "Liquidity map", "Key levels & scenarios", "Risk considerations"].map(
                     (l) => (
                       <li key={l} className="flex items-center gap-3">
-                        <span className="h-1 w-1 rounded-full bg-emerald" />
+                        <span className="h-1 w-1 bg-emerald" />
                         {l}
                       </li>
                     ),
@@ -127,16 +127,16 @@ function InsightsPage() {
         <Stagger className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {rest.map((p) => (
             <StaggerItem key={p.slug}>
-              <article className="surface-card group flex h-full flex-col rounded-3xl p-7">
+              <article className="surface-card group flex h-full flex-col p-7">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full bg-secondary px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-muted-foreground">
+                  <span className="bg-secondary px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-muted-foreground">
                     {p.category}
                   </span>
                   <span className="num text-[0.65rem] text-muted-foreground">{p.readTime}</span>
                 </div>
                 <h3 className="mt-5 text-pretty text-lg font-semibold leading-snug">{p.title}</h3>
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{p.excerpt}</p>
-                <div className="mt-6 flex items-center justify-between border-t border-hairline pt-4">
+                <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
                   <span className="num text-[0.7rem] text-muted-foreground">{formatDate(p.date)}</span>
                   <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-emerald" />
                 </div>

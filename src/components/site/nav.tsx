@@ -63,33 +63,37 @@ export function SiteNav() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        scrolled ? "py-2" : "py-4",
+        "fixed inset-x-0 top-0 z-50 border-b transition-colors duration-500",
+        scrolled
+          ? "border-border bg-[var(--glass)] backdrop-blur-md backdrop-saturate-150"
+          : "border-transparent",
       )}
     >
-      <div className="mx-auto w-[min(1200px,94vw)]">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <nav
           className={cn(
-            "flex items-center justify-between rounded-full px-4 py-2.5 transition-all duration-500 sm:px-5",
-            scrolled ? "glass-panel shadow-[var(--shadow-soft)]" : "border border-transparent",
+            "flex items-center justify-between transition-all duration-500",
+            scrolled ? "py-3" : "py-5",
           )}
         >
-          <Link to="/" className="flex min-w-0 items-center gap-2.5">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-navy text-navy-foreground">
+          <Link to="/" className="flex min-w-0 items-center gap-3">
+            <span className="grid h-9 w-9 shrink-0 place-items-center border border-border bg-navy text-navy-foreground">
               <span className="font-display text-sm font-bold">TA</span>
             </span>
             <span className="hidden min-w-0 flex-col leading-tight sm:flex">
-              <span className="truncate font-display text-sm font-semibold">Technical Analyst</span>
+              <span className="truncate font-display text-sm font-semibold tracking-tight">
+                Technical Analyst
+              </span>
               <span className="eyebrow text-[0.6rem]">Market Research</span>
             </span>
           </Link>
 
-          <div className="hidden items-center gap-1 lg:flex">
+          <div className="hidden items-center lg:flex">
             {links.map((l) => (
               <a
                 key={l.label}
                 href={l.href}
-                className="rounded-full px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                className="link-underline px-3.5 py-1 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
               >
                 {l.label}
               </a>
@@ -100,35 +104,36 @@ export function SiteNav() {
             <button
               onClick={toggle}
               aria-label="Toggle colour theme"
-              className="grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
+              className="grid h-9 w-9 place-items-center border border-border text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
             <a
               href="/#contact"
-              className="hidden rounded-full bg-navy px-4 py-2 text-sm font-semibold text-navy-foreground transition-transform hover:-translate-y-0.5 sm:inline-flex"
+              className="hidden border border-border bg-navy px-4 py-2 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-navy-foreground transition-all hover:bg-emerald hover:text-navy-foreground sm:inline-flex"
             >
               Book a consultation
             </a>
             <button
               onClick={() => setOpen((o) => !o)}
               aria-label="Toggle navigation"
-              className="grid h-9 w-9 place-items-center rounded-full border border-border lg:hidden"
+              className="grid h-9 w-9 place-items-center border border-border lg:hidden"
             >
               {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>
         </nav>
 
+
         {open ? (
-          <div className="glass-panel mt-2 rounded-2xl p-3 lg:hidden">
-            <div className="grid gap-1">
+          <div className="mb-3 border border-border bg-card lg:hidden">
+            <div className="grid">
               {links.map((l) => (
                 <a
                   key={l.label}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  className="border-b border-border px-4 py-3 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   {l.label}
                 </a>
@@ -136,7 +141,7 @@ export function SiteNav() {
               <a
                 href="/#contact"
                 onClick={() => setOpen(false)}
-                className="mt-1 rounded-xl bg-navy px-3 py-2.5 text-center text-sm font-semibold text-navy-foreground"
+                className="bg-navy px-4 py-3 text-center font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground"
               >
                 Book a consultation
               </a>
@@ -161,7 +166,7 @@ export function BackToTop() {
       <a
         href="/cv-technical-market-analyst.txt"
         download
-        className="glass-panel hidden items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium shadow-[var(--shadow-soft)] transition-transform hover:-translate-y-0.5 sm:inline-flex"
+        className="hidden items-center gap-2 border border-border bg-card px-4 py-2.5 font-mono text-[0.7rem] uppercase tracking-[0.14em] transition-all hover:shadow-[4px_4px_0_0_var(--emerald)] sm:inline-flex"
       >
         <Download className="h-4 w-4 text-emerald" />
         Download CV
@@ -171,7 +176,7 @@ export function BackToTop() {
         animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0.7, y: show ? 0 : 12 }}
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Back to top"
-        className="grid h-11 w-11 place-items-center rounded-full bg-navy text-navy-foreground shadow-[var(--shadow-lift)]"
+        className="grid h-11 w-11 place-items-center border border-border bg-navy text-navy-foreground"
         style={{ pointerEvents: show ? "auto" : "none" }}
       >
         <ArrowUp className="h-4 w-4" />

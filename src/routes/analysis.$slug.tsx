@@ -50,7 +50,7 @@ function AnalysisDetail() {
 
         <Reveal className="mt-8">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-emerald-soft px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
+            <span className="border border-emerald bg-transparent px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
               {a.market}
             </span>
             <span className="num text-xs font-semibold">{a.pair}</span>
@@ -65,9 +65,9 @@ function AnalysisDetail() {
           </p>
         </Reveal>
 
-        <Reveal delay={0.1} className="mt-12 rounded-3xl border border-hairline bg-card p-6 shadow-[var(--shadow-soft)]">
+        <Reveal delay={0.1} className="mt-12 border border-border bg-card p-6">
           <AreaChart series={a.series} height={220} />
-          <div className="mt-4 rounded-2xl border border-hairline bg-surface/60 p-4">
+          <div className="mt-4 border border-border bg-surface p-4">
             <CandleChart />
           </div>
         </Reveal>
@@ -86,7 +86,7 @@ function AnalysisDetail() {
               ))}
             </ul>
 
-            <div className="mt-10 flex gap-4 rounded-2xl border border-hairline bg-surface/60 p-6">
+            <div className="mt-10 flex gap-4 border border-border bg-surface p-6">
               <TriangleAlert className="h-5 w-5 shrink-0 text-emerald" />
               <div>
                 <p className="font-display text-sm font-semibold">Invalidation</p>
@@ -94,7 +94,7 @@ function AnalysisDetail() {
               </div>
             </div>
 
-            <div className="mt-6 flex gap-4 rounded-2xl border border-hairline bg-surface/60 p-6">
+            <div className="mt-6 flex gap-4 border border-border bg-surface p-6">
               <Target className="h-5 w-5 shrink-0 text-emerald" />
               <div>
                 <p className="font-display text-sm font-semibold">Outcome</p>
@@ -104,11 +104,11 @@ function AnalysisDetail() {
           </Reveal>
 
           <Reveal delay={0.08}>
-            <div className="sticky top-28 rounded-3xl border border-hairline bg-card p-7 shadow-[var(--shadow-soft)]">
+            <div className="sticky top-28 border border-border bg-card p-7">
               <p className="eyebrow">Trade parameters</p>
               <dl className="mt-6 grid gap-4">
                 {a.levels.map((l) => (
-                  <div key={l.label} className="flex items-center justify-between gap-4 border-b border-hairline pb-3">
+                  <div key={l.label} className="flex items-center justify-between gap-4 border-b border-border pb-3">
                     <dt className="text-xs text-muted-foreground">{l.label}</dt>
                     <dd className="num text-xs font-semibold">{l.value}</dd>
                   </div>
@@ -120,7 +120,7 @@ function AnalysisDetail() {
               </dl>
               <a
                 href="/#contact"
-                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-sm font-semibold text-navy-foreground transition-transform hover:-translate-y-0.5"
+                className="mt-8 inline-flex w-full items-center justify-center gap-2 border border-border bg-navy px-5 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground transition-colors hover:bg-emerald"
               >
                 Request similar coverage
                 <ArrowUpRight className="h-4 w-4" />
@@ -137,7 +137,7 @@ function AnalysisDetail() {
                 key={r.slug}
                 to="/analysis/$slug"
                 params={{ slug: r.slug }}
-                className="surface-card group rounded-3xl p-6"
+                className="surface-card group p-6"
               >
                 <span className="num text-xs font-semibold">{r.pair}</span>
                 <AreaChart series={r.series} height={80} animate={false} showGrid={false} />

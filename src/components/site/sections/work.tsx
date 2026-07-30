@@ -29,7 +29,7 @@ export function FeaturedAnalysis() {
 
   return (
     <section id="featured" className="scroll-mt-28 py-24 lg:py-32">
-      <div className="mx-auto w-[min(1200px,92vw)]">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <SectionHeading
             eyebrow="Featured analysis"
@@ -37,7 +37,7 @@ export function FeaturedAnalysis() {
             description="A selection of documented ideas across markets. Each includes the original structure read, the invalidation level and the realised result in risk multiples."
           />
           <Reveal delay={0.1} className="lg:pb-2">
-            <label className="flex items-center gap-2 rounded-full border border-hairline bg-card px-4 py-2.5">
+            <label className="flex items-center gap-2 border border-border bg-card px-4 py-2.5">
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 value={query}
@@ -56,7 +56,7 @@ export function FeaturedAnalysis() {
               key={f}
               onClick={() => setFilter(f)}
               className={cn(
-                "rounded-full border px-4 py-2 text-xs font-semibold transition-all",
+                "border px-4 py-2 text-xs font-semibold transition-all",
                 filter === f
                   ? "border-navy bg-navy text-navy-foreground"
                   : "border-hairline text-muted-foreground hover:border-emerald hover:text-emerald",
@@ -74,14 +74,14 @@ export function FeaturedAnalysis() {
                 to="/analysis/$slug"
                 params={{ slug: a.slug }}
                 className={cn(
-                  "surface-card group grid h-full overflow-hidden rounded-3xl",
+                  "surface-card group grid h-full overflow-hidden",
                   i === 0 ? "lg:grid-cols-[1.05fr_1fr]" : "",
                 )}
               >
-                <div className="relative overflow-hidden bg-surface/60 p-6">
+                <div className="relative overflow-hidden bg-surface p-6">
                   <div className="flex items-center justify-between">
                     <span className="num text-xs font-semibold">{a.pair}</span>
-                    <span className="rounded-full bg-emerald-soft px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
+                    <span className="border border-emerald bg-transparent px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
                       {a.market}
                     </span>
                   </div>
@@ -96,7 +96,7 @@ export function FeaturedAnalysis() {
                     {a.title}
                   </h3>
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{a.summary}</p>
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-5">
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
                     <div>
                       <p className="eyebrow text-[0.6rem]">Outcome</p>
                       <p className="num mt-1 text-sm font-semibold text-emerald">{a.outcome}</p>
@@ -126,12 +126,12 @@ export function Performance() {
   return (
     <section
       id="performance"
-      className="relative scroll-mt-28 overflow-hidden border-y border-hairline bg-navy py-24 text-navy-foreground lg:py-32"
+      className="relative scroll-mt-28 overflow-hidden border-y border-border bg-navy py-24 text-navy-foreground lg:py-32"
     >
       <div className="grid-lines pointer-events-none absolute inset-0 opacity-[0.08]" />
-      <div className="pointer-events-none absolute -right-24 top-1/4 h-96 w-96 rounded-full bg-emerald/20 blur-3xl" />
+      
 
-      <div className="mx-auto w-[min(1200px,92vw)]">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <Reveal className="max-w-3xl">
           <div className="flex items-center gap-3">
             <span className="h-px w-8 bg-emerald" />
@@ -148,7 +148,7 @@ export function Performance() {
         <Stagger className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {stats.map((s) => (
             <StaggerItem key={s.label}>
-              <div className="group h-full rounded-3xl border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur transition-colors duration-500 hover:border-emerald/50">
+              <div className="group h-full border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur transition-colors duration-500 hover:border-emerald/50">
                 <p className="text-4xl font-semibold sm:text-5xl">
                   <Counter value={s.value} suffix={s.suffix} />
                 </p>
@@ -172,7 +172,7 @@ export function Performance() {
 
 function CoverageMap() {
   return (
-    <div className="h-full rounded-3xl border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur">
+    <div className="h-full border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur">
       <p className="eyebrow text-navy-foreground/60">Session coverage</p>
       <div className="relative mt-5 aspect-[2/1] w-full">
         <svg viewBox="0 0 100 50" className="h-full w-full" role="img" aria-label="Global session coverage map">
@@ -217,7 +217,7 @@ function CoverageMap() {
       <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[0.65rem] text-navy-foreground/60">
         {["Asia", "London", "New York"].map((s) => (
           <span key={s} className="num inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
+            <span className="h-1.5 w-1.5 bg-emerald" />
             {s} session
           </span>
         ))}

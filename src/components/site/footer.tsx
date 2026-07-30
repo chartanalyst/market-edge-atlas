@@ -11,12 +11,12 @@ export const socials = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-hairline bg-surface/60">
-      <div className="mx-auto w-[min(1200px,92vw)] py-16">
+    <footer className="border-t border-border bg-surface">
+      <div className="mx-auto w-[min(1320px,94vw)] py-16">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-navy text-navy-foreground">
+              <span className="grid h-9 w-9 place-items-center bg-navy text-navy-foreground">
                 <span className="font-display text-sm font-bold">TA</span>
               </span>
               <span className="font-display text-sm font-semibold">Technical Market Analyst</span>
@@ -31,7 +31,7 @@ export function SiteFooter() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="grid h-9 w-9 place-items-center rounded-lg border border-hairline text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
+                  className="grid h-9 w-9 place-items-center border border-border text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
                 >
                   <s.icon className="h-4 w-4" />
                 </a>
@@ -88,7 +88,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-hairline pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Technical Market Analyst. All rights reserved.</p>
           <p className="max-w-xl sm:text-right">
             Research and education only. Nothing published here constitutes financial advice.
