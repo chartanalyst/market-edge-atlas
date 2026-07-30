@@ -18,12 +18,12 @@ export function Services() {
             return (
               <StaggerItem key={s.title}>
                 <TiltCard className="h-full">
-                  <article className="surface-card group relative h-full overflow-hidden rounded-3xl p-7">
+                  <article className="surface-card group relative h-full overflow-hidden rounded-none p-7">
                     <div
-                      className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+                      className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-none opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
                       style={{ background: "var(--gradient-emerald)" }}
                     />
-                    <span className="relative grid h-11 w-11 place-items-center rounded-2xl border border-hairline bg-surface/70 text-emerald">
+                    <span className="relative grid h-11 w-11 place-items-center rounded-none border border-hairline bg-surface/70 text-emerald">
                       <Icon className="h-5 w-5" />
                     </span>
                     <h3 className="relative mt-6 text-lg font-semibold">{s.title}</h3>
@@ -42,7 +42,7 @@ export function Services() {
           })}
 
           <StaggerItem>
-            <div className="flex h-full flex-col justify-between rounded-3xl bg-navy p-7 text-navy-foreground">
+            <div className="flex h-full flex-col justify-between rounded-none bg-navy p-7 text-navy-foreground">
               <div>
                 <p className="eyebrow text-navy-foreground/60">Not sure which fits?</p>
                 <h3 className="mt-4 text-xl font-semibold leading-snug">
@@ -55,7 +55,7 @@ export function Services() {
               </div>
               <a
                 href="#contact"
-                className="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-emerald px-5 py-3 text-sm font-semibold text-navy transition-transform hover:-translate-y-0.5"
+                className="mt-7 inline-flex items-center justify-center gap-2 rounded-none bg-emerald px-5 py-3 text-sm font-semibold text-navy transition-transform hover:-translate-y-0.5"
               >
                 Book a consultation
                 <Icons.ArrowUpRight className="h-4 w-4" />
@@ -78,7 +78,7 @@ export function WhyWorkWithMe() {
           align="center"
         />
 
-        <Stagger className="mt-14 grid gap-px overflow-hidden rounded-3xl border border-hairline bg-hairline sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="mt-14 grid gap-px overflow-hidden rounded-none border border-hairline bg-hairline sm:grid-cols-2 lg:grid-cols-3">
           {differentiators.map((d) => {
             const Icon = (Icons[d.icon as keyof typeof Icons] ?? Icons.Activity) as Icons.LucideIcon;
             return (

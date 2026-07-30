@@ -35,8 +35,8 @@ export function Contact() {
               { icon: Clock, l: "Response time", v: "Within one business day" },
               { icon: MapPin, l: "Coverage", v: "Asia · London · New York sessions" },
             ].map((c) => (
-              <div key={c.l} className="flex items-center gap-4 rounded-2xl border border-hairline bg-card/70 p-5 backdrop-blur">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-soft text-accent-foreground">
+              <div key={c.l} className="flex items-center gap-4 rounded-none border border-hairline bg-card/70 p-5 backdrop-blur">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-none bg-emerald-soft text-accent-foreground">
                   <c.icon className="h-4 w-4" />
                 </span>
                 <div className="min-w-0">
@@ -54,7 +54,7 @@ export function Contact() {
                 <a
                   key={s.label}
                   href={s.href}
-                  className="inline-flex items-center gap-2 rounded-full border border-hairline bg-card px-4 py-2.5 text-xs font-semibold transition-colors hover:border-emerald hover:text-emerald"
+                  className="inline-flex items-center gap-2 rounded-none border border-hairline bg-card px-4 py-2.5 text-xs font-semibold transition-colors hover:border-emerald hover:text-emerald"
                 >
                   <s.icon className="h-3.5 w-3.5" />
                   {s.label}
@@ -67,7 +67,7 @@ export function Contact() {
         <Reveal delay={0.12}>
           <form
             onSubmit={onSubmit}
-            className="rounded-3xl border border-hairline bg-card p-7 shadow-[var(--shadow-lift)] sm:p-9"
+            className="rounded-none border border-hairline bg-card p-7 shadow-[var(--shadow-lift)] sm:p-9"
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <Field label="Full name" name="name" placeholder="Alex Morgan" />
@@ -82,7 +82,7 @@ export function Contact() {
                 <select
                   id="topic"
                   name="topic"
-                  className="mt-2.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-emerald"
+                  className="mt-2.5 w-full rounded-none border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-emerald"
                 >
                   {[
                     "Technical analysis retainer",
@@ -108,13 +108,13 @@ export function Contact() {
                 required
                 rows={5}
                 placeholder="Markets you trade, timeframe, and what you'd like covered…"
-                className="mt-2.5 w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-emerald"
+                className="mt-2.5 w-full resize-none rounded-none border border-border bg-background px-4 py-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-emerald"
               />
             </div>
 
             <button
               type="submit"
-              className="group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-6 py-3.5 text-sm font-semibold text-navy-foreground transition-transform hover:-translate-y-0.5"
+              className="group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-none bg-navy px-6 py-3.5 text-sm font-semibold text-navy-foreground transition-transform hover:-translate-y-0.5"
             >
               {sent ? (
                 <>
@@ -162,7 +162,7 @@ function Field({
         type={type}
         required={required}
         placeholder={placeholder}
-        className="mt-2.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-emerald"
+        className="mt-2.5 w-full rounded-none border border-border bg-background px-4 py-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-emerald"
       />
     </div>
   );

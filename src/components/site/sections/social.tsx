@@ -33,7 +33,7 @@ export function Testimonials() {
         <SectionHeading eyebrow="Testimonials" title="What desks and communities say." align="center" />
 
         <Reveal delay={0.1} className="relative mt-14">
-          <div className="glass-panel rounded-3xl p-8 shadow-[var(--shadow-lift)] sm:p-12">
+          <div className="glass-panel rounded-none p-8 shadow-[var(--shadow-lift)] sm:p-12">
             <Quote className="h-8 w-8 text-emerald/40" />
             <AnimatePresence mode="wait">
               <motion.blockquote
@@ -48,7 +48,7 @@ export function Testimonials() {
                 </p>
                 <footer className="mt-8 flex flex-wrap items-center justify-between gap-5">
                   <div className="flex min-w-0 items-center gap-4">
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-navy font-display text-sm font-semibold text-navy-foreground">
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-none bg-navy font-display text-sm font-semibold text-navy-foreground">
                       {t.name
                         .split(" ")
                         .map((n) => n[0])
@@ -73,7 +73,7 @@ export function Testimonials() {
             <button
               onClick={prev}
               aria-label="Previous testimonial"
-              className="grid h-10 w-10 place-items-center rounded-full border border-hairline bg-card transition-colors hover:border-emerald hover:text-emerald"
+              className="grid h-10 w-10 place-items-center rounded-none border border-hairline bg-card transition-colors hover:border-emerald hover:text-emerald"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -85,8 +85,8 @@ export function Testimonials() {
                   aria-label={`Go to testimonial ${i + 1}`}
                   className={
                     i === index
-                      ? "h-1.5 w-7 rounded-full bg-emerald transition-all"
-                      : "h-1.5 w-1.5 rounded-full bg-hairline transition-all"
+                      ? "h-1.5 w-7 rounded-none bg-emerald transition-all"
+                      : "h-1.5 w-1.5 rounded-none bg-hairline transition-all"
                   }
                 />
               ))}
@@ -94,7 +94,7 @@ export function Testimonials() {
             <button
               onClick={next}
               aria-label="Next testimonial"
-              className="grid h-10 w-10 place-items-center rounded-full border border-hairline bg-card transition-colors hover:border-emerald hover:text-emerald"
+              className="grid h-10 w-10 place-items-center rounded-none border border-hairline bg-card transition-colors hover:border-emerald hover:text-emerald"
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -118,7 +118,7 @@ export function Insights() {
           <Reveal delay={0.1}>
             <Link
               to="/insights"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold transition-colors hover:border-emerald hover:text-emerald"
+              className="inline-flex items-center gap-2 rounded-none border border-border bg-card px-5 py-3 text-sm font-semibold transition-colors hover:border-emerald hover:text-emerald"
             >
               All insights
               <ArrowUpRight className="h-4 w-4" />
@@ -129,9 +129,9 @@ export function Insights() {
         <Stagger className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {insights.slice(0, 6).map((p) => (
             <StaggerItem key={p.slug}>
-              <Link to="/insights" className="surface-card group flex h-full flex-col rounded-3xl p-7">
+              <Link to="/insights" className="surface-card group flex h-full flex-col rounded-none p-7">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full bg-emerald-soft px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
+                  <span className="rounded-none bg-emerald-soft px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
                     {p.category}
                   </span>
                   <span className="num text-[0.65rem] text-muted-foreground">{p.readTime}</span>

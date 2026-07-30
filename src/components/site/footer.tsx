@@ -16,7 +16,7 @@ export function SiteFooter() {
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-navy text-navy-foreground">
+              <span className="grid h-9 w-9 place-items-center rounded-none bg-navy text-navy-foreground">
                 <span className="font-display text-sm font-bold">TA</span>
               </span>
               <span className="font-display text-sm font-semibold">Technical Market Analyst</span>
@@ -31,7 +31,7 @@ export function SiteFooter() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="grid h-9 w-9 place-items-center rounded-lg border border-hairline text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
+                  className="grid h-9 w-9 place-items-center rounded-none border border-hairline text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
                 >
                   <s.icon className="h-4 w-4" />
                 </a>

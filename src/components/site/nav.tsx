@@ -70,12 +70,12 @@ export function SiteNav() {
       <div className="mx-auto w-[min(1200px,94vw)]">
         <nav
           className={cn(
-            "flex items-center justify-between rounded-full px-4 py-2.5 transition-all duration-500 sm:px-5",
+            "flex items-center justify-between rounded-none px-4 py-2.5 transition-all duration-500 sm:px-5",
             scrolled ? "glass-panel shadow-[var(--shadow-soft)]" : "border border-transparent",
           )}
         >
           <Link to="/" className="flex min-w-0 items-center gap-2.5">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-navy text-navy-foreground">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-none bg-navy text-navy-foreground">
               <span className="font-display text-sm font-bold">TA</span>
             </span>
             <span className="hidden min-w-0 flex-col leading-tight sm:flex">
@@ -89,7 +89,7 @@ export function SiteNav() {
               <a
                 key={l.label}
                 href={l.href}
-                className="rounded-full px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                className="rounded-none px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               >
                 {l.label}
               </a>
@@ -100,20 +100,20 @@ export function SiteNav() {
             <button
               onClick={toggle}
               aria-label="Toggle colour theme"
-              className="grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground"
+              className="grid h-9 w-9 place-items-center rounded-none border border-border text-muted-foreground transition-colors hover:text-foreground"
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
             <a
               href="/#contact"
-              className="hidden rounded-full bg-navy px-4 py-2 text-sm font-semibold text-navy-foreground transition-transform hover:-translate-y-0.5 sm:inline-flex"
+              className="hidden rounded-none bg-navy px-4 py-2 text-sm font-semibold text-navy-foreground transition-transform hover:-translate-y-0.5 sm:inline-flex"
             >
               Book a consultation
             </a>
             <button
               onClick={() => setOpen((o) => !o)}
               aria-label="Toggle navigation"
-              className="grid h-9 w-9 place-items-center rounded-full border border-border lg:hidden"
+              className="grid h-9 w-9 place-items-center rounded-none border border-border lg:hidden"
             >
               {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
@@ -121,14 +121,14 @@ export function SiteNav() {
         </nav>
 
         {open ? (
-          <div className="glass-panel mt-2 rounded-2xl p-3 lg:hidden">
+          <div className="glass-panel mt-2 rounded-none p-3 lg:hidden">
             <div className="grid gap-1">
               {links.map((l) => (
                 <a
                   key={l.label}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  className="rounded-none px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
                 >
                   {l.label}
                 </a>
@@ -136,7 +136,7 @@ export function SiteNav() {
               <a
                 href="/#contact"
                 onClick={() => setOpen(false)}
-                className="mt-1 rounded-xl bg-navy px-3 py-2.5 text-center text-sm font-semibold text-navy-foreground"
+                className="mt-1 rounded-none bg-navy px-3 py-2.5 text-center text-sm font-semibold text-navy-foreground"
               >
                 Book a consultation
               </a>
@@ -161,7 +161,7 @@ export function BackToTop() {
       <a
         href="/cv-technical-market-analyst.txt"
         download
-        className="glass-panel hidden items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium shadow-[var(--shadow-soft)] transition-transform hover:-translate-y-0.5 sm:inline-flex"
+        className="glass-panel hidden items-center gap-2 rounded-none px-4 py-2.5 text-sm font-medium shadow-[var(--shadow-soft)] transition-transform hover:-translate-y-0.5 sm:inline-flex"
       >
         <Download className="h-4 w-4 text-emerald" />
         Download CV
@@ -171,7 +171,7 @@ export function BackToTop() {
         animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0.7, y: show ? 0 : 12 }}
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Back to top"
-        className="grid h-11 w-11 place-items-center rounded-full bg-navy text-navy-foreground shadow-[var(--shadow-lift)]"
+        className="grid h-11 w-11 place-items-center rounded-none bg-navy text-navy-foreground shadow-[var(--shadow-lift)]"
         style={{ pointerEvents: show ? "auto" : "none" }}
       >
         <ArrowUp className="h-4 w-4" />

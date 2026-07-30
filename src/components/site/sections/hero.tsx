@@ -20,11 +20,11 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease }}
-            className="inline-flex items-center gap-2 rounded-full border border-hairline bg-card/70 px-3.5 py-1.5 backdrop-blur"
+            className="inline-flex items-center gap-2 rounded-none border border-hairline bg-card/70 px-3.5 py-1.5 backdrop-blur"
           >
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald opacity-70" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-none bg-emerald opacity-70" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-none bg-emerald" />
             </span>
             <span className="eyebrow text-foreground/70">Coverage live · 5 asset classes</span>
           </motion.div>
@@ -60,14 +60,14 @@ export function Hero() {
           >
             <a
               href="#featured"
-              className="group inline-flex items-center gap-2 rounded-full bg-navy px-6 py-3.5 text-sm font-semibold text-navy-foreground shadow-[var(--shadow-lift)] transition-transform hover:-translate-y-0.5"
+              className="group inline-flex items-center gap-2 rounded-none bg-navy px-6 py-3.5 text-sm font-semibold text-navy-foreground shadow-[var(--shadow-lift)] transition-transform hover:-translate-y-0.5"
             >
               View Portfolio
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
               href="#contact"
-              className="group inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3.5 text-sm font-semibold transition-colors hover:border-emerald hover:text-emerald"
+              className="group inline-flex items-center gap-2 rounded-none border border-border bg-card px-6 py-3.5 text-sm font-semibold transition-colors hover:border-emerald hover:text-emerald"
             >
               Contact Me
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -101,7 +101,7 @@ export function Hero() {
           transition={{ duration: 1, ease, delay: 0.2 }}
           className="relative"
         >
-          <div className="relative rounded-3xl border border-hairline bg-card/85 p-5 shadow-[var(--shadow-lift)] backdrop-blur-xl">
+          <div className="relative rounded-none border border-hairline bg-card/85 p-5 shadow-[var(--shadow-lift)] backdrop-blur-xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="num text-xs text-muted-foreground">BTC / USD · Weekly</p>
@@ -109,16 +109,16 @@ export function Hero() {
                   <Counter value={112480} /> <span className="text-sm text-emerald">+1.84%</span>
                 </p>
               </div>
-              <span className="rounded-full bg-emerald-soft px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-accent-foreground">
+              <span className="rounded-none bg-emerald-soft px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-accent-foreground">
                 Bullish structure
               </span>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-hairline bg-background/60 p-3">
+            <div className="mt-5 rounded-none border border-hairline bg-background/60 p-3">
               <AreaChart series={[22, 26, 21, 30, 27, 36, 32, 44, 40, 52, 58, 54, 68, 74, 88]} height={150} />
             </div>
 
-            <div className="mt-3 rounded-2xl border border-hairline bg-background/60 p-3">
+            <div className="mt-3 rounded-none border border-hairline bg-background/60 p-3">
               <CandleChart />
             </div>
 
@@ -128,7 +128,7 @@ export function Hero() {
                 { l: "R:R", v: "1 : 3.8" },
                 { l: "Risk", v: "0.75%" },
               ].map((c) => (
-                <div key={c.l} className="rounded-xl border border-hairline bg-background/60 px-2 py-3">
+                <div key={c.l} className="rounded-none border border-hairline bg-background/60 px-2 py-3">
                   <p className="eyebrow text-[0.6rem]">{c.l}</p>
                   <p className="num mt-1 text-sm font-semibold">{c.v}</p>
                 </div>
@@ -137,7 +137,7 @@ export function Hero() {
           </div>
 
           <motion.div
-            className="glass-panel absolute -left-5 top-1/3 hidden rounded-2xl px-4 py-3 shadow-[var(--shadow-soft)] sm:block"
+            className="glass-panel absolute -left-5 top-1/3 hidden rounded-none px-4 py-3 shadow-[var(--shadow-soft)] sm:block"
             animate={{ y: [0, -12, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           >
@@ -151,7 +151,7 @@ export function Hero() {
           </motion.div>
 
           <motion.div
-            className="glass-panel absolute -right-3 bottom-16 hidden rounded-2xl px-4 py-3 shadow-[var(--shadow-soft)] sm:block"
+            className="glass-panel absolute -right-3 bottom-16 hidden rounded-none px-4 py-3 shadow-[var(--shadow-soft)] sm:block"
             animate={{ y: [0, 14, 0] }}
             transition={{ duration: 9.5, repeat: Infinity, ease: "easeInOut" }}
           >
