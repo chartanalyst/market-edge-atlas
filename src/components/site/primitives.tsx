@@ -125,8 +125,8 @@ export function TiltCard({ children, className }: { children: ReactNode; classNa
         const r = el.getBoundingClientRect();
         const px = (e.clientX - r.left) / r.width - 0.5;
         const py = (e.clientY - r.top) / r.height - 0.5;
-        ry.set(px * 7);
-        rx.set(-py * 7);
+        ry.set(px * 2.5);
+        rx.set(-py * 2.5);
       }}
       onMouseLeave={() => {
         rx.set(0);
@@ -154,11 +154,16 @@ export function SectionHeading({
 }) {
   return (
     <Reveal className={cn(align === "center" && "mx-auto max-w-3xl text-center", "max-w-3xl", className)}>
-      <div className={cn("flex items-center gap-3", align === "center" && "justify-center")}>
-        <span className="h-px w-8 bg-emerald" />
+      <div
+        className={cn(
+          "flex items-center gap-3 border-t border-border pt-4",
+          align === "center" && "justify-center",
+        )}
+      >
+        <span className="h-1.5 w-1.5 bg-emerald" />
         <p className="eyebrow">{eyebrow}</p>
       </div>
-      <h2 className="mt-5 text-balance text-3xl font-semibold leading-[1.08] sm:text-4xl lg:text-5xl">
+      <h2 className="mt-6 text-balance text-3xl font-semibold leading-[1.03] tracking-[-0.04em] sm:text-4xl lg:text-[3.2rem]">
         {title}
       </h2>
       {description ? (
