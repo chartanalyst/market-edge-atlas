@@ -19,14 +19,14 @@ export function Experience() {
               <StaggerItem key={t.period + t.role}>
                 <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:gap-8">
                   <div className="hidden pt-2 sm:block">
-                    <span className="relative grid h-4 w-4 place-items-center rounded-none border-2 border-emerald bg-background">
-                      <span className="h-1.5 w-1.5 rounded-none bg-emerald" />
+                    <span className="relative grid h-4 w-4 place-items-center border-2 border-emerald bg-background">
+                      <span className="h-1.5 w-1.5 bg-emerald" />
                     </span>
                   </div>
-                  <div className="surface-card rounded-none p-7">
+                  <div className="surface-card p-7">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                       <span className="num text-xs font-semibold text-emerald">{t.period}</span>
-                      <span className="rounded-none bg-secondary px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-muted-foreground">
+                      <span className="bg-secondary px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-muted-foreground">
                         {t.tag}
                       </span>
                     </div>
@@ -35,7 +35,7 @@ export function Experience() {
                     <ul className="mt-5 grid gap-2.5">
                       {t.points.map((p) => (
                         <li key={p} className="grid grid-cols-[auto_1fr] gap-3 text-sm text-muted-foreground">
-                          <span className="mt-2 h-1 w-1 rounded-none bg-emerald" />
+                          <span className="mt-2 h-1 w-1 bg-emerald" />
                           <span className="leading-relaxed">{p}</span>
                         </li>
                       ))}
@@ -55,7 +55,7 @@ export function Process() {
   return (
     <section
       id="process"
-      className="scroll-mt-28 overflow-hidden border-y border-hairline bg-surface/50 py-24 lg:py-32"
+      className="scroll-mt-28 overflow-hidden border-y border-border bg-surface py-24 lg:py-32"
     >
       <div className="mx-auto w-[min(1320px,94vw)]">
         <SectionHeading
@@ -74,7 +74,7 @@ export function Process() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-              className="surface-card group relative w-[264px] shrink-0 rounded-none p-6"
+              className="surface-card group relative w-[264px] shrink-0 p-6"
             >
               <div className="flex items-center justify-between">
                 <span className="num text-3xl font-semibold text-emerald/25 transition-colors group-hover:text-emerald">

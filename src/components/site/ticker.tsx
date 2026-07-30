@@ -4,7 +4,7 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 export function MarketTicker() {
   const items = [...tickerItems, ...tickerItems];
   return (
-    <div className="relative overflow-hidden border-y border-hairline bg-surface/70 py-3">
+    <div className="relative overflow-hidden border-y border-border bg-surface py-3">
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-background to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-background to-transparent" />
       <div className="flex w-max animate-ticker items-center gap-8 pr-8">

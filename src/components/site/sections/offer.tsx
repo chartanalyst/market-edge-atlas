@@ -18,8 +18,8 @@ export function Services() {
             return (
               <StaggerItem key={s.title}>
                 <TiltCard className="h-full">
-                  <article className="surface-card group relative h-full overflow-hidden rounded-none p-7">
-                    <span className="relative grid h-11 w-11 place-items-center rounded-none border border-border bg-surface/70 text-emerald">
+                  <article className="surface-card group relative h-full overflow-hidden p-7">
+                    <span className="relative grid h-11 w-11 place-items-center border border-border bg-surface text-emerald">
                       <Icon className="h-5 w-5" />
                     </span>
                     <h3 className="relative mt-6 text-lg font-semibold">{s.title}</h3>
@@ -74,12 +74,12 @@ export function WhyWorkWithMe() {
           align="center"
         />
 
-        <Stagger className="mt-14 grid gap-px overflow-hidden rounded-none border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="mt-14 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
           {differentiators.map((d) => {
             const Icon = (Icons[d.icon as keyof typeof Icons] ?? Icons.Activity) as Icons.LucideIcon;
             return (
               <StaggerItem key={d.title} className="bg-card">
-                <div className="group h-full p-8 transition-colors duration-500 hover:bg-surface/70">
+                <div className="group h-full p-8 transition-colors duration-500 hover:bg-surface">
                   <div className="flex items-center gap-3">
                     <Icon className="h-5 w-5 text-emerald transition-transform duration-500 group-hover:scale-110" />
                     <h3 className="font-display text-base font-semibold">{d.title}</h3>
