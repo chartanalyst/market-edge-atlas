@@ -12,7 +12,7 @@ export const socials = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-hairline bg-surface/60">
-      <div className="mx-auto w-[min(1200px,92vw)] py-16">
+      <div className="mx-auto w-[min(1320px,94vw)] py-16">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5">
@@ -31,7 +31,7 @@ export function SiteFooter() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="grid h-9 w-9 place-items-center rounded-none border border-hairline text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
+                  className="grid h-9 w-9 place-items-center rounded-none border border-border text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
                 >
                   <s.icon className="h-4 w-4" />
                 </a>

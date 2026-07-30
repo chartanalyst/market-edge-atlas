@@ -21,7 +21,7 @@ export function Contact() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{ background: "var(--gradient-hero)" }}
       />
-      <div className="mx-auto grid w-[min(1200px,92vw)] gap-12 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="mx-auto grid w-[min(1320px,94vw)] gap-12 lg:grid-cols-[0.95fr_1.05fr]">
         <div>
           <SectionHeading
             eyebrow="Contact"
@@ -35,7 +35,7 @@ export function Contact() {
               { icon: Clock, l: "Response time", v: "Within one business day" },
               { icon: MapPin, l: "Coverage", v: "Asia · London · New York sessions" },
             ].map((c) => (
-              <div key={c.l} className="flex items-center gap-4 rounded-none border border-hairline bg-card/70 p-5 backdrop-blur">
+              <div key={c.l} className="flex items-center gap-4 rounded-none border border-border bg-card/70 p-5 backdrop-blur">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-none bg-emerald-soft text-accent-foreground">
                   <c.icon className="h-4 w-4" />
                 </span>
@@ -54,7 +54,7 @@ export function Contact() {
                 <a
                   key={s.label}
                   href={s.href}
-                  className="inline-flex items-center gap-2 rounded-none border border-hairline bg-card px-4 py-2.5 text-xs font-semibold transition-colors hover:border-emerald hover:text-emerald"
+                  className="inline-flex items-center gap-2 rounded-none border border-border bg-card px-4 py-2.5 text-xs font-semibold transition-colors hover:border-emerald hover:text-emerald"
                 >
                   <s.icon className="h-3.5 w-3.5" />
                   {s.label}
@@ -67,7 +67,7 @@ export function Contact() {
         <Reveal delay={0.12}>
           <form
             onSubmit={onSubmit}
-            className="rounded-none border border-hairline bg-card p-7 shadow-[var(--shadow-lift)] sm:p-9"
+            className="rounded-none border border-border bg-card p-7 shadow-[var(--shadow-lift)] sm:p-9"
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <Field label="Full name" name="name" placeholder="Alex Morgan" />

@@ -5,7 +5,7 @@ import { processSteps, timeline } from "@/lib/site-data";
 export function Experience() {
   return (
     <section id="experience" className="scroll-mt-28 py-24 lg:py-32">
-      <div className="mx-auto w-[min(1200px,92vw)]">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <SectionHeading
           eyebrow="Experience"
           title="Seven years of continuous market coverage."
@@ -57,7 +57,7 @@ export function Process() {
       id="process"
       className="scroll-mt-28 overflow-hidden border-y border-hairline bg-surface/50 py-24 lg:py-32"
     >
-      <div className="mx-auto w-[min(1200px,92vw)]">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <SectionHeading
           eyebrow="Analysis process"
           title="A seven-stage sequence, run identically every time."

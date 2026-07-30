@@ -65,9 +65,9 @@ function AnalysisDetail() {
           </p>
         </Reveal>
 
-        <Reveal delay={0.1} className="mt-12 rounded-none border border-hairline bg-card p-6 shadow-[var(--shadow-soft)]">
+        <Reveal delay={0.1} className="mt-12 rounded-none border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
           <AreaChart series={a.series} height={220} />
-          <div className="mt-4 rounded-none border border-hairline bg-surface/60 p-4">
+          <div className="mt-4 rounded-none border border-border bg-surface/60 p-4">
             <CandleChart />
           </div>
         </Reveal>
@@ -86,7 +86,7 @@ function AnalysisDetail() {
               ))}
             </ul>
 
-            <div className="mt-10 flex gap-4 rounded-none border border-hairline bg-surface/60 p-6">
+            <div className="mt-10 flex gap-4 rounded-none border border-border bg-surface/60 p-6">
               <TriangleAlert className="h-5 w-5 shrink-0 text-emerald" />
               <div>
                 <p className="font-display text-sm font-semibold">Invalidation</p>
@@ -94,7 +94,7 @@ function AnalysisDetail() {
               </div>
             </div>
 
-            <div className="mt-6 flex gap-4 rounded-none border border-hairline bg-surface/60 p-6">
+            <div className="mt-6 flex gap-4 rounded-none border border-border bg-surface/60 p-6">
               <Target className="h-5 w-5 shrink-0 text-emerald" />
               <div>
                 <p className="font-display text-sm font-semibold">Outcome</p>
@@ -104,7 +104,7 @@ function AnalysisDetail() {
           </Reveal>
 
           <Reveal delay={0.08}>
-            <div className="sticky top-28 rounded-none border border-hairline bg-card p-7 shadow-[var(--shadow-soft)]">
+            <div className="sticky top-28 rounded-none border border-border bg-card p-7 shadow-[var(--shadow-soft)]">
               <p className="eyebrow">Trade parameters</p>
               <dl className="mt-6 grid gap-4">
                 {a.levels.map((l) => (

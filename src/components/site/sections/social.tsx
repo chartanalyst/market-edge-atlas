@@ -73,7 +73,7 @@ export function Testimonials() {
             <button
               onClick={prev}
               aria-label="Previous testimonial"
-              className="grid h-10 w-10 place-items-center rounded-none border border-hairline bg-card transition-colors hover:border-emerald hover:text-emerald"
+              className="grid h-10 w-10 place-items-center rounded-none border border-border bg-card transition-colors hover:border-emerald hover:text-emerald"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -94,7 +94,7 @@ export function Testimonials() {
             <button
               onClick={next}
               aria-label="Next testimonial"
-              className="grid h-10 w-10 place-items-center rounded-none border border-hairline bg-card transition-colors hover:border-emerald hover:text-emerald"
+              className="grid h-10 w-10 place-items-center rounded-none border border-border bg-card transition-colors hover:border-emerald hover:text-emerald"
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -108,7 +108,7 @@ export function Testimonials() {
 export function Insights() {
   return (
     <section id="insights" className="scroll-mt-28 border-y border-hairline bg-surface/50 py-24 lg:py-32">
-      <div className="mx-auto w-[min(1200px,92vw)]">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <SectionHeading
             eyebrow="Educational content"

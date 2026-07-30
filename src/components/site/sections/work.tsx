@@ -29,7 +29,7 @@ export function FeaturedAnalysis() {
 
   return (
     <section id="featured" className="scroll-mt-28 py-24 lg:py-32">
-      <div className="mx-auto w-[min(1200px,92vw)]">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
           <SectionHeading
             eyebrow="Featured analysis"
@@ -37,7 +37,7 @@ export function FeaturedAnalysis() {
             description="A selection of documented ideas across markets. Each includes the original structure read, the invalidation level and the realised result in risk multiples."
           />
           <Reveal delay={0.1} className="lg:pb-2">
-            <label className="flex items-center gap-2 rounded-none border border-hairline bg-card px-4 py-2.5">
+            <label className="flex items-center gap-2 rounded-none border border-border bg-card px-4 py-2.5">
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 value={query}
@@ -131,7 +131,7 @@ export function Performance() {
       <div className="grid-lines pointer-events-none absolute inset-0 opacity-[0.08]" />
       
 
-      <div className="mx-auto w-[min(1200px,92vw)]">
+      <div className="mx-auto w-[min(1320px,94vw)]">
         <Reveal className="max-w-3xl">
           <div className="flex items-center gap-3">
             <span className="h-px w-8 bg-emerald" />

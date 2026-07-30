@@ -44,7 +44,7 @@ function InsightsPage() {
 
   return (
     <main className="pt-32">
-      <section className="mx-auto w-[min(1200px,92vw)]">
+      <section className="mx-auto w-[min(1320px,94vw)]">
         <Reveal>
           <div className="flex items-center gap-3">
             <span className="h-px w-8 bg-emerald" />
@@ -75,7 +75,7 @@ function InsightsPage() {
               </button>
             ))}
           </div>
-          <label className="flex items-center gap-2 rounded-none border border-hairline bg-card px-4 py-2.5">
+          <label className="flex items-center gap-2 rounded-none border border-border bg-card px-4 py-2.5">
             <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
             <input
               value={query}
@@ -105,7 +105,7 @@ function InsightsPage() {
                   <span>{featured.readTime}</span>
                 </div>
               </div>
-              <div className="grid-lines rounded-none border border-hairline bg-surface/50 p-8">
+              <div className="grid-lines rounded-none border border-border bg-surface/50 p-8">
                 <p className="eyebrow">In this note</p>
                 <ul className="mt-5 grid gap-3 text-sm text-muted-foreground">
                   {["Higher-timeframe context", "Liquidity map", "Key levels & scenarios", "Risk considerations"].map(
