@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, Target, TriangleAlert } from "lucide-react";
 import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Reveal } from "@/components/site/primitives";
-import { analyses } from "@/lib/site-data";
+import { analyses, type Analysis } from "@/lib/site-data";
 
 export const Route = createFileRoute("/analysis/$slug")({
   loader: ({ params }) => {
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/analysis/$slug")({
 });
 
 function AnalysisDetail() {
-  const { analysis: a } = Route.useLoaderData();
+  const { analysis: a } = Route.useLoaderData() as { analysis: Analysis };
   const related = analyses.filter((x) => x.slug !== a.slug).slice(0, 3);
 
   return (
