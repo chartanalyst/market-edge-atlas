@@ -131,7 +131,7 @@ export function Insights() {
             <StaggerItem key={p.slug}>
               <Link to="/insights" className="surface-card group flex h-full flex-col p-7">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="border border-emerald bg-transparent px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
+                  <span className="border border-emerald bg-transparent px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
                     {p.category}
                   </span>
                   <span className="num text-[0.65rem] text-muted-foreground">{p.readTime}</span>

@@ -50,7 +50,7 @@ function AnalysisDetail() {
 
         <Reveal className="mt-8">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="border border-emerald bg-transparent px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
+            <span className="border border-emerald bg-transparent px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
               {a.market}
             </span>
             <span className="num text-xs font-semibold">{a.pair}</span>
@@ -120,7 +120,7 @@ function AnalysisDetail() {
               </dl>
               <a
                 href="/#contact"
-                className="mt-7 inline-flex w-full items-center justify-center gap-2 bg-navy px-5 py-3 text-sm font-semibold text-navy-foreground transition-transform hover:-translate-y-0.5"
+                className="mt-8 inline-flex w-full items-center justify-center gap-2 border border-border bg-navy px-5 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground transition-colors hover:bg-emerald"
               >
                 Request similar coverage
                 <ArrowUpRight className="h-4 w-4" />

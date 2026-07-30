@@ -91,7 +91,7 @@ function InsightsPage() {
           <Reveal delay={0.14} className="mt-12">
             <article className="surface-card grid gap-8 p-8 lg:grid-cols-[1.2fr_1fr] lg:p-12">
               <div>
-                <span className="border border-emerald bg-transparent px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
+                <span className="border border-emerald bg-transparent px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
                   {featured.category}
                 </span>
                 <h2 className="mt-6 text-balance text-2xl font-semibold leading-snug sm:text-3xl">

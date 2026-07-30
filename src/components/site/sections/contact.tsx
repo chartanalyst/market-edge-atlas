@@ -114,7 +114,7 @@ export function Contact() {
 
             <button
               type="submit"
-              className="group mt-7 inline-flex w-full items-center justify-center gap-2 bg-navy px-6 py-3.5 text-sm font-semibold text-navy-foreground transition-transform hover:-translate-y-0.5"
+              className="group mt-8 inline-flex w-full items-center justify-center gap-2 border border-border bg-navy px-6 py-4 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground transition-colors hover:bg-emerald"
             >
               {sent ? (
                 <>

@@ -81,7 +81,7 @@ export function FeaturedAnalysis() {
                 <div className="relative overflow-hidden bg-surface p-6">
                   <div className="flex items-center justify-between">
                     <span className="num text-xs font-semibold">{a.pair}</span>
-                    <span className="border border-emerald bg-transparent px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-accent-foreground">
+                    <span className="border border-emerald bg-transparent px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
                       {a.market}
                     </span>
                   </div>
