@@ -29,7 +29,6 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <main>
-      <h1 className="sr-only">Professional Technical Market Analyst</h1>
       <Hero />
       <MarketTicker />
       <About />
