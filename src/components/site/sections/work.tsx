@@ -173,6 +173,7 @@ export function Performance() {
 }
 
 function CoverageMap() {
+  const { coverageMap } = useSiteContent();
   return (
     <div className="h-full border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur">
       <p className="eyebrow text-navy-foreground/60">Session coverage</p>
