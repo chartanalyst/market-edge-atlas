@@ -9,11 +9,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
-import { faqs, insights, testimonials } from "@/lib/site-data";
+import { useSiteContent } from "@/components/site/content-context";
 
 export function Testimonials() {
+  const { testimonials } = useSiteContent();
   const [index, setIndex] = useState(0);
-  const next = useCallback(() => setIndex((i) => (i + 1) % testimonials.length), []);
+  const next = useCallback(
+    () => setIndex((i) => (i + 1) % testimonials.length),
+    [testimonials.length],
+  );
   const prev = () => setIndex((i) => (i - 1 + testimonials.length) % testimonials.length);
 
   useEffect(() => {
@@ -22,6 +26,7 @@ export function Testimonials() {
   }, [next]);
 
   const t = testimonials[index];
+  if (!t) return null;
 
   return (
     <section id="testimonials" className="relative scroll-mt-28 overflow-hidden py-24 lg:py-32">
@@ -106,6 +111,7 @@ export function Testimonials() {
 }
 
 export function Insights() {
+  const { insights } = useSiteContent();
   return (
     <section id="insights" className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32">
       <div className="mx-auto w-[min(1320px,94vw)]">
@@ -158,6 +164,7 @@ export function Insights() {
 }
 
 export function Faq() {
+  const { faqs } = useSiteContent();
   return (
     <section id="faq" className="scroll-mt-28 py-24 lg:py-32">
       <div className="mx-auto grid w-[min(1100px,92vw)] gap-12 lg:grid-cols-[0.85fr_1.15fr]">

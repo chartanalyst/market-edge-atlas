@@ -1,8 +1,9 @@
 import * as Icons from "lucide-react";
 import { SectionHeading, Stagger, StaggerItem, TiltCard } from "@/components/site/primitives";
-import { differentiators, services } from "@/lib/site-data";
+import { useSiteContent } from "@/components/site/content-context";
 
 export function Services() {
+  const { services } = useSiteContent();
   return (
     <section id="services" className="scroll-mt-28 py-24 lg:py-32">
       <div className="mx-auto w-[min(1320px,94vw)]">
@@ -65,6 +66,7 @@ export function Services() {
 }
 
 export function WhyWorkWithMe() {
+  const { differentiators } = useSiteContent();
   return (
     <section id="why" className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32">
       <div className="mx-auto w-[min(1320px,94vw)]">

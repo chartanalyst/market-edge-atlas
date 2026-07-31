@@ -1,7 +1,8 @@
-import { tickerItems } from "@/lib/site-data";
+import { useSiteContent } from "@/components/site/content-context";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 export function MarketTicker() {
+  const { tickerItems } = useSiteContent();
   const items = [...tickerItems, ...tickerItems];
   return (
     <div className="relative overflow-hidden border-y border-border bg-surface py-3">
