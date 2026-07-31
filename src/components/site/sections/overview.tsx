@@ -1,43 +1,32 @@
 import * as Icons from "lucide-react";
 import { Reveal, SectionHeading, Stagger, StaggerItem, TiltCard } from "@/components/site/primitives";
-import { markets } from "@/lib/site-data";
+import { useSiteContent } from "@/components/site/content-context";
 import { AreaChart } from "@/components/site/charts";
 
 export function About() {
+  const { copy } = useSiteContent();
+  const about = copy.about;
   return (
     <section id="about" className="relative scroll-mt-28 py-24 lg:py-32">
       <div className="mx-auto grid w-[min(1320px,94vw)] gap-14 lg:grid-cols-[0.95fr_1.05fr]">
         <div>
           <SectionHeading
-            eyebrow="About"
-            title={<>Research discipline borrowed from the institutional side of the desk.</>}
-            description="I've spent seven years reading price for a living — first inside a digital-asset research desk, now independently for funds, communities and private clients across five asset classes."
+            eyebrow={about.eyebrow}
+            title={about.title}
+            description={about.description}
           />
 
           <Reveal delay={0.1} className="mt-8 grid gap-5 text-sm leading-relaxed text-muted-foreground">
-            <p>
-              My mission is simple: make technical analysis defensible. Every chart I publish states a
-              thesis, the evidence supporting it, the level that proves it wrong, and the risk taken to
-              express it. If a call fails, it is logged exactly like the ones that work.
-            </p>
-            <p>
-              The approach is structure-first. I build context from the highest timeframe downward,
-              mapping ranges, liquidity and unmitigated zones before considering an entry. Confirmation
-              is required, never assumed. Narrative and sentiment inform the environment — they never
-              override the chart.
-            </p>
+            {about.paragraphs.map((p) => (
+              <p key={p}>{p}</p>
+            ))}
           </Reveal>
 
           <Reveal delay={0.16} className="mt-10 grid gap-4 sm:grid-cols-2">
-            {[
-              { t: "Auditable", d: "Public log of thesis vs. outcome since 2021." },
-              { t: "Repeatable", d: "One written seven-stage process for every market." },
-              { t: "Risk-first", d: "Invalidation defined before position sizing." },
-              { t: "Multi-market", d: "Cross-asset confirmation on every directional call." },
-            ].map((i) => (
-              <div key={i.t} className="border border-border bg-surface p-5">
-                <p className="font-display text-sm font-semibold">{i.t}</p>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{i.d}</p>
+            {about.pillars.map((i) => (
+              <div key={i.title} className="border border-border bg-surface p-5">
+                <p className="font-display text-sm font-semibold">{i.title}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{i.desc}</p>
               </div>
             ))}
           </Reveal>
@@ -45,35 +34,14 @@ export function About() {
 
         <Reveal delay={0.12} className="relative">
           <div className="sticky top-28 border border-border bg-card p-7">
-            <p className="eyebrow">What makes the analysis different</p>
+            <p className="eyebrow">{about.asideTitle}</p>
             <ul className="mt-7 grid gap-6">
-              {[
-                {
-                  n: "01",
-                  t: "Evidence before opinion",
-                  d: "Each thesis is built on observable structure, not on a narrative searching for a chart.",
-                },
-                {
-                  n: "02",
-                  t: "Invalidation is published",
-                  d: "You always know the exact level at which the idea is wrong — stated up front.",
-                },
-                {
-                  n: "03",
-                  t: "Cross-asset confirmation",
-                  d: "Dollar strength, yields and breadth are checked before any directional conviction.",
-                },
-                {
-                  n: "04",
-                  t: "Outcomes tracked in R",
-                  d: "Performance is expressed in risk multiples, not screenshots of winners.",
-                },
-              ].map((s) => (
-                <li key={s.n} className="grid grid-cols-[auto_1fr] gap-4">
-                  <span className="num mt-0.5 text-xs font-semibold text-emerald">{s.n}</span>
+              {about.points.map((s2) => (
+                <li key={s2.n} className="grid grid-cols-[auto_1fr] gap-4">
+                  <span className="num mt-0.5 text-xs font-semibold text-emerald">{s2.n}</span>
                   <div className="min-w-0">
-                    <p className="font-display text-sm font-semibold">{s.t}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.d}</p>
+                    <p className="font-display text-sm font-semibold">{s2.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s2.desc}</p>
                   </div>
                 </li>
               ))}
@@ -81,11 +49,11 @@ export function About() {
 
             <div className="mt-8 border border-border bg-surface p-4">
               <div className="flex items-center justify-between">
-                <p className="eyebrow text-[0.6rem]">Cumulative R · published ideas</p>
-                <p className="num text-sm font-semibold text-emerald">+148R</p>
+                <p className="eyebrow text-[0.6rem]">{about.chartLabel}</p>
+                <p className="num text-sm font-semibold text-emerald">{about.chartValue}</p>
               </div>
               <AreaChart
-                series={[4, 9, 7, 16, 21, 19, 30, 38, 35, 48, 61, 70, 88, 104, 126, 148]}
+                series={about.chartSeries}
                 height={110}
                 showGrid={false}
               />
@@ -98,6 +66,7 @@ export function About() {
 }
 
 export function Markets() {
+  const { markets } = useSiteContent();
   return (
     <section id="markets" className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32">
       <div className="mx-auto w-[min(1320px,94vw)]">
