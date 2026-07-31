@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -14,6 +15,9 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BackToTop, ScrollProgress, SiteNav } from "@/components/site/nav";
 import { SiteFooter } from "@/components/site/footer";
 import { Toaster } from "@/components/ui/sonner";
+import { SiteContentProvider } from "@/components/site/content-context";
+import { getSiteContent } from "@/lib/content.functions";
+import { defaultSiteContent } from "@/lib/site-content";
 
 function NotFoundComponent() {
   return (
@@ -106,6 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
   }),
+  loader: () => getSiteContent(),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -128,16 +133,29 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const content = Route.useLoaderData() ?? defaultSiteContent;
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isChrome = !pathname.startsWith("/admin") && !pathname.startsWith("/auth");
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ScrollProgress />
-      <SiteNav />
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <SiteFooter />
-      <BackToTop />
-      <Toaster position="bottom-center" />
+      <SiteContentProvider value={content}>
+        {isChrome ? (
+          <>
+            <ScrollProgress />
+            <SiteNav />
+          </>
+        ) : null}
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        {isChrome ? (
+          <>
+            <SiteFooter />
+            <BackToTop />
+          </>
+        ) : null}
+        <Toaster position="bottom-center" />
+      </SiteContentProvider>
     </QueryClientProvider>
   );
 }
