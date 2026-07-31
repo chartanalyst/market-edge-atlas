@@ -3,8 +3,12 @@ import { ArrowRight, Check, Clock, Mail, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Reveal, SectionHeading } from "@/components/site/primitives";
 import { socials } from "@/components/site/footer";
+import { useSiteContent } from "@/components/site/content-context";
+
 
 export function Contact() {
+  const { copy } = useSiteContent();
+  const contact = copy.contact;
   const [sent, setSent] = useState(false);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -24,16 +28,16 @@ export function Contact() {
       <div className="mx-auto grid w-[min(1320px,94vw)] gap-12 lg:grid-cols-[0.95fr_1.05fr]">
         <div>
           <SectionHeading
-            eyebrow="Contact"
-            title="Let's discuss your markets."
-            description="Research retainers, community coverage, education or a one-off custom review — tell me what you need and I'll respond with a scope and timeline."
+            eyebrow={contact.eyebrow}
+            title={contact.title}
+            description={contact.description}
           />
 
           <Reveal delay={0.1} className="mt-10 grid gap-4">
             {[
-              { icon: Mail, l: "Email", v: "research@technical-analyst.io" },
-              { icon: Clock, l: "Response time", v: "Within one business day" },
-              { icon: MapPin, l: "Coverage", v: "Asia · London · New York sessions" },
+              { icon: Mail, l: "Email", v: contact.email },
+              { icon: Clock, l: "Response time", v: contact.responseTime },
+              { icon: MapPin, l: "Coverage", v: contact.coverage },
             ].map((c) => (
               <div key={c.l} className="flex items-center gap-4 border border-border bg-card p-5 backdrop-blur">
                 <span className="grid h-10 w-10 shrink-0 place-items-center border border-emerald bg-transparent text-emerald">
@@ -84,14 +88,7 @@ export function Contact() {
                   name="topic"
                   className="mt-2.5 w-full border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-emerald"
                 >
-                  {[
-                    "Technical analysis retainer",
-                    "Institutional report",
-                    "Community coverage",
-                    "Education / mentoring",
-                    "Custom market review",
-                    "Consulting",
-                  ].map((o) => (
+                  {contact.engagements.map((o) => (
                     <option key={o}>{o}</option>
                   ))}
                 </select>
@@ -128,9 +125,7 @@ export function Contact() {
                 </>
               )}
             </button>
-            <p className="mt-4 text-center text-xs text-muted-foreground">
-              Prefer a call? Book a 45-minute consultation and I'll send a written summary afterwards.
-            </p>
+            <p className="mt-4 text-center text-xs text-muted-foreground">{contact.footnote}</p>
           </form>
         </Reveal>
       </div>

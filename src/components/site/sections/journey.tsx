@@ -1,8 +1,9 @@
 import { motion } from "motion/react";
 import { Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
-import { processSteps, timeline } from "@/lib/site-data";
+import { useSiteContent } from "@/components/site/content-context";
 
 export function Experience() {
+  const { timeline } = useSiteContent();
   return (
     <section id="experience" className="scroll-mt-28 py-24 lg:py-32">
       <div className="mx-auto w-[min(1320px,94vw)]">
@@ -52,6 +53,7 @@ export function Experience() {
 }
 
 export function Process() {
+  const { processSteps } = useSiteContent();
   return (
     <section
       id="process"

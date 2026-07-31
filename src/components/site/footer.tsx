@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MessageCircle, Linkedin, Send, Twitter } from "lucide-react";
+import { useSiteContent } from "@/components/site/content-context";
+
 
 export const socials = [
   { label: "Email", href: "mailto:research@technical-analyst.io", icon: Mail },
@@ -10,6 +12,8 @@ export const socials = [
 ];
 
 export function SiteFooter() {
+  const { copy } = useSiteContent();
+  const brand = copy.brand;
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto w-[min(1320px,94vw)] py-16">
@@ -17,14 +21,11 @@ export function SiteFooter() {
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5">
               <span className="grid h-9 w-9 place-items-center bg-navy text-navy-foreground">
-                <span className="font-display text-sm font-bold">TA</span>
+                <span className="font-display text-sm font-bold">{brand.initials}</span>
               </span>
-              <span className="font-display text-sm font-semibold">Technical Market Analyst</span>
+              <span className="font-display text-sm font-semibold">{brand.name}</span>
             </div>
-            <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
-              Institutional-grade technical research across crypto, forex, equities, commodities and
-              indices. Structure first, risk always.
-            </p>
+            <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{brand.tagline}</p>
             <div className="mt-6 flex gap-2">
               {socials.map((s) => (
                 <a
@@ -89,10 +90,10 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-14 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Technical Market Analyst. All rights reserved.</p>
-          <p className="max-w-xl sm:text-right">
-            Research and education only. Nothing published here constitutes financial advice.
+          <p>
+            © {new Date().getFullYear()} {brand.name}. All rights reserved.
           </p>
+          <p className="max-w-xl sm:text-right">{brand.disclaimer}</p>
         </div>
       </div>
     </footer>

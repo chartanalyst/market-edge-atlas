@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight, Search } from "lucide-react";
 import { Reveal, Stagger, StaggerItem } from "@/components/site/primitives";
-import { insights } from "@/lib/site-data";
+import { useSiteContent } from "@/components/site/content-context";
 import { cn } from "@/lib/utils";
 
 const title = "Market Insights & Technical Education | Technical Market Analyst";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/insights")({
 });
 
 function InsightsPage() {
+  const { insights } = useSiteContent();
   const categories = ["All", ...Array.from(new Set(insights.map((i) => i.category)))];
   const [cat, setCat] = useState("All");
   const [query, setQuery] = useState("");
@@ -37,7 +38,7 @@ function InsightsPage() {
           (!q || p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q))
         );
       }),
-    [cat, query],
+    [insights, cat, query],
   );
 
   const [featured, ...rest] = visible;

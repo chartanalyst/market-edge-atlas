@@ -2,19 +2,23 @@ import { motion } from "motion/react";
 import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
 import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Counter } from "@/components/site/primitives";
+import { useSiteContent } from "@/components/site/content-context";
+
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Hero() {
+  const { copy } = useSiteContent();
+  const hero = copy.hero;
   return (
     <section className="relative overflow-hidden border-b border-border pt-28 sm:pt-36">
       <div className="grid-lines pointer-events-none absolute inset-0 -z-10 opacity-70 [mask-image:radial-gradient(80%_70%_at_50%_0%,black,transparent)]" />
 
       <div className="mx-auto w-[min(1320px,94vw)]">
         <div className="flex items-center justify-between border-y border-border py-2.5">
-          <span className="eyebrow">001 — Overview</span>
-          <span className="eyebrow hidden sm:inline">Independent Research Practice</span>
-          <span className="eyebrow">Est. 2019</span>
+          <span className="eyebrow">{hero.indexLabel}</span>
+          <span className="eyebrow hidden sm:inline">{hero.practice}</span>
+          <span className="eyebrow">{hero.established}</span>
         </div>
 
         <div className="grid items-stretch gap-0 lg:grid-cols-[1.05fr_0.95fr]">
@@ -29,7 +33,7 @@ export function Hero() {
                 <span className="absolute inline-flex h-full w-full animate-ping bg-emerald opacity-70" />
                 <span className="relative inline-flex h-1.5 w-1.5 bg-emerald" />
               </span>
-              <span className="eyebrow text-foreground/70">Coverage live · 5 asset classes</span>
+              <span className="eyebrow text-foreground/70">{hero.badge}</span>
             </motion.div>
 
             <motion.h1
@@ -38,11 +42,11 @@ export function Hero() {
               transition={{ duration: 0.85, ease, delay: 0.08 }}
               className="mt-8 text-balance text-[2.7rem] font-semibold leading-[0.98] tracking-[-0.04em] sm:text-6xl lg:text-[4.6rem]"
             >
-              Professional
+              {hero.titleLine1}
               <br />
-              <span className="text-emerald">Technical Market</span>
+              <span className="text-emerald">{hero.titleAccent}</span>
               <br />
-              Analyst
+              {hero.titleLine3}
             </motion.h1>
 
             <motion.p
@@ -51,8 +55,7 @@ export function Hero() {
               transition={{ duration: 0.8, ease, delay: 0.18 }}
               className="mt-8 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg"
             >
-              Providing institutional-grade technical analysis across Crypto, Forex, Stocks,
-              Commodities, and Indices.
+              {hero.subtitle}
             </motion.p>
 
             <motion.div
@@ -65,14 +68,14 @@ export function Hero() {
                 href="#featured"
                 className="group inline-flex items-center gap-2 border border-border bg-navy px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground transition-all hover:bg-emerald"
               >
-                View Portfolio
+                {hero.primaryCta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </a>
               <a
                 href="#contact"
                 className="group inline-flex items-center gap-2 border border-border bg-transparent px-7 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.16em] transition-all hover:shadow-[4px_4px_0_0_var(--emerald)]"
               >
-                Contact Me
+                {hero.secondaryCta}
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </a>
             </motion.div>
@@ -83,19 +86,15 @@ export function Hero() {
               transition={{ duration: 0.9, delay: 0.4 }}
               className="mt-14 grid max-w-xl grid-cols-3 border-y border-border"
             >
-              {[
-                { v: 2400, s: "+", l: "Charts published" },
-                { v: 71, s: "%", l: "Thesis hit rate" },
-                { v: 7, s: "yrs", l: "Full-time research" },
-              ].map((k, i) => (
+              {hero.kpis.map((k, i) => (
                 <div
-                  key={k.l}
+                  key={k.label}
                   className={i < 2 ? "border-r border-hairline py-6 pr-4" : "py-6 pl-4"}
                 >
                   <dt className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                    <Counter value={k.v} suffix={k.s} />
+                    <Counter value={k.value} suffix={k.suffix} />
                   </dt>
-                  <dd className="eyebrow mt-2 text-[0.6rem]">{k.l}</dd>
+                  <dd className="eyebrow mt-2 text-[0.6rem]">{k.label}</dd>
                 </div>
               ))}
             </motion.dl>
@@ -110,19 +109,20 @@ export function Hero() {
             <div className="relative w-full border border-border bg-card">
               <div className="flex items-start justify-between border-b border-border p-5">
                 <div>
-                  <p className="eyebrow">BTC / USD · Weekly</p>
+                  <p className="eyebrow">{hero.panelLabel}</p>
                   <p className="num mt-2 text-2xl font-semibold">
-                    <Counter value={112480} /> <span className="text-sm text-emerald">+1.84%</span>
+                    <Counter value={hero.panelPrice} />{" "}
+                    <span className="text-sm text-emerald">{hero.panelChange}</span>
                   </p>
                 </div>
                 <span className="border border-emerald px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-emerald">
-                  Bullish structure
+                  {hero.panelBadge}
                 </span>
               </div>
 
               <div className="border-b border-border p-4">
                 <AreaChart
-                  series={[22, 26, 21, 30, 27, 36, 32, 44, 40, 52, 58, 54, 68, 74, 88]}
+                  series={hero.panelSeries}
                   height={150}
                 />
               </div>
@@ -132,14 +132,10 @@ export function Hero() {
               </div>
 
               <div className="grid grid-cols-3 text-center">
-                {[
-                  { l: "Bias", v: "Long" },
-                  { l: "R:R", v: "1 : 3.8" },
-                  { l: "Risk", v: "0.75%" },
-                ].map((c, i) => (
-                  <div key={c.l} className={i < 2 ? "border-r border-hairline px-2 py-4" : "px-2 py-4"}>
-                    <p className="eyebrow text-[0.58rem]">{c.l}</p>
-                    <p className="num mt-1.5 text-sm font-semibold">{c.v}</p>
+                {hero.panelMetrics.map((c, i) => (
+                  <div key={c.label} className={i < 2 ? "border-r border-hairline px-2 py-4" : "px-2 py-4"}>
+                    <p className="eyebrow text-[0.58rem]">{c.label}</p>
+                    <p className="num mt-1.5 text-sm font-semibold">{c.value}</p>
                   </div>
                 ))}
               </div>
@@ -153,8 +149,8 @@ export function Hero() {
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="h-4 w-4 text-emerald" />
                 <div>
-                  <p className="text-xs font-semibold">Invalidation defined</p>
-                  <p className="num text-[0.65rem] text-muted-foreground">before every entry</p>
+                  <p className="text-xs font-semibold">{hero.floatOne.title}</p>
+                  <p className="num text-[0.65rem] text-muted-foreground">{hero.floatOne.sub}</p>
                 </div>
               </div>
             </motion.div>
@@ -167,8 +163,8 @@ export function Hero() {
               <div className="flex items-center gap-2.5">
                 <Sparkles className="h-4 w-4 text-emerald" />
                 <div>
-                  <p className="text-xs font-semibold">Liquidity mapped</p>
-                  <p className="num text-[0.65rem] text-muted-foreground">HTF → LTF confluence</p>
+                  <p className="text-xs font-semibold">{hero.floatTwo.title}</p>
+                  <p className="num text-[0.65rem] text-muted-foreground">{hero.floatTwo.sub}</p>
                 </div>
               </div>
             </motion.div>

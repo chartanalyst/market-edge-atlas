@@ -3,12 +3,13 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Search } from "lucide-react";
 import { AreaChart } from "@/components/site/charts";
 import { Counter, Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
-import { analyses, coverageMap, stats } from "@/lib/site-data";
+import { useSiteContent } from "@/components/site/content-context";
 import { cn } from "@/lib/utils";
 
 const filters = ["All", "Crypto", "Forex", "Stocks", "Commodities", "Indices"] as const;
 
 export function FeaturedAnalysis() {
+  const { analyses } = useSiteContent();
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");
   const [query, setQuery] = useState("");
 
@@ -24,7 +25,7 @@ export function FeaturedAnalysis() {
           a.summary.toLowerCase().includes(q);
         return matchFilter && matchQuery;
       }),
-    [filter, query],
+    [analyses, filter, query],
   );
 
   return (
@@ -123,6 +124,7 @@ export function FeaturedAnalysis() {
 }
 
 export function Performance() {
+  const { stats } = useSiteContent();
   return (
     <section
       id="performance"
@@ -171,6 +173,7 @@ export function Performance() {
 }
 
 function CoverageMap() {
+  const { coverageMap } = useSiteContent();
   return (
     <div className="h-full border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur">
       <p className="eyebrow text-navy-foreground/60">Session coverage</p>
