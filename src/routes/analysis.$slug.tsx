@@ -2,13 +2,15 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, Target, TriangleAlert } from "lucide-react";
 import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Reveal } from "@/components/site/primitives";
-import { analyses, type Analysis } from "@/lib/site-data";
+import type { Analysis } from "@/lib/site-data";
+import { getSiteContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/analysis/$slug")({
-  loader: ({ params }) => {
-    const analysis = analyses.find((a) => a.slug === params.slug);
+  loader: async ({ params }) => {
+    const content = await getSiteContent();
+    const analysis = content.analyses.find((a) => a.slug === params.slug);
     if (!analysis) throw notFound();
-    return { analysis };
+    return { analysis, all: content.analyses };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -33,8 +35,8 @@ export const Route = createFileRoute("/analysis/$slug")({
 });
 
 function AnalysisDetail() {
-  const { analysis: a } = Route.useLoaderData() as { analysis: Analysis };
-  const related = analyses.filter((x) => x.slug !== a.slug).slice(0, 3);
+  const { analysis: a, all } = Route.useLoaderData() as { analysis: Analysis; all: Analysis[] };
+  const related = all.filter((x) => x.slug !== a.slug).slice(0, 3);
 
   return (
     <main className="pt-32">
