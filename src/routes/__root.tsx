@@ -93,6 +93,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#F8F5EF" },
+      { property: "og:title", content: "Technical Market Analyst — Institutional-Grade Research" },
+      { name: "twitter:title", content: "Technical Market Analyst — Institutional-Grade Research" },
+      { property: "og:description", content: "Institutional-grade technical analysis across crypto, forex, stocks, commodities and indices." },
+      { name: "twitter:description", content: "Institutional-grade technical analysis across crypto, forex, stocks, commodities and indices." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f5dcf60-a126-4fed-9802-677971cba4a1/id-preview-fea033af--3a3f1d14-383c-4f82-b6b3-e7cf92a49601.lovable.app-1785499798202.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f5dcf60-a126-4fed-9802-677971cba4a1/id-preview-fea033af--3a3f1d14-383c-4f82-b6b3-e7cf92a49601.lovable.app-1785499798202.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
