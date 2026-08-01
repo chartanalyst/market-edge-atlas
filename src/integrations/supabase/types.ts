@@ -14,6 +14,132 @@ export type Database = {
   }
   public: {
     Tables: {
+      analyses: {
+        Row: {
+          bias: string
+          category: string
+          cover_image: string | null
+          created_at: string
+          date: string
+          description: string
+          featured: boolean
+          gallery: Json
+          id: string
+          invalidation: string
+          market: string
+          market_structure: string
+          outcome: string
+          pair: string
+          pdf_url: string | null
+          published: boolean
+          rr: string
+          series: Json
+          slug: string
+          sort_order: number
+          subtitle: string
+          summary: string
+          tags: string[]
+          targets: Json
+          thesis: Json
+          timeframe: string
+          title: string
+          tradingview_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          bias?: string
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          date?: string
+          description?: string
+          featured?: boolean
+          gallery?: Json
+          id?: string
+          invalidation?: string
+          market?: string
+          market_structure?: string
+          outcome?: string
+          pair?: string
+          pdf_url?: string | null
+          published?: boolean
+          rr?: string
+          series?: Json
+          slug: string
+          sort_order?: number
+          subtitle?: string
+          summary?: string
+          tags?: string[]
+          targets?: Json
+          thesis?: Json
+          timeframe?: string
+          title: string
+          tradingview_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bias?: string
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          date?: string
+          description?: string
+          featured?: boolean
+          gallery?: Json
+          id?: string
+          invalidation?: string
+          market?: string
+          market_structure?: string
+          outcome?: string
+          pair?: string
+          pdf_url?: string | null
+          published?: boolean
+          rr?: string
+          series?: Json
+          slug?: string
+          sort_order?: number
+          subtitle?: string
+          summary?: string
+          tags?: string[]
+          targets?: Json
+          thesis?: Json
+          timeframe?: string
+          title?: string
+          tradingview_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inquiries: {
+        Row: {
+          created_at: string
+          email: string
+          handled: boolean
+          id: string
+          message: string
+          name: string
+          organization: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          handled?: boolean
+          id?: string
+          message: string
+          name: string
+          organization?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          handled?: boolean
+          id?: string
+          message?: string
+          name?: string
+          organization?: string
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           data: Json
@@ -35,6 +161,60 @@ export type Database = {
         }
         Relationships: []
       }
+      trading_results: {
+        Row: {
+          created_at: string
+          date: string
+          direction: string
+          entry: string
+          exit: string
+          id: string
+          instrument: string
+          market: string
+          notes: string
+          percentage: number
+          published: boolean
+          r_multiple: number
+          result: string
+          screenshot: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          direction?: string
+          entry?: string
+          exit?: string
+          id?: string
+          instrument?: string
+          market?: string
+          notes?: string
+          percentage?: number
+          published?: boolean
+          r_multiple?: number
+          result?: string
+          screenshot?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          direction?: string
+          entry?: string
+          exit?: string
+          id?: string
+          instrument?: string
+          market?: string
+          notes?: string
+          percentage?: number
+          published?: boolean
+          r_multiple?: number
+          result?: string
+          screenshot?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -53,6 +233,60 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_reports: {
+        Row: {
+          body: string
+          cover_image: string | null
+          created_at: string
+          date: string
+          gallery: Json
+          id: string
+          pdf_url: string | null
+          published: boolean
+          slug: string
+          sort_order: number
+          summary: string
+          tags: string[]
+          title: string
+          updated_at: string
+          week_label: string
+        }
+        Insert: {
+          body?: string
+          cover_image?: string | null
+          created_at?: string
+          date?: string
+          gallery?: Json
+          id?: string
+          pdf_url?: string | null
+          published?: boolean
+          slug: string
+          sort_order?: number
+          summary?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+          week_label?: string
+        }
+        Update: {
+          body?: string
+          cover_image?: string | null
+          created_at?: string
+          date?: string
+          gallery?: Json
+          id?: string
+          pdf_url?: string | null
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          summary?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          week_label?: string
         }
         Relationships: []
       }
