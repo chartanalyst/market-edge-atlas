@@ -14,6 +14,7 @@ import { getAdminStatus } from "@/lib/admin.functions";
 import { adminSections, type AdminSection } from "@/lib/admin-schema";
 import { defaultSiteContent, type SiteContentKey } from "@/lib/site-content";
 import { FieldControl } from "@/components/admin/field-control";
+import { AnalysesManager } from "@/components/admin/analyses-manager";
 
 const title = "Content admin — Technical Market Analyst";
 
@@ -43,23 +44,23 @@ function AdminPage() {
   const status = useQuery({ queryKey: ["admin-status"], queryFn: () => fetchStatus() });
   const content = useQuery({ queryKey: ["site-content"], queryFn: () => fetchContent() });
 
-  const [activeKey, setActiveKey] = useState<SiteContentKey>("copy");
+  const [activeKey, setActiveKey] = useState<SiteContentKey | "analyses-db">("analyses-db");
   const [draft, setDraft] = useState<unknown>(null);
 
   const section = useMemo(
-    () => adminSections.find((s) => s.key === activeKey) as AdminSection,
+    () => adminSections.find((s) => s.key === activeKey) as AdminSection | undefined,
     [activeKey],
   );
 
   useEffect(() => {
-    if (!content.data) return;
+    if (!content.data || activeKey === "analyses-db") return;
     setDraft(structuredClone(content.data[activeKey]));
   }, [content.data, activeKey]);
 
   const saveMutation = useMutation({
-    mutationFn: () => save({ data: { key: activeKey, data: draft } }),
+    mutationFn: () => save({ data: { key: activeKey as string, data: draft } }),
     onSuccess: async () => {
-      toast.success(`${section.label} saved`, { description: "The live site is updated." });
+      toast.success(`${section?.label ?? "Section"} saved`, { description: "The live site is updated." });
       await queryClient.invalidateQueries({ queryKey: ["site-content"] });
     },
     onError: (error) =>
@@ -67,10 +68,10 @@ function AdminPage() {
   });
 
   const resetMutation = useMutation({
-    mutationFn: () => reset({ data: { key: activeKey } }),
+    mutationFn: () => reset({ data: { key: activeKey as string } }),
     onSuccess: async () => {
-      setDraft(structuredClone(defaultSiteContent[activeKey]));
-      toast.success(`${section.label} restored to defaults`);
+      setDraft(structuredClone(defaultSiteContent[activeKey as SiteContentKey]));
+      toast.success(`${section?.label ?? "Section"} restored to defaults`);
       await queryClient.invalidateQueries({ queryKey: ["site-content"] });
     },
     onError: (error) =>
@@ -138,6 +139,16 @@ function AdminPage() {
         <nav className="lg:sticky lg:top-28 lg:self-start">
           <p className="eyebrow">Sections</p>
           <ul className="mt-4 grid gap-px border border-border bg-border">
+            <li>
+              <button
+                onClick={() => setActiveKey("analyses-db")}
+                className={`w-full bg-card px-4 py-3 text-left text-sm transition-colors hover:text-emerald ${
+                  activeKey === "analyses-db" ? "bg-surface font-semibold text-emerald" : ""
+                }`}
+              >
+                Analyses (research)
+              </button>
+            </li>
             {adminSections.map((s) => (
               <li key={s.key}>
                 <button
@@ -154,6 +165,10 @@ function AdminPage() {
         </nav>
 
         <section className="min-w-0">
+          {activeKey === "analyses-db" || !section ? (
+            <AnalysesManager />
+          ) : (
+          <>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold">{section.label}</h2>
@@ -217,6 +232,8 @@ function AdminPage() {
               })
             )}
           </div>
+          </>
+          )}
         </section>
       </div>
     </main>
