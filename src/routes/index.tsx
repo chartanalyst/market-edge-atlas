@@ -7,6 +7,7 @@ import { Experience, Process } from "@/components/site/sections/journey";
 import { Services, WhyWorkWithMe } from "@/components/site/sections/offer";
 import { Faq, Insights, Testimonials } from "@/components/site/sections/social";
 import { Contact } from "@/components/site/sections/contact";
+import { useSiteContent } from "@/components/site/content-context";
 
 const title = "Technical Market Analyst — Institutional-Grade Multi-Market Research";
 const description =
@@ -27,22 +28,32 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { sections } = useSiteContent();
+  const registry: Record<string, () => JSX.Element> = {
+    hero: Hero,
+    ticker: MarketTicker,
+    about: About,
+    markets: Markets,
+    featured: FeaturedAnalysis,
+    performance: Performance,
+    experience: Experience,
+    process: Process,
+    services: Services,
+    why: WhyWorkWithMe,
+    testimonials: Testimonials,
+    insights: Insights,
+    faq: Faq,
+    contact: Contact,
+  };
+
   return (
     <main>
-      <Hero />
-      <MarketTicker />
-      <About />
-      <Markets />
-      <FeaturedAnalysis />
-      <Performance />
-      <Experience />
-      <Process />
-      <Services />
-      <WhyWorkWithMe />
-      <Testimonials />
-      <Insights />
-      <Faq />
-      <Contact />
+      {sections
+        .filter((s) => s.enabled && registry[s.id])
+        .map((s) => {
+          const Section = registry[s.id];
+          return <Section key={s.id} />;
+        })}
     </main>
   );
 }
