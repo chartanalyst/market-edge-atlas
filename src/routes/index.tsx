@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { sections } = useSiteContent();
-  const registry: Record<string, () => JSX.Element> = {
+  const registry: Record<string, React.ComponentType> = {
     hero: Hero,
     ticker: MarketTicker,
     about: About,
