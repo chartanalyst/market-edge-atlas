@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AnalysisSlugRouteImport } from './routes/analysis.$slug'
+import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,6 +46,11 @@ const AnalysisSlugRoute = AnalysisSlugRouteImport.update({
   path: '/analysis/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
+  id: '/api/public/media/$',
+  path: '/api/public/media/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/insights': typeof InsightsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/insights': typeof InsightsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,12 +76,25 @@ export interface FileRoutesById {
   '/insights': typeof InsightsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/insights' | '/admin' | '/analysis/$slug'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/insights'
+    | '/admin'
+    | '/analysis/$slug'
+    | '/api/public/media/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/insights' | '/admin' | '/analysis/$slug'
+  to:
+    | '/'
+    | '/auth'
+    | '/insights'
+    | '/admin'
+    | '/analysis/$slug'
+    | '/api/public/media/$'
   id:
     | '__root__'
     | '/'
@@ -82,6 +103,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/_authenticated/admin'
     | '/analysis/$slug'
+    | '/api/public/media/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -90,6 +112,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   InsightsRoute: typeof InsightsRoute
   AnalysisSlugRoute: typeof AnalysisSlugRoute
+  ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -136,6 +159,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/media/$': {
+      id: '/api/public/media/$'
+      path: '/api/public/media/$'
+      fullPath: '/api/public/media/$'
+      preLoaderRoute: typeof ApiPublicMediaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -156,17 +186,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   InsightsRoute: InsightsRoute,
   AnalysisSlugRoute: AnalysisSlugRoute,
+  ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -7,12 +7,24 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const getSiteContent = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const supabase = createPublicSupabase();
-    const { data } = await supabase.from("site_content").select("key, data");
-    return mergeSiteContent(data as { key: string; data: unknown }[] | null);
+    const [contentRes, analysisRes] = await Promise.all([
+      supabase.from("site_content").select("key, data"),
+      supabase
+        .from("analyses")
+        .select("*")
+        .eq("published", true)
+        .order("sort_order", { ascending: true })
+        .order("date", { ascending: false }),
+    ]);
+    return mergeSiteContent(
+      contentRes.data as { key: string; data: unknown }[] | null,
+      analysisRes.data as Record<string, unknown>[] | null,
+    );
   } catch {
     return mergeSiteContent(null);
   }
 });
+
 
 export const saveSiteContentSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

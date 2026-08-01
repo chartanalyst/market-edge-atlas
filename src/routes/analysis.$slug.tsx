@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, Target, TriangleAlert } from "lucide-react";
 import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Reveal } from "@/components/site/primitives";
-import type { Analysis } from "@/lib/site-data";
+import type { AnalysisRecord } from "@/lib/analysis-model";
 import { getSiteContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/analysis/$slug")({
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/analysis/$slug")({
 });
 
 function AnalysisDetail() {
-  const { analysis: a, all } = Route.useLoaderData() as { analysis: Analysis; all: Analysis[] };
+  const { analysis: a, all } = Route.useLoaderData() as { analysis: AnalysisRecord; all: AnalysisRecord[] };
   const related = all.filter((x) => x.slug !== a.slug).slice(0, 3);
 
   return (
@@ -109,7 +109,7 @@ function AnalysisDetail() {
             <div className="sticky top-28 border border-border bg-card p-7">
               <p className="eyebrow">Trade parameters</p>
               <dl className="mt-6 grid gap-4">
-                {a.levels.map((l) => (
+                {a.targets.map((l) => (
                   <div key={l.label} className="flex items-center justify-between gap-4 border-b border-border pb-3">
                     <dt className="text-xs text-muted-foreground">{l.label}</dt>
                     <dd className="num text-xs font-semibold">{l.value}</dd>
