@@ -1,5 +1,4 @@
 import {
-  analyses,
   coverageMap,
   differentiators,
   faqs,
@@ -11,13 +10,24 @@ import {
   testimonials,
   tickerItems,
   timeline,
-  type Analysis,
 } from "@/lib/site-data";
 import { defaultCopy, type SiteCopy } from "@/lib/site-copy";
+import {
+  analysisFromRow,
+  defaultAnalysisRecords,
+  sortAnalyses,
+  type AnalysisRecord,
+} from "@/lib/analysis-model";
+import {
+  defaultLinks,
+  defaultSections,
+  type LinkSetting,
+  type SectionSetting,
+} from "@/lib/site-structure";
 
 export type SiteContent = {
   copy: SiteCopy;
-  analyses: Analysis[];
+  analyses: AnalysisRecord[];
   insights: typeof insights;
   markets: typeof markets;
   services: typeof services;
@@ -29,13 +39,15 @@ export type SiteContent = {
   stats: typeof stats;
   tickerItems: typeof tickerItems;
   coverageMap: typeof coverageMap;
+  sections: SectionSetting[];
+  links: LinkSetting[];
 };
 
 export type SiteContentKey = keyof SiteContent;
 
 export const defaultSiteContent: SiteContent = {
   copy: defaultCopy,
-  analyses,
+  analyses: defaultAnalysisRecords,
   insights,
   markets,
   services,
@@ -47,6 +59,8 @@ export const defaultSiteContent: SiteContent = {
   stats,
   tickerItems,
   coverageMap,
+  sections: defaultSections,
+  links: defaultLinks,
 };
 
 export const siteContentKeys = Object.keys(defaultSiteContent) as SiteContentKey[];
@@ -54,9 +68,11 @@ export const siteContentKeys = Object.keys(defaultSiteContent) as SiteContentKey
 /**
  * Database rows override the built-in defaults, key by key. A missing row simply
  * falls back to the shipped content, so the site can never render empty.
+ * Published analyses come from their own table once any exist.
  */
 export function mergeSiteContent(
   rows: { key: string; data: unknown }[] | null | undefined,
+  analysisRows?: Record<string, unknown>[] | null,
 ): SiteContent {
   const merged = { ...defaultSiteContent } as Record<string, unknown>;
   for (const row of rows ?? []) {
@@ -72,7 +88,25 @@ export function mergeSiteContent(
       };
       continue;
     }
+    if (row.key === "sections") {
+      const stored = Array.isArray(row.data) ? (row.data as SectionSetting[]) : [];
+      const known = new Map(defaultSections.map((s) => [s.id, s]));
+      const ordered = stored
+        .filter((s) => known.has(s.id))
+        .map((s) => ({ ...known.get(s.id)!, enabled: s.enabled !== false }));
+      const missing = defaultSections.filter((s) => !ordered.some((o) => o.id === s.id));
+      merged.sections = [...ordered, ...missing];
+      continue;
+    }
+    if (row.key === "analyses") continue; // analyses live in their own table
     if (Array.isArray(row.data)) merged[row.key] = row.data;
   }
+
+  if (analysisRows && analysisRows.length > 0) {
+    merged.analyses = sortAnalyses(analysisRows.map((r) => analysisFromRow(r)));
+  } else {
+    merged.analyses = sortAnalyses(defaultAnalysisRecords);
+  }
+
   return merged as SiteContent;
 }
