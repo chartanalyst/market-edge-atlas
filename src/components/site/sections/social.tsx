@@ -110,59 +110,6 @@ export function Testimonials() {
   );
 }
 
-export function Insights() {
-  const { insights } = useSiteContent();
-  return (
-    <section id="insights" className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32">
-      <div className="mx-auto w-[min(1320px,94vw)]">
-        <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
-          <SectionHeading
-            eyebrow="Educational content"
-            title="Weekly outlooks, technical concepts and research notes."
-            description="Free, structured education alongside the professional research — written the same way I write for desks."
-          />
-          <Reveal delay={0.1}>
-            <Link
-              to="/insights"
-              className="inline-flex items-center gap-2 border border-border bg-card px-5 py-3 text-sm font-semibold transition-colors hover:border-emerald hover:text-emerald"
-            >
-              All insights
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </Reveal>
-        </div>
-
-        <Stagger className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {insights.slice(0, 6).map((p) => (
-            <StaggerItem key={p.slug}>
-              <Link to="/insights" className="surface-card group flex h-full flex-col p-7">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="border border-emerald bg-transparent px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
-                    {p.category}
-                  </span>
-                  <span className="num text-[0.65rem] text-muted-foreground">{p.readTime}</span>
-                </div>
-                <h3 className="mt-5 text-pretty text-lg font-semibold leading-snug">{p.title}</h3>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{p.excerpt}</p>
-                <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
-                  <span className="num text-[0.7rem] text-muted-foreground">
-                    {new Date(p.date).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </span>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-emerald" />
-                </div>
-              </Link>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </div>
-    </section>
-  );
-}
-
 export function Faq() {
   const { faqs } = useSiteContent();
   return (

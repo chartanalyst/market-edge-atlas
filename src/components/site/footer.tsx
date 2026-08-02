@@ -1,19 +1,38 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, MessageCircle, Linkedin, Send, Twitter } from "lucide-react";
+import {
+  Github,
+  Globe,
+  Linkedin,
+  LineChart,
+  Mail,
+  MessageCircle,
+  Send,
+  Twitter,
+  type LucideIcon,
+} from "lucide-react";
 import { useSiteContent } from "@/components/site/content-context";
 
+/** Icons per supported platform — keys are matched case-insensitively. */
+const platformIcons: Record<string, LucideIcon> = {
+  email: Mail,
+  x: Twitter,
+  twitter: Twitter,
+  linkedin: Linkedin,
+  discord: MessageCircle,
+  telegram: Send,
+  tradingview: LineChart,
+  github: Github,
+};
 
-export const socials = [
-  { label: "Email", href: "mailto:research@technical-analyst.io", icon: Mail },
-  { label: "X", href: "https://x.com", icon: Twitter },
-  { label: "LinkedIn", href: "https://linkedin.com", icon: Linkedin },
-  { label: "Discord", href: "https://discord.com", icon: MessageCircle },
-  { label: "Telegram", href: "https://telegram.org", icon: Send },
-];
+export function iconForPlatform(platform: string): LucideIcon {
+  return platformIcons[platform.trim().toLowerCase()] ?? Globe;
+}
 
 export function SiteFooter() {
-  const { copy } = useSiteContent();
+  const { copy, links } = useSiteContent();
   const brand = copy.brand;
+  const socials = links.filter((l) => l.href.trim().length > 0);
+
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto w-[min(1320px,94vw)] py-16">
@@ -26,17 +45,23 @@ export function SiteFooter() {
               <span className="font-display text-sm font-semibold">{brand.name}</span>
             </div>
             <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{brand.tagline}</p>
-            <div className="mt-6 flex gap-2">
-              {socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  aria-label={s.label}
-                  className="grid h-9 w-9 place-items-center border border-border text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
-                >
-                  <s.icon className="h-4 w-4" />
-                </a>
-              ))}
+            <div className="mt-6 flex flex-wrap gap-2">
+              {socials.map((s) => {
+                const Icon = iconForPlatform(s.platform);
+                const isMail = s.href.startsWith("mailto:");
+                return (
+                  <a
+                    key={`${s.platform}-${s.href}`}
+                    href={s.href}
+                    aria-label={s.label || s.platform}
+                    title={s.label || s.platform}
+                    {...(isMail ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+                    className="grid h-9 w-9 place-items-center border border-border text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -54,7 +79,7 @@ export function SiteFooter() {
             items={[
               { label: "Services", href: "/#services" },
               { label: "Process", href: "/#process" },
-              { label: "Experience", href: "/#experience" },
+              { label: "Certifications", href: "/#certifications" },
               { label: "Testimonials", href: "/#testimonials" },
             ]}
           />
@@ -62,8 +87,12 @@ export function SiteFooter() {
             <p className="eyebrow">Resources</p>
             <ul className="mt-5 grid gap-3 text-sm">
               <li>
-                <Link to="/insights" className="text-muted-foreground transition-colors hover:text-foreground">
-                  Insights & education
+                <Link
+                  to="/"
+                  hash="reports"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Weekly reports
                 </Link>
               </li>
               <li>

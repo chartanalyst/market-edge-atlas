@@ -7,13 +7,13 @@ export const defaultSections: SectionSetting[] = [
   { id: "about", label: "About", enabled: true },
   { id: "markets", label: "Markets covered", enabled: true },
   { id: "featured", label: "Featured analysis", enabled: true },
+  { id: "reports", label: "Weekly reports", enabled: true },
   { id: "performance", label: "Performance dashboard", enabled: true },
-  { id: "experience", label: "Experience", enabled: true },
   { id: "process", label: "Analysis process", enabled: true },
+  { id: "certifications", label: "Certifications", enabled: true },
   { id: "services", label: "Services", enabled: true },
   { id: "why", label: "Why work with me", enabled: true },
   { id: "testimonials", label: "Testimonials", enabled: true },
-  { id: "insights", label: "Insights & education", enabled: true },
   { id: "faq", label: "FAQ", enabled: true },
   { id: "contact", label: "Contact", enabled: true },
 ];
@@ -26,4 +26,5 @@ export const defaultLinks: LinkSetting[] = [
   { platform: "LinkedIn", label: "LinkedIn", href: "https://linkedin.com" },
   { platform: "Discord", label: "Discord", href: "https://discord.com" },
   { platform: "Telegram", label: "Telegram", href: "https://telegram.org" },
+  { platform: "TradingView", label: "TradingView", href: "https://www.tradingview.com" },
 ];

@@ -1,4 +1,5 @@
 import {
+  certifications,
   coverageMap,
   differentiators,
   faqs,
@@ -18,6 +19,7 @@ import {
   sortAnalyses,
   type AnalysisRecord,
 } from "@/lib/analysis-model";
+import { reportFromRow, sortReports, type ReportRecord } from "@/lib/report-model";
 import {
   defaultLinks,
   defaultSections,
@@ -29,6 +31,8 @@ export type SiteContent = {
   copy: SiteCopy;
   analyses: AnalysisRecord[];
   insights: typeof insights;
+  certifications: typeof certifications;
+  reports: ReportRecord[];
   markets: typeof markets;
   services: typeof services;
   processSteps: typeof processSteps;
@@ -49,6 +53,8 @@ export const defaultSiteContent: SiteContent = {
   copy: defaultCopy,
   analyses: defaultAnalysisRecords,
   insights,
+  certifications,
+  reports: [],
   markets,
   services,
   processSteps,
@@ -73,6 +79,7 @@ export const siteContentKeys = Object.keys(defaultSiteContent) as SiteContentKey
 export function mergeSiteContent(
   rows: { key: string; data: unknown }[] | null | undefined,
   analysisRows?: Record<string, unknown>[] | null,
+  reportRows?: Record<string, unknown>[] | null,
 ): SiteContent {
   const merged = { ...defaultSiteContent } as Record<string, unknown>;
   for (const row of rows ?? []) {
@@ -98,7 +105,7 @@ export function mergeSiteContent(
       merged.sections = [...ordered, ...missing];
       continue;
     }
-    if (row.key === "analyses") continue; // analyses live in their own table
+    if (row.key === "analyses" || row.key === "reports") continue; // stored in their own tables
     if (Array.isArray(row.data)) merged[row.key] = row.data;
   }
 
@@ -107,6 +114,8 @@ export function mergeSiteContent(
   } else {
     merged.analyses = sortAnalyses(defaultAnalysisRecords);
   }
+
+  merged.reports = sortReports((reportRows ?? []).map((r) => reportFromRow(r)));
 
   return merged as SiteContent;
 }

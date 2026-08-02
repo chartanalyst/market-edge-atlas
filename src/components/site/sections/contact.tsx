@@ -2,12 +2,13 @@ import { useState, type FormEvent } from "react";
 import { ArrowRight, Check, Clock, Mail, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Reveal, SectionHeading } from "@/components/site/primitives";
-import { socials } from "@/components/site/footer";
+import { iconForPlatform } from "@/components/site/footer";
 import { useSiteContent } from "@/components/site/content-context";
 
 
 export function Contact() {
-  const { copy } = useSiteContent();
+  const { copy, links } = useSiteContent();
+  const socials = links.filter((l) => l.href.trim().length > 0);
   const contact = copy.contact;
   const [sent, setSent] = useState(false);
 
@@ -54,16 +55,21 @@ export function Contact() {
           <Reveal delay={0.16} className="mt-8">
             <p className="eyebrow">Direct channels</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  className="inline-flex items-center gap-2 border border-border bg-card px-4 py-2.5 text-xs font-semibold transition-colors hover:border-emerald hover:text-emerald"
-                >
-                  <s.icon className="h-3.5 w-3.5" />
-                  {s.label}
-                </a>
-              ))}
+              {socials.map((s) => {
+                const Icon = iconForPlatform(s.platform);
+                const isMail = s.href.startsWith("mailto:");
+                return (
+                  <a
+                    key={`${s.platform}-${s.href}`}
+                    href={s.href}
+                    {...(isMail ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+                    className="inline-flex items-center gap-2 border border-border bg-card px-4 py-2.5 text-xs font-semibold transition-colors hover:border-emerald hover:text-emerald"
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {s.label || s.platform}
+                  </a>
+                );
+              })}
             </div>
           </Reveal>
         </div>
