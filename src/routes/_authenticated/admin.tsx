@@ -15,6 +15,7 @@ import { adminSections, type AdminSection } from "@/lib/admin-schema";
 import { defaultSiteContent, type SiteContentKey } from "@/lib/site-content";
 import { FieldControl } from "@/components/admin/field-control";
 import { AnalysesManager } from "@/components/admin/analyses-manager";
+import { ReportsManager } from "@/components/admin/reports-manager";
 
 const title = "Content admin — Technical Market Analyst";
 
@@ -44,7 +45,7 @@ function AdminPage() {
   const status = useQuery({ queryKey: ["admin-status"], queryFn: () => fetchStatus() });
   const content = useQuery({ queryKey: ["site-content"], queryFn: () => fetchContent() });
 
-  const [activeKey, setActiveKey] = useState<SiteContentKey | "analyses-db">("analyses-db");
+  const [activeKey, setActiveKey] = useState<SiteContentKey | "analyses-db" | "reports-db">("analyses-db");
   const [draft, setDraft] = useState<unknown>(null);
 
   const section = useMemo(
@@ -53,7 +54,7 @@ function AdminPage() {
   );
 
   useEffect(() => {
-    if (!content.data || activeKey === "analyses-db") return;
+    if (!content.data || activeKey === "analyses-db" || activeKey === "reports-db") return;
     setDraft(structuredClone(content.data[activeKey]));
   }, [content.data, activeKey]);
 
@@ -149,6 +150,16 @@ function AdminPage() {
                 Analyses (research)
               </button>
             </li>
+            <li>
+              <button
+                onClick={() => setActiveKey("reports-db")}
+                className={`w-full bg-card px-4 py-3 text-left text-sm transition-colors hover:text-emerald ${
+                  activeKey === "reports-db" ? "bg-surface font-semibold text-emerald" : ""
+                }`}
+              >
+                Weekly reports
+              </button>
+            </li>
             {adminSections.map((s) => (
               <li key={s.key}>
                 <button
@@ -165,7 +176,9 @@ function AdminPage() {
         </nav>
 
         <section className="min-w-0">
-          {activeKey === "analyses-db" || !section ? (
+          {activeKey === "reports-db" ? (
+            <ReportsManager />
+          ) : activeKey === "analyses-db" || !section ? (
             <AnalysesManager />
           ) : (
           <>
