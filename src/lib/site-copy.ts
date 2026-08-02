@@ -22,6 +22,8 @@ export type SiteCopy = {
     panelChange: string;
     panelBadge: string;
     panelSeries: number[];
+    /** Optional image URL — when set, replaces the generated chart panel. */
+    panelImage: string;
     panelMetrics: { label: string; value: string }[];
     floatOne: { title: string; sub: string };
     floatTwo: { title: string; sub: string };
@@ -53,7 +55,7 @@ export type SiteCopy = {
 export const defaultCopy: SiteCopy = {
   brand: {
     initials: "TA",
-    name: "Technical Market Analyst",
+    name: "Market Edge Atlas",
     tagline:
       "Institutional-grade technical research across crypto, forex, equities, commodities and indices. Structure first, risk always.",
     disclaimer:
@@ -81,6 +83,7 @@ export const defaultCopy: SiteCopy = {
     panelChange: "+1.84%",
     panelBadge: "Bullish structure",
     panelSeries: [22, 26, 21, 30, 27, 36, 32, 44, 40, 52, 58, 54, 68, 74, 88],
+    panelImage: "",
     panelMetrics: [
       { label: "Bias", value: "Long" },
       { label: "R:R", value: "1 : 3.8" },
@@ -136,7 +139,7 @@ export const defaultCopy: SiteCopy = {
     title: "Let's discuss your markets.",
     description:
       "Research retainers, community coverage, education or a one-off custom review — tell me what you need and I'll respond with a scope and timeline.",
-    email: "research@technical-analyst.io",
+    email: "ubaid.ullah2005op@gmail.com",
     responseTime: "Within one business day",
     coverage: "Asia · London · New York sessions",
     engagements: [

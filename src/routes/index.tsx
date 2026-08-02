@@ -3,6 +3,7 @@ import { Hero } from "@/components/site/sections/hero";
 import { MarketTicker } from "@/components/site/ticker";
 import { About, Markets } from "@/components/site/sections/overview";
 import { FeaturedAnalysis, Performance } from "@/components/site/sections/work";
+import { TradingJournal } from "@/components/site/sections/journal";
 import { Process } from "@/components/site/sections/journey";
 import { Services, WhyWorkWithMe } from "@/components/site/sections/offer";
 import { Faq, Testimonials } from "@/components/site/sections/social";
@@ -10,10 +11,10 @@ import { Certifications } from "@/components/site/sections/certifications";
 import { WeeklyReports } from "@/components/site/sections/reports";
 import { Contact } from "@/components/site/sections/contact";
 import { useSiteContent } from "@/components/site/content-context";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-meta";
 
-const title = "Technical Market Analyst — Institutional-Grade Multi-Market Research";
-const description =
-  "Institutional-grade technical analysis across crypto, forex, stocks, commodities and indices. Documented theses, defined invalidation, tracked outcomes.";
+const title = SITE_TITLE;
+const description = SITE_DESCRIPTION;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,6 +40,7 @@ function Index() {
     featured: FeaturedAnalysis,
     reports: WeeklyReports,
     performance: Performance,
+    journal: TradingJournal,
     process: Process,
     certifications: Certifications,
     services: Services,

@@ -87,7 +87,16 @@ export function FeaturedAnalysis() {
                     </span>
                   </div>
                   <div className="mt-4 transition-transform duration-700 group-hover:scale-[1.03]">
-                    <AreaChart series={a.series} height={i === 0 ? 200 : 130} animate={false} />
+                    {a.coverImage ? (
+                      <img
+                        src={a.coverImage}
+                        alt={a.title}
+                        className={`w-full object-cover ${i === 0 ? "h-[200px]" : "h-[130px]"}`}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <AreaChart series={a.series} height={i === 0 ? 200 : 130} animate={false} />
+                    )}
                   </div>
                 </div>
 
@@ -131,7 +140,6 @@ export function Performance() {
       className="relative scroll-mt-28 overflow-hidden border-y border-border bg-navy py-24 text-navy-foreground lg:py-32"
     >
       <div className="grid-lines pointer-events-none absolute inset-0 opacity-[0.08]" />
-      
 
       <div className="mx-auto w-[min(1320px,94vw)]">
         <Reveal className="max-w-3xl">
@@ -162,69 +170,8 @@ export function Performance() {
               </div>
             </StaggerItem>
           ))}
-
-          <StaggerItem className="sm:col-span-2 lg:col-span-1">
-            <CoverageMap />
-          </StaggerItem>
         </Stagger>
       </div>
     </section>
-  );
-}
-
-function CoverageMap() {
-  const { coverageMap } = useSiteContent();
-  return (
-    <div className="h-full border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur">
-      <p className="eyebrow text-navy-foreground/60">Session coverage</p>
-      <div className="relative mt-5 aspect-[2/1] w-full">
-        <svg viewBox="0 0 100 50" className="h-full w-full" role="img" aria-label="Global session coverage map">
-          {Array.from({ length: 26 }).map((_, r) =>
-            Array.from({ length: 52 }).map((__, c) => {
-              const x = c * 1.94 + 1;
-              const y = r * 1.94 + 1;
-              const inLand =
-                (x > 12 && x < 34 && y > 8 && y < 26) ||
-                (x > 26 && x < 40 && y > 26 && y < 44) ||
-                (x > 42 && x < 56 && y > 6 && y < 20) ||
-                (x > 44 && x < 58 && y > 20 && y < 38) ||
-                (x > 56 && x < 88 && y > 8 && y < 32) ||
-                (x > 78 && x < 92 && y > 33 && y < 43);
-              if (!inLand) return null;
-              return <circle key={`${r}-${c}`} cx={x} cy={y} r="0.42" fill="currentColor" opacity="0.22" />;
-            }),
-          )}
-          {coverageMap.map((p, i) => (
-            <g key={p.city}>
-              <circle cx={p.x} cy={p.y / 2 + 4} r="1.6" fill="var(--emerald)" opacity="0.2">
-                <animate
-                  attributeName="r"
-                  values="1.2;3.4;1.2"
-                  dur="3.4s"
-                  begin={`${i * 0.32}s`}
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="opacity"
-                  values="0.35;0;0.35"
-                  dur="3.4s"
-                  begin={`${i * 0.32}s`}
-                  repeatCount="indefinite"
-                />
-              </circle>
-              <circle cx={p.x} cy={p.y / 2 + 4} r="0.75" fill="var(--emerald)" />
-            </g>
-          ))}
-        </svg>
-      </div>
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[0.65rem] text-navy-foreground/60">
-        {["Asia", "London", "New York"].map((s) => (
-          <span key={s} className="num inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 bg-emerald" />
-            {s} session
-          </span>
-        ))}
-      </div>
-    </div>
   );
 }

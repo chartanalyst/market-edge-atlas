@@ -1,7 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-/** Is the caller an admin? Also claims admin for the very first account (bootstrap). */
+/** Initial developer admin — only this email can claim first-admin bootstrap. */
+const BOOTSTRAP_ADMIN_EMAIL = (
+  process.env.BOOTSTRAP_ADMIN_EMAIL || "mdimam.cse9.bu@gmail.com"
+)
+  .trim()
+  .toLowerCase();
+
+/** Is the caller an admin? Also claims admin for the allowed bootstrap account. */
 export const getAdminStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -11,7 +18,16 @@ export const getAdminStatus = createServerFn({ method: "GET" })
     });
     if (isAdmin) return { isAdmin: true as const, bootstrapped: false };
 
-    // Bootstrap: the first account to sign in becomes the site owner/admin.
+    const email = String(
+      (context.claims as { email?: string } | undefined)?.email ?? "",
+    )
+      .trim()
+      .toLowerCase();
+
+    if (!email || email !== BOOTSTRAP_ADMIN_EMAIL) {
+      return { isAdmin: false as const, bootstrapped: false };
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { count } = await supabaseAdmin
       .from("user_roles")

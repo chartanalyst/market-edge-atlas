@@ -18,6 +18,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SiteContentProvider } from "@/components/site/content-context";
 import { getSiteContent } from "@/lib/content.functions";
 import { defaultSiteContent } from "@/lib/site-content";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-meta";
 
 function NotFoundComponent() {
   return (
@@ -84,35 +85,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Technical Market Analyst — Institutional-Grade Research" },
-      {
-        name: "description",
-        content:
-          "Institutional-grade technical analysis across crypto, forex, stocks, commodities and indices.",
-      },
+      { title: SITE_TITLE },
+      { name: "description", content: SITE_DESCRIPTION },
+      { name: "author", content: "Market Edge Atlas" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:site_name", content: "Market Edge Atlas" },
+      { name: "twitter:card", content: "summary" },
       { name: "theme-color", content: "#F8F5EF" },
-      { property: "og:title", content: "Technical Market Analyst — Institutional-Grade Research" },
-      { name: "twitter:title", content: "Technical Market Analyst — Institutional-Grade Research" },
-      { property: "og:description", content: "Institutional-grade technical analysis across crypto, forex, stocks, commodities and indices." },
-      { name: "twitter:description", content: "Institutional-grade technical analysis across crypto, forex, stocks, commodities and indices." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f5dcf60-a126-4fed-9802-677971cba4a1/id-preview-fea033af--3a3f1d14-383c-4f82-b6b3-e7cf92a49601.lovable.app-1785499798202.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4f5dcf60-a126-4fed-9802-677971cba4a1/id-preview-fea033af--3a3f1d14-383c-4f82-b6b3-e7cf92a49601.lovable.app-1785499798202.png" },
+      { property: "og:title", content: SITE_TITLE },
+      { name: "twitter:title", content: SITE_TITLE },
+      { property: "og:description", content: SITE_DESCRIPTION },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
+      { property: "og:image", content: "/apple-touch-icon.png" },
+      { name: "twitter:image", content: "/apple-touch-icon.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
-      },
-    ],
-    scripts: [
-      {
-        children: `try{if(localStorage.getItem('tma-theme')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}`,
       },
     ],
   }),

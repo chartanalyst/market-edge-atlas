@@ -68,10 +68,33 @@ function AnalysisDetail() {
         </Reveal>
 
         <Reveal delay={0.1} className="mt-12 border border-border bg-card p-6">
-          <AreaChart series={a.series} height={220} />
-          <div className="mt-4 border border-border bg-surface p-4">
-            <CandleChart />
-          </div>
+          {a.coverImage ? (
+            <img
+              src={a.coverImage}
+              alt={a.title}
+              className="w-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <AreaChart series={a.series} height={220} />
+          )}
+          {a.gallery?.length ? (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {a.gallery.map((src) => (
+                <img
+                  key={src}
+                  src={src}
+                  alt=""
+                  className="w-full border border-border object-cover"
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          ) : !a.coverImage ? (
+            <div className="mt-4 border border-border bg-surface p-4">
+              <CandleChart />
+            </div>
+          ) : null}
         </Reveal>
 
         <div className="mt-12 grid gap-12 lg:grid-cols-[1.15fr_0.85fr]">

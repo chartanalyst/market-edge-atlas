@@ -1,23 +1,51 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Check, Clock, Mail, MapPin } from "lucide-react";
+import { ArrowRight, Check, Clock, Mail, MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { Reveal, SectionHeading } from "@/components/site/primitives";
 import { iconForPlatform } from "@/components/site/footer";
 import { useSiteContent } from "@/components/site/content-context";
-
+import { submitContact } from "@/lib/contact.functions";
 
 export function Contact() {
   const { copy, links } = useSiteContent();
   const socials = links.filter((l) => l.href.trim().length > 0);
   const contact = copy.contact;
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const submit = useServerFn(submitContact);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSent(true);
-    toast.success("Message received", {
-      description: "I reply to every enquiry within one business day.",
-    });
+    if (busy) return;
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    setBusy(true);
+    try {
+      const result = await submit({
+        data: {
+          name: String(fd.get("name") ?? ""),
+          email: String(fd.get("email") ?? ""),
+          organisation: String(fd.get("org") ?? ""),
+          topic: String(fd.get("topic") ?? ""),
+          message: String(fd.get("message") ?? ""),
+        },
+      });
+      setSent(true);
+      form.reset();
+      toast.success("Message received", {
+        description: result?.emailed
+          ? "I reply to every enquiry within one business day."
+          : "Saved — email delivery may need a one-time inbox confirmation.",
+      });
+    } catch (err) {
+      console.error("[contact] form error:", err);
+      toast.error(err instanceof Error ? err.message : "Could not send enquiry", {
+        duration: 8000,
+      });
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -117,9 +145,15 @@ export function Contact() {
 
             <button
               type="submit"
-              className="group mt-8 inline-flex w-full items-center justify-center gap-2 border border-border bg-navy px-6 py-4 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground transition-colors hover:bg-emerald"
+              disabled={busy || sent}
+              className="group mt-8 inline-flex w-full items-center justify-center gap-2 border border-border bg-navy px-6 py-4 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground transition-colors hover:bg-emerald disabled:opacity-70"
             >
-              {sent ? (
+              {busy ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending…
+                </>
+              ) : sent ? (
                 <>
                   <Check className="h-4 w-4 text-emerald" />
                   Message sent

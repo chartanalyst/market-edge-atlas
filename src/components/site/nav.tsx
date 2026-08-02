@@ -1,38 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, useScroll, useSpring } from "motion/react";
 import { useEffect, useState } from "react";
-import { ArrowUp, Download, Menu, Moon, Sun, X } from "lucide-react";
+import { ArrowUp, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { label: "About", href: "/#about" },
   { label: "Markets", href: "/#markets" },
   { label: "Analysis", href: "/#featured" },
+  { label: "Journal", href: "/#journal" },
   { label: "Reports", href: "/#reports" },
   { label: "Process", href: "/#process" },
   { label: "Services", href: "/#services" },
   { label: "Certifications", href: "/#certifications" },
   { label: "FAQ", href: "/#faq" },
 ];
-
-function useTheme() {
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    const stored = window.localStorage.getItem("tma-theme");
-    const initial = stored === "dark";
-    setDark(initial);
-    document.documentElement.classList.toggle("dark", initial);
-  }, []);
-  const toggle = () => {
-    setDark((d) => {
-      const next = !d;
-      document.documentElement.classList.toggle("dark", next);
-      window.localStorage.setItem("tma-theme", next ? "dark" : "light");
-      return next;
-    });
-  };
-  return { dark, toggle };
-}
 
 export function ScrollProgress() {
   const { scrollYProgress } = useScroll();
@@ -49,7 +31,6 @@ export function ScrollProgress() {
 export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const { dark, toggle } = useTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
@@ -60,6 +41,15 @@ export function SiteNav() {
   }, []);
 
   useEffect(() => setOpen(false), [pathname]);
+
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    try {
+      window.localStorage.removeItem("tma-theme");
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   return (
     <header
@@ -83,9 +73,9 @@ export function SiteNav() {
             </span>
             <span className="hidden min-w-0 flex-col leading-tight sm:flex">
               <span className="truncate font-display text-sm font-semibold tracking-tight">
-                Technical Analyst
+                Market Edge Atlas
               </span>
-              <span className="eyebrow text-[0.6rem]">Market Research</span>
+              <span className="eyebrow text-[0.6rem]">Technical Analyst</span>
             </span>
           </Link>
 
@@ -102,13 +92,6 @@ export function SiteNav() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <button
-              onClick={toggle}
-              aria-label="Toggle colour theme"
-              className="grid h-9 w-9 place-items-center border border-border text-muted-foreground transition-colors hover:border-emerald hover:text-emerald"
-            >
-              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
             <a
               href="/#contact"
               className="hidden border border-border bg-navy px-4 py-2 font-mono text-[0.7rem] uppercase tracking-[0.14em] text-navy-foreground transition-all hover:bg-emerald hover:text-navy-foreground sm:inline-flex"
@@ -124,7 +107,6 @@ export function SiteNav() {
             </button>
           </div>
         </nav>
-
 
         {open ? (
           <div className="mb-3 border border-border bg-card lg:hidden">
@@ -164,14 +146,6 @@ export function BackToTop() {
 
   return (
     <div className="fixed bottom-6 right-5 z-50 flex flex-col items-end gap-3">
-      <a
-        href="/cv-technical-market-analyst.txt"
-        download
-        className="hidden items-center gap-2 border border-border bg-card px-4 py-2.5 font-mono text-[0.7rem] uppercase tracking-[0.14em] transition-all hover:shadow-[4px_4px_0_0_var(--emerald)] sm:inline-flex"
-      >
-        <Download className="h-4 w-4 text-emerald" />
-        Download CV
-      </a>
       <motion.button
         initial={false}
         animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0.7, y: show ? 0 : 12 }}

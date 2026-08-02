@@ -1,9 +1,17 @@
-import { useSiteContent } from "@/components/site/content-context";
+import { useLivePrices } from "@/hooks/use-live-prices";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { useSiteContent } from "@/components/site/content-context";
 
 export function MarketTicker() {
   const { tickerItems } = useSiteContent();
-  const items = [...tickerItems, ...tickerItems];
+  const live = useLivePrices();
+
+  const merged = tickerItems.map((t) => {
+    const q = live[t.symbol];
+    return q ? { ...t, price: q.price, change: q.change, up: q.up } : t;
+  });
+  const items = [...merged, ...merged];
+
   return (
     <div className="relative overflow-hidden border-y border-border bg-surface py-3">
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-background to-transparent" />

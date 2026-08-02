@@ -81,6 +81,7 @@ export const adminSections: AdminSection[] = [
           t("panelChange", "Chart panel change"),
           t("panelBadge", "Chart panel badge"),
           { name: "panelSeries", label: "Chart panel series", type: "numberList" },
+          t("panelImage", "Hero panel image URL (replaces charts when set)", "https://… or upload path"),
           { name: "panelMetrics", label: "Chart panel metrics", type: "objectList", fields: labelValue },
           {
             name: "floatOne",
@@ -169,7 +170,7 @@ export const adminSections: AdminSection[] = [
     itemLabel: "Link",
     titleField: "label",
     fields: [
-      t("platform", "Platform", "Email | X | LinkedIn | Discord | Telegram | TradingView | GitHub"),
+      t("platform", "Platform", "Email | X | LinkedIn | Discord | Telegram | Instagram | TradingView | GitHub"),
       t("label", "Label"),
       t("href", "URL", "https://…"),
     ],
@@ -264,24 +265,15 @@ export const adminSections: AdminSection[] = [
     kind: "list",
     key: "tickerItems",
     label: "Market ticker",
-    blurb: "Instruments scrolling in the ticker bar.",
+    blurb: "Instruments scrolling in the ticker bar. Live prices overlay BTC/ETH/SOL/XAU when available.",
     itemLabel: "Instrument",
     titleField: "symbol",
     fields: [
       t("symbol", "Symbol"),
-      t("price", "Price"),
-      t("change", "Change"),
+      t("price", "Fallback price"),
+      t("change", "Fallback change"),
       { name: "up", label: "Positive change", type: "boolean" },
     ],
-  },
-  {
-    kind: "list",
-    key: "coverageMap",
-    label: "Coverage map",
-    blurb: "Session cities plotted on the world map (x/y are percentages).",
-    itemLabel: "City",
-    titleField: "city",
-    fields: [t("city", "City"), num("x", "X %"), num("y", "Y %")],
   },
 ];
 

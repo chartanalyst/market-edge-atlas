@@ -3,13 +3,20 @@ import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
 import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Counter } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
-
+import { parsePriceNumber, useLivePrices } from "@/hooks/use-live-prices";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Hero() {
   const { copy } = useSiteContent();
   const hero = copy.hero;
+  const live = useLivePrices();
+  const btc = live["BTC/USD"];
+  const livePrice = btc ? parsePriceNumber(btc.price) : null;
+  const panelPrice = livePrice ?? hero.panelPrice;
+  const panelChange = btc?.change ?? hero.panelChange;
+  const panelChangeUp = btc ? btc.up : !hero.panelChange.trim().startsWith("-");
+
   return (
     <section className="relative overflow-hidden border-b border-border pt-28 sm:pt-36">
       <div className="grid-lines pointer-events-none absolute inset-0 -z-10 opacity-70 [mask-image:radial-gradient(80%_70%_at_50%_0%,black,transparent)]" />
@@ -107,38 +114,54 @@ export function Hero() {
             className="relative flex items-center py-14 lg:py-20 lg:pl-14"
           >
             <div className="relative w-full border border-border bg-card">
-              <div className="flex items-start justify-between border-b border-border p-5">
-                <div>
-                  <p className="eyebrow">{hero.panelLabel}</p>
-                  <p className="num mt-2 text-2xl font-semibold">
-                    <Counter value={hero.panelPrice} />{" "}
-                    <span className="text-sm text-emerald">{hero.panelChange}</span>
-                  </p>
-                </div>
-                <span className="border border-emerald px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-emerald">
-                  {hero.panelBadge}
-                </span>
-              </div>
-
-              <div className="border-b border-border p-4">
-                <AreaChart
-                  series={hero.panelSeries}
-                  height={150}
+              {hero.panelImage ? (
+                <img
+                  src={hero.panelImage}
+                  alt={hero.panelLabel || "Market chart"}
+                  className="aspect-[4/5] w-full object-cover sm:aspect-square lg:aspect-[4/5]"
                 />
-              </div>
-
-              <div className="border-b border-border p-4">
-                <CandleChart />
-              </div>
-
-              <div className="grid grid-cols-3 text-center">
-                {hero.panelMetrics.map((c, i) => (
-                  <div key={c.label} className={i < 2 ? "border-r border-hairline px-2 py-4" : "px-2 py-4"}>
-                    <p className="eyebrow text-[0.58rem]">{c.label}</p>
-                    <p className="num mt-1.5 text-sm font-semibold">{c.value}</p>
+              ) : (
+                <>
+                  <div className="flex items-start justify-between border-b border-border p-5">
+                    <div>
+                      <p className="eyebrow">{hero.panelLabel}</p>
+                      <p className="num mt-2 text-2xl font-semibold">
+                        <Counter value={panelPrice} />{" "}
+                        <span
+                          className={
+                            panelChangeUp ? "text-sm text-emerald" : "text-sm text-destructive"
+                          }
+                        >
+                          {panelChange}
+                        </span>
+                      </p>
+                    </div>
+                    <span className="border border-emerald px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-emerald">
+                      {hero.panelBadge}
+                    </span>
                   </div>
-                ))}
-              </div>
+
+                  <div className="border-b border-border p-4">
+                    <AreaChart series={hero.panelSeries} height={150} />
+                  </div>
+
+                  <div className="border-b border-border p-4">
+                    <CandleChart />
+                  </div>
+
+                  <div className="grid grid-cols-3 text-center">
+                    {hero.panelMetrics.map((c, i) => (
+                      <div
+                        key={c.label}
+                        className={i < 2 ? "border-r border-hairline px-2 py-4" : "px-2 py-4"}
+                      >
+                        <p className="eyebrow text-[0.58rem]">{c.label}</p>
+                        <p className="num mt-1.5 text-sm font-semibold">{c.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             <motion.div

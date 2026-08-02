@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   Github,
   Globe,
+  Instagram,
   Linkedin,
   LineChart,
   Mail,
@@ -20,6 +21,7 @@ const platformIcons: Record<string, LucideIcon> = {
   linkedin: Linkedin,
   discord: MessageCircle,
   telegram: Send,
+  instagram: Instagram,
   tradingview: LineChart,
   github: Github,
 };
@@ -72,6 +74,7 @@ export function SiteFooter() {
               { label: "Markets", href: "/#markets" },
               { label: "Featured analysis", href: "/#featured" },
               { label: "Performance", href: "/#performance" },
+              { label: "Trading journal", href: "/#journal" },
             ]}
           />
           <FooterCol
@@ -103,15 +106,6 @@ export function SiteFooter() {
               <li>
                 <a href="/#contact" className="text-muted-foreground transition-colors hover:text-foreground">
                   Book a consultation
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/cv-technical-market-analyst.txt"
-                  download
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Download CV
                 </a>
               </li>
             </ul>

@@ -16,8 +16,9 @@ import { defaultSiteContent, type SiteContentKey } from "@/lib/site-content";
 import { FieldControl } from "@/components/admin/field-control";
 import { AnalysesManager } from "@/components/admin/analyses-manager";
 import { ReportsManager } from "@/components/admin/reports-manager";
+import { TradesManager } from "@/components/admin/trades-manager";
 
-const title = "Content admin — Technical Market Analyst";
+const title = "Content admin — Market Edge Atlas";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -45,7 +46,9 @@ function AdminPage() {
   const status = useQuery({ queryKey: ["admin-status"], queryFn: () => fetchStatus() });
   const content = useQuery({ queryKey: ["site-content"], queryFn: () => fetchContent() });
 
-  const [activeKey, setActiveKey] = useState<SiteContentKey | "analyses-db" | "reports-db">("analyses-db");
+  const [activeKey, setActiveKey] = useState<
+    SiteContentKey | "analyses-db" | "reports-db" | "trades-db"
+  >("analyses-db");
   const [draft, setDraft] = useState<unknown>(null);
 
   const section = useMemo(
@@ -54,7 +57,13 @@ function AdminPage() {
   );
 
   useEffect(() => {
-    if (!content.data || activeKey === "analyses-db" || activeKey === "reports-db") return;
+    if (
+      !content.data ||
+      activeKey === "analyses-db" ||
+      activeKey === "reports-db" ||
+      activeKey === "trades-db"
+    )
+      return;
     setDraft(structuredClone(content.data[activeKey]));
   }, [content.data, activeKey]);
 
@@ -160,6 +169,16 @@ function AdminPage() {
                 Weekly reports
               </button>
             </li>
+            <li>
+              <button
+                onClick={() => setActiveKey("trades-db")}
+                className={`w-full bg-card px-4 py-3 text-left text-sm transition-colors hover:text-emerald ${
+                  activeKey === "trades-db" ? "bg-surface font-semibold text-emerald" : ""
+                }`}
+              >
+                Trading journal
+              </button>
+            </li>
             {adminSections.map((s) => (
               <li key={s.key}>
                 <button
@@ -178,6 +197,8 @@ function AdminPage() {
         <section className="min-w-0">
           {activeKey === "reports-db" ? (
             <ReportsManager />
+          ) : activeKey === "trades-db" ? (
+            <TradesManager />
           ) : activeKey === "analyses-db" || !section ? (
             <AnalysesManager />
           ) : (
