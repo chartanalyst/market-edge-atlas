@@ -3,9 +3,11 @@ import { Hero } from "@/components/site/sections/hero";
 import { MarketTicker } from "@/components/site/ticker";
 import { About, Markets } from "@/components/site/sections/overview";
 import { FeaturedAnalysis, Performance } from "@/components/site/sections/work";
-import { Experience, Process } from "@/components/site/sections/journey";
+import { Process } from "@/components/site/sections/journey";
 import { Services, WhyWorkWithMe } from "@/components/site/sections/offer";
-import { Faq, Insights, Testimonials } from "@/components/site/sections/social";
+import { Faq, Testimonials } from "@/components/site/sections/social";
+import { Certifications } from "@/components/site/sections/certifications";
+import { WeeklyReports } from "@/components/site/sections/reports";
 import { Contact } from "@/components/site/sections/contact";
 import { useSiteContent } from "@/components/site/content-context";
 
@@ -35,13 +37,13 @@ function Index() {
     about: About,
     markets: Markets,
     featured: FeaturedAnalysis,
+    reports: WeeklyReports,
     performance: Performance,
-    experience: Experience,
     process: Process,
+    certifications: Certifications,
     services: Services,
     why: WhyWorkWithMe,
     testimonials: Testimonials,
-    insights: Insights,
     faq: Faq,
     contact: Contact,
   };

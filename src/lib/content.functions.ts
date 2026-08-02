@@ -7,10 +7,16 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const getSiteContent = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const supabase = createPublicSupabase();
-    const [contentRes, analysisRes] = await Promise.all([
+    const [contentRes, analysisRes, reportRes] = await Promise.all([
       supabase.from("site_content").select("key, data"),
       supabase
         .from("analyses")
+        .select("*")
+        .eq("published", true)
+        .order("sort_order", { ascending: true })
+        .order("date", { ascending: false }),
+      supabase
+        .from("weekly_reports")
         .select("*")
         .eq("published", true)
         .order("sort_order", { ascending: true })
@@ -19,6 +25,7 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
     return mergeSiteContent(
       contentRes.data as { key: string; data: unknown }[] | null,
       analysisRes.data as Record<string, unknown>[] | null,
+      reportRes.data as Record<string, unknown>[] | null,
     );
   } catch {
     return mergeSiteContent(null);

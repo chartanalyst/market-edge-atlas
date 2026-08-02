@@ -484,3 +484,33 @@ export const coverageMap = [
   { city: "Sydney", x: 86, y: 73 },
   { city: "São Paulo", x: 34, y: 70 },
 ];
+
+export const certifications = [
+  {
+    name: "Chartered Market Technician (CMT) — Level II",
+    org: "CMT Association",
+    date: "2023-06",
+    credentialId: "CMT-II-48210",
+    link: "https://cmtassociation.org",
+    image: "",
+    desc: "Advanced technical analysis, quantitative risk management and portfolio construction.",
+  },
+  {
+    name: "Certified Financial Technician (CFTe I)",
+    org: "IFTA",
+    date: "2022-04",
+    credentialId: "CFTE-19044",
+    link: "https://ifta.org",
+    image: "",
+    desc: "International standard for technical analysis methodology and ethics.",
+  },
+  {
+    name: "Bloomberg Market Concepts",
+    org: "Bloomberg for Education",
+    date: "2021-09",
+    credentialId: "",
+    link: "https://portal.bloombergforeducation.com",
+    image: "",
+    desc: "Economics, currencies, fixed income and equity market fundamentals.",
+  },
+];

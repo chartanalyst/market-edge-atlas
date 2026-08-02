@@ -12,9 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AnalysisSlugRouteImport } from './routes/analysis.$slug'
+import { Route as ReportsSlugRouteImport } from './routes/reports.$slug'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -31,11 +31,6 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InsightsRoute = InsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -44,6 +39,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const AnalysisSlugRoute = AnalysisSlugRouteImport.update({
   id: '/analysis/$slug',
   path: '/analysis/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsSlugRoute = ReportsSlugRouteImport.update({
+  id: '/reports/$slug',
+  path: '/reports/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
@@ -55,17 +55,17 @@ const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/insights': typeof InsightsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/reports/$slug': typeof ReportsSlugRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/insights': typeof InsightsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/reports/$slug': typeof ReportsSlugRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
 export interface FileRoutesById {
@@ -73,9 +73,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/insights': typeof InsightsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/reports/$slug': typeof ReportsSlugRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
 export interface FileRouteTypes {
@@ -83,26 +83,26 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/insights'
     | '/admin'
     | '/analysis/$slug'
+    | '/reports/$slug'
     | '/api/public/media/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/insights'
     | '/admin'
     | '/analysis/$slug'
+    | '/reports/$slug'
     | '/api/public/media/$'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/insights'
     | '/_authenticated/admin'
     | '/analysis/$slug'
+    | '/reports/$slug'
     | '/api/public/media/$'
   fileRoutesById: FileRoutesById
 }
@@ -110,8 +110,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  InsightsRoute: typeof InsightsRoute
   AnalysisSlugRoute: typeof AnalysisSlugRoute
+  ReportsSlugRoute: typeof ReportsSlugRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
 }
 
@@ -138,13 +138,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/insights': {
-      id: '/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof InsightsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -157,6 +150,13 @@ declare module '@tanstack/react-router' {
       path: '/analysis/$slug'
       fullPath: '/analysis/$slug'
       preLoaderRoute: typeof AnalysisSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/$slug': {
+      id: '/reports/$slug'
+      path: '/reports/$slug'
+      fullPath: '/reports/$slug'
+      preLoaderRoute: typeof ReportsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/media/$': {
@@ -184,8 +184,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  InsightsRoute: InsightsRoute,
   AnalysisSlugRoute: AnalysisSlugRoute,
+  ReportsSlugRoute: ReportsSlugRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
 }
 export const routeTree = rootRouteImport

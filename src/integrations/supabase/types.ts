@@ -238,12 +238,14 @@ export type Database = {
       }
       weekly_reports: {
         Row: {
+          asset: string
           body: string
           cover_image: string | null
           created_at: string
           date: string
           gallery: Json
           id: string
+          market: string
           pdf_url: string | null
           published: boolean
           slug: string
@@ -251,16 +253,19 @@ export type Database = {
           summary: string
           tags: string[]
           title: string
+          tradingview_url: string | null
           updated_at: string
           week_label: string
         }
         Insert: {
+          asset?: string
           body?: string
           cover_image?: string | null
           created_at?: string
           date?: string
           gallery?: Json
           id?: string
+          market?: string
           pdf_url?: string | null
           published?: boolean
           slug: string
@@ -268,16 +273,19 @@ export type Database = {
           summary?: string
           tags?: string[]
           title: string
+          tradingview_url?: string | null
           updated_at?: string
           week_label?: string
         }
         Update: {
+          asset?: string
           body?: string
           cover_image?: string | null
           created_at?: string
           date?: string
           gallery?: Json
           id?: string
+          market?: string
           pdf_url?: string | null
           published?: boolean
           slug?: string
@@ -285,6 +293,7 @@ export type Database = {
           summary?: string
           tags?: string[]
           title?: string
+          tradingview_url?: string | null
           updated_at?: string
           week_label?: string
         }
