@@ -3,6 +3,8 @@ import { motion, useScroll, useSpring } from "motion/react";
 import { useEffect, useState } from "react";
 import { ArrowUp, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MarketTicker } from "@/components/site/ticker";
+import { useSiteContent } from "@/components/site/content-context";
 
 const links = [
   { label: "About", href: "/#about" },
@@ -29,6 +31,8 @@ export function ScrollProgress() {
 }
 
 export function SiteNav() {
+  const { sections } = useSiteContent();
+  const showTicker = sections.find((s) => s.id === "ticker")?.enabled ?? true;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -52,14 +56,16 @@ export function SiteNav() {
   }, []);
 
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 border-b transition-colors duration-500",
-        scrolled
-          ? "border-border bg-[var(--glass)] backdrop-blur-md backdrop-saturate-150"
-          : "border-transparent",
-      )}
-    >
+    <header className="fixed inset-x-0 top-0 z-50">
+      {showTicker ? <MarketTicker /> : null}
+      <div
+        className={cn(
+          "border-b transition-colors duration-500",
+          scrolled
+            ? "border-border bg-[var(--glass)] backdrop-blur-md backdrop-saturate-150"
+            : "border-border bg-background",
+        )}
+      >
       <div className="mx-auto w-[min(1320px,94vw)]">
         <nav
           className={cn(
@@ -131,6 +137,7 @@ export function SiteNav() {
             </div>
           </div>
         ) : null}
+      </div>
       </div>
     </header>
   );

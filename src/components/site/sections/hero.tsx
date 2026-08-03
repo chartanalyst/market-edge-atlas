@@ -18,7 +18,7 @@ export function Hero() {
   const panelChangeUp = btc ? btc.up : !hero.panelChange.trim().startsWith("-");
 
   return (
-    <section className="relative overflow-hidden border-b border-border pt-28 sm:pt-36">
+    <section className="relative overflow-hidden border-b border-border pt-36 sm:pt-44">
       <div className="grid-lines pointer-events-none absolute inset-0 -z-10 opacity-70 [mask-image:radial-gradient(80%_70%_at_50%_0%,black,transparent)]" />
 
       <div className="mx-auto w-[min(1320px,94vw)]">

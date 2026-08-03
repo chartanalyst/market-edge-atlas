@@ -267,7 +267,7 @@ export const adminSections: AdminSection[] = [
     kind: "list",
     key: "tickerItems",
     label: "Market ticker",
-    blurb: "Instruments scrolling in the ticker bar. Live prices overlay BTC/ETH/SOL/XAU when available.",
+    blurb: "Instruments in the scrolling bar above the navigation. Live prices overlay BTC/ETH/SOL/XAU when available.",
     itemLabel: "Instrument",
     titleField: "symbol",
     fields: [

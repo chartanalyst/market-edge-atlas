@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/site/sections/hero";
-import { MarketTicker } from "@/components/site/ticker";
 import { About, Markets } from "@/components/site/sections/overview";
 import { FeaturedAnalysis, Performance } from "@/components/site/sections/work";
 import { TradingJournal } from "@/components/site/sections/journal";
@@ -34,7 +33,6 @@ function Index() {
   const { sections } = useSiteContent();
   const registry: Record<string, React.ComponentType> = {
     hero: Hero,
-    ticker: MarketTicker,
     about: About,
     markets: Markets,
     featured: FeaturedAnalysis,
