@@ -110,36 +110,6 @@ export type Database = {
         }
         Relationships: []
       }
-      inquiries: {
-        Row: {
-          created_at: string
-          email: string
-          handled: boolean
-          id: string
-          message: string
-          name: string
-          organization: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          handled?: boolean
-          id?: string
-          message: string
-          name: string
-          organization?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          handled?: boolean
-          id?: string
-          message?: string
-          name?: string
-          organization?: string
-        }
-        Relationships: []
-      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -167,6 +137,36 @@ export type Database = {
           name?: string
           organisation?: string | null
           topic?: string | null
+        }
+        Relationships: []
+      }
+      inquiries: {
+        Row: {
+          created_at: string
+          email: string
+          handled: boolean
+          id: string
+          message: string
+          name: string
+          organization: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          handled?: boolean
+          id?: string
+          message: string
+          name: string
+          organization?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          handled?: boolean
+          id?: string
+          message?: string
+          name?: string
+          organization?: string
         }
         Relationships: []
       }
