@@ -139,17 +139,17 @@ export async function getPerformance(limit = 12) {
 export async function getSiteInfo(topics?: string[]) {
   const supabase = createPublicSupabase();
   const { data } = await supabase.from("site_content").select("key, data");
-  const rows = (data ?? []) as { key: string; data: unknown }[];
-  const wanted = topics?.length ? new Set(topics) : null;
-
-  const out: Record<string, unknown> = {};
-  for (const row of rows) {
-    if (wanted && !wanted.has(row.key)) continue;
-    if (row.key === "analyses" || row.key === "reports") continue;
-    out[row.key] = row.data;
-  }
-  return JSON.parse(JSON.stringify(out).slice(0, 12000) + (JSON.stringify(out).length > 12000 ? "" : "")) as Record<
+  const merged = mergeSiteContent((data ?? []) as { key: string; data: unknown }[]) as unknown as Record<
     string,
     unknown
   >;
+  const wanted = topics?.length ? topics : Object.keys(merged);
+
+  const out: Record<string, unknown> = {};
+  for (const key of wanted) {
+    if (key === "analyses" || key === "reports") continue;
+    if (merged[key] !== undefined) out[key] = merged[key];
+  }
+  return out;
 }
+
