@@ -1,4 +1,6 @@
 import { createPublicSupabase } from "@/lib/content.server";
+import { mergeSiteContent } from "@/lib/site-content";
+
 
 /** Trimmed row shapes handed to the model — keeps tool output compact. */
 type ResearchHit = {
