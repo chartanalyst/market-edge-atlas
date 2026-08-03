@@ -51,7 +51,7 @@ export const listAllReports = createServerFn({ method: "GET" })
 
 export const saveReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => reportSchema.parse(input))
+  .validator((input: unknown) => reportSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const payload = {
@@ -93,7 +93,7 @@ export const saveReport = createServerFn({ method: "POST" })
 
 export const deleteReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { error } = await context.supabase.from("weekly_reports").delete().eq("id", data.id);

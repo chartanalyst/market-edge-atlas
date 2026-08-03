@@ -17,6 +17,7 @@ import { FieldControl } from "@/components/admin/field-control";
 import { AnalysesManager } from "@/components/admin/analyses-manager";
 import { ReportsManager } from "@/components/admin/reports-manager";
 import { TradesManager } from "@/components/admin/trades-manager";
+import { ContactInbox } from "@/components/admin/contact-inbox";
 
 const title = "Content admin — Market Edge Atlas";
 
@@ -47,7 +48,7 @@ function AdminPage() {
   const content = useQuery({ queryKey: ["site-content"], queryFn: () => fetchContent() });
 
   const [activeKey, setActiveKey] = useState<
-    SiteContentKey | "analyses-db" | "reports-db" | "trades-db"
+    SiteContentKey | "analyses-db" | "reports-db" | "trades-db" | "contact-inbox"
   >("analyses-db");
   const [draft, setDraft] = useState<unknown>(null);
 
@@ -61,7 +62,8 @@ function AdminPage() {
       !content.data ||
       activeKey === "analyses-db" ||
       activeKey === "reports-db" ||
-      activeKey === "trades-db"
+      activeKey === "trades-db" ||
+      activeKey === "contact-inbox"
     )
       return;
     setDraft(structuredClone(content.data[activeKey]));
@@ -171,6 +173,16 @@ function AdminPage() {
             </li>
             <li>
               <button
+                onClick={() => setActiveKey("contact-inbox")}
+                className={`w-full bg-card px-4 py-3 text-left text-sm transition-colors hover:text-emerald ${
+                  activeKey === "contact-inbox" ? "bg-surface font-semibold text-emerald" : ""
+                }`}
+              >
+                Contact inbox
+              </button>
+            </li>
+            <li>
+              <button
                 onClick={() => setActiveKey("trades-db")}
                 className={`w-full bg-card px-4 py-3 text-left text-sm transition-colors hover:text-emerald ${
                   activeKey === "trades-db" ? "bg-surface font-semibold text-emerald" : ""
@@ -199,6 +211,8 @@ function AdminPage() {
             <ReportsManager />
           ) : activeKey === "trades-db" ? (
             <TradesManager />
+          ) : activeKey === "contact-inbox" ? (
+            <ContactInbox />
           ) : activeKey === "analyses-db" || !section ? (
             <AnalysesManager />
           ) : (

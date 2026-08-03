@@ -35,7 +35,7 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
 
 export const saveSiteContentSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         key: z.string().refine((k) => (siteContentKeys as string[]).includes(k), {
@@ -67,7 +67,7 @@ export const saveSiteContentSection = createServerFn({ method: "POST" })
 
 export const resetSiteContentSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ key: z.string() }).parse(input))
+  .validator((input: unknown) => z.object({ key: z.string() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,

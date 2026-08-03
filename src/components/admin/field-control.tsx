@@ -1,6 +1,7 @@
 import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import type { Field } from "@/lib/admin-schema";
 import { emptyItem } from "@/lib/admin-schema";
+import { ImageUpload } from "@/components/admin/upload-zone";
 
 const inputClass =
   "mt-2 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-emerald";
@@ -40,6 +41,16 @@ export function FieldControl({
           className={`${inputClass} num`}
         />
       </label>
+    );
+  }
+
+  if (field.type === "image") {
+    return (
+      <ImageUpload
+        label={field.label}
+        value={String(value ?? "")}
+        onChange={(url) => onChange(url)}
+      />
     );
   }
 

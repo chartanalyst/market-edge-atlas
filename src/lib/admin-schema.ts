@@ -5,6 +5,7 @@ export type FieldType =
   | "textarea"
   | "number"
   | "boolean"
+  | "image"
   | "stringList"
   | "numberList"
   | "objectList"
@@ -46,6 +47,7 @@ const t = (name: string, label: string, placeholder?: string): Field => ({
 });
 const area = (name: string, label: string): Field => ({ name, label, type: "textarea" });
 const num = (name: string, label: string): Field => ({ name, label, type: "number" });
+const img = (name: string, label: string): Field => ({ name, label, type: "image" });
 
 const labelValue: Field[] = [t("label", "Label"), t("value", "Value")];
 
@@ -81,7 +83,7 @@ export const adminSections: AdminSection[] = [
           t("panelChange", "Chart panel change"),
           t("panelBadge", "Chart panel badge"),
           { name: "panelSeries", label: "Chart panel series", type: "numberList" },
-          t("panelImage", "Hero panel image URL (replaces charts when set)", "https://… or upload path"),
+          img("panelImage", "Hero panel image (replaces chart when set)"),
           { name: "panelMetrics", label: "Chart panel metrics", type: "objectList", fields: labelValue },
           {
             name: "floatOne",
@@ -189,7 +191,7 @@ export const adminSections: AdminSection[] = [
       t("date", "Issue date (YYYY-MM)"),
       t("credentialId", "Credential ID (optional)"),
       t("link", "Credential link", "https://…"),
-      t("image", "Certificate image URL"),
+      img("image", "Certificate image"),
       area("desc", "Short description"),
     ],
   },

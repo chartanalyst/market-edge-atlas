@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, useScroll, useSpring } from "motion/react";
 import { useEffect, useState } from "react";
-import { ArrowUp, Menu, X } from "lucide-react";
+import { ArrowUp, Download, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -146,6 +146,14 @@ export function BackToTop() {
 
   return (
     <div className="fixed bottom-6 right-5 z-50 flex flex-col items-end gap-3">
+      <a
+        href="/cv-technical-market-analyst.txt"
+        download
+        className="hidden items-center gap-2 border border-border bg-card px-4 py-2.5 font-mono text-[0.7rem] uppercase tracking-[0.14em] transition-all hover:shadow-[4px_4px_0_0_var(--emerald)] sm:inline-flex"
+      >
+        <Download className="h-4 w-4 text-emerald" />
+        Download CV
+      </a>
       <motion.button
         initial={false}
         animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0.7, y: show ? 0 : 12 }}

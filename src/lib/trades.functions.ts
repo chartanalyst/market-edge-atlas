@@ -148,7 +148,7 @@ export const listAllTrades = createServerFn({ method: "GET" })
 
 export const saveTrade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => tradeSchema.parse(input))
+  .validator((input: unknown) => tradeSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const result =
@@ -184,7 +184,7 @@ export const saveTrade = createServerFn({ method: "POST" })
 
 export const deleteTrade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { error } = await context.supabase.from("trading_results").delete().eq("id", data.id);

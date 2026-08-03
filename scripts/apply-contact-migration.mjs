@@ -71,8 +71,10 @@ const endpoint = `${url.replace(/\/$/, "")}/rest/v1/rpc/`; // won't work for raw
 // POST https://api.supabase.com/v1/projects/{ref}/database/query
 // with personal access token.
 
-const projectRef = process.env.SUPABASE_PROJECT_ID;
-const accessToken = process.env.SUPABASE_ACCESS_TOKEN; // personal access token
+const projectRef =
+  process.env.SUPABASE_PROJECT_ID ||
+  url.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
 
 if (accessToken && projectRef) {
   const res = await fetch(

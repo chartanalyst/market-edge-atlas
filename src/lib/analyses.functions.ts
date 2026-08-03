@@ -64,7 +64,7 @@ export const listAllAnalyses = createServerFn({ method: "GET" })
 
 export const saveAnalysis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => analysisSchema.parse(input))
+  .validator((input: unknown) => analysisSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const payload = {
@@ -117,7 +117,7 @@ export const saveAnalysis = createServerFn({ method: "POST" })
 
 export const deleteAnalysis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { error } = await context.supabase.from("analyses").delete().eq("id", data.id);
