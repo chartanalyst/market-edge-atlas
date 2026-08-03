@@ -154,8 +154,10 @@ function RootComponent() {
           <>
             <SiteFooter />
             <BackToTop />
+            <ChatWidget />
           </>
         ) : null}
+
         <Toaster position="bottom-center" />
       </SiteContentProvider>
     </QueryClientProvider>
