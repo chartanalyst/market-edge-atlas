@@ -15,6 +15,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BackToTop, ScrollProgress, SiteNav } from "@/components/site/nav";
 import { SiteFooter } from "@/components/site/footer";
 import { Toaster } from "@/components/ui/sonner";
+import { ChatWidget } from "@/components/site/chat-widget";
+
 import { SiteContentProvider } from "@/components/site/content-context";
 import { getSiteContent } from "@/lib/content.functions";
 import { defaultSiteContent } from "@/lib/site-content";
@@ -154,8 +156,10 @@ function RootComponent() {
           <>
             <SiteFooter />
             <BackToTop />
+            <ChatWidget />
           </>
         ) : null}
+
         <Toaster position="bottom-center" />
       </SiteContentProvider>
     </QueryClientProvider>

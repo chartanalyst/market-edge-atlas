@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AnalysisSlugRouteImport } from './routes/analysis.$slug'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ReportsSlugRouteImport } from './routes/reports.$slug'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media/$'
 
@@ -41,6 +42,11 @@ const AnalysisSlugRoute = AnalysisSlugRouteImport.update({
   path: '/analysis/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportsSlugRoute = ReportsSlugRouteImport.update({
   id: '/reports/$slug',
   path: '/reports/$slug',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/api/chat': typeof ApiChatRoute
   '/reports/$slug': typeof ReportsSlugRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/api/chat': typeof ApiChatRoute
   '/reports/$slug': typeof ReportsSlugRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
+  '/api/chat': typeof ApiChatRoute
   '/reports/$slug': typeof ReportsSlugRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
 }
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/analysis/$slug'
+    | '/api/chat'
     | '/reports/$slug'
     | '/api/public/media/$'
   fileRoutesByTo: FileRoutesByTo
@@ -93,6 +103,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/analysis/$slug'
+    | '/api/chat'
     | '/reports/$slug'
     | '/api/public/media/$'
   id:
@@ -102,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/admin'
     | '/analysis/$slug'
+    | '/api/chat'
     | '/reports/$slug'
     | '/api/public/media/$'
   fileRoutesById: FileRoutesById
@@ -111,6 +123,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   AnalysisSlugRoute: typeof AnalysisSlugRoute
+  ApiChatRoute: typeof ApiChatRoute
   ReportsSlugRoute: typeof ReportsSlugRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
 }
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports/$slug': {
       id: '/reports/$slug'
       path: '/reports/$slug'
@@ -185,19 +205,10 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   AnalysisSlugRoute: AnalysisSlugRoute,
+  ApiChatRoute: ApiChatRoute,
   ReportsSlugRoute: ReportsSlugRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
