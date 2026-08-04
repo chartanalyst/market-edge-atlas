@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-/** Initial developer admin — only this email can claim first-admin bootstrap. */
+/** Site owner email — auto-granted admin on sign-in (no Supabase dashboard needed). */
 const BOOTSTRAP_ADMIN_EMAIL = (
   process.env.BOOTSTRAP_ADMIN_EMAIL || "chartanalyst1000@gmail.com"
 )
@@ -75,29 +75,20 @@ async function tryBootstrapAdmin(context: AdminFnContext): Promise<boolean> {
     supabaseAdmin = mod.createSupabaseAdminClient();
   } catch (error) {
     const msg = error instanceof Error ? error.message : "Could not load admin client";
-    if (msg.includes("SUPABASE_SERVICE_ROLE_KEY")) {
+    if (msg.includes("SUPABASE_SERVICE_ROLE_KEY") || msg.includes("service role")) {
       throw new Error(
-        "Admin bootstrap requires SUPABASE_SERVICE_ROLE_KEY in your server .env. Copy the service_role key from Supabase → Settings → API, restart npm run dev, then sign in again.",
+        "Owner admin needs the Supabase service role on the server. In Lovable: open your project → Cloud → connect Supabase (or add SUPABASE_SERVICE_ROLE_KEY in Secrets), publish, then sign in again at /auth.",
       );
     }
     throw error;
   }
 
-  const { count } = await supabaseAdmin
-    .from("user_roles")
-    .select("id", { count: "exact", head: true })
-    .eq("role", "admin");
-
-  if ((count ?? 0) > 0) {
-    throw new Error(
-      "An admin account already exists. Ask the site owner to grant your user the admin role in Supabase (user_roles table).",
-    );
-  }
-
-  const { error } = await supabaseAdmin
-    .from("user_roles")
-    .insert({ user_id: context.userId, role: "admin" });
+  const { error } = await supabaseAdmin.from("user_roles").upsert(
+    { user_id: context.userId, role: "admin" },
+    { onConflict: "user_id,role" },
+  );
   if (error) {
+    if (error.code === "23505") return true;
     throw new Error(`Could not assign admin role: ${error.message}`);
   }
 
@@ -125,7 +116,7 @@ async function ensureAdminAccess(context: AdminFnContext): Promise<{ bootstrappe
     .toLowerCase();
   if (email === BOOTSTRAP_ADMIN_EMAIL) {
     throw new Error(
-      "Bootstrap admin sign-in succeeded but admin role is not active. Add SUPABASE_SERVICE_ROLE_KEY to .env and restart, or insert your user into user_roles manually in Supabase SQL.",
+      "Owner sign-in worked but admin role could not be activated. In Lovable Cloud, connect Supabase or add SUPABASE_SERVICE_ROLE_KEY in Secrets, publish, then sign in again at /auth.",
     );
   }
 
