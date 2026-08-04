@@ -9,6 +9,7 @@ export const BOOTSTRAP_ADMIN_EMAIL = (
 export type SupabaseLike = {
   rpc: (fn: any, args?: any) => any;
   from: (table: any) => any;
+  storage?: any;
 };
 
 export type AdminFnContext = {
