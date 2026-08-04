@@ -20,15 +20,15 @@ Lovable syncs from your connected repo. After push, wait for the project to rebu
 
 5. **Publish** / redeploy the app after any secret change
 
-## Step 3 — Run migration in Lovable chat (optional backup)
+## Step 3 — Run migration in Lovable chat (required once)
 
 In the Lovable AI chat, paste:
 
 ```
-Apply the SQL migration file supabase/migrations/20260804120000_grant_site_owner_admin.sql to the connected Supabase database.
+Run migration supabase/migrations/20260804200000_admin_api_complete.sql on the connected Supabase database.
 ```
 
-This grants admin to `chartanalyst1000@gmail.com` even before sign-in.
+This creates the contact inbox, admin delete policies, weekly report columns, and grants admin to `chartanalyst1000@gmail.com`.
 
 ## Step 4 — Client signs in
 

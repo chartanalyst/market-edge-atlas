@@ -8,7 +8,7 @@ import {
   sortAnalyses,
   type AnalysisRecord,
 } from "@/lib/analysis-model";
-import { adminContextFromHandler, ensureAdminAccess } from "@/lib/admin-guard";
+import { adminContextFromHandler, ensureAdminAccess, loadAdminDb } from "@/lib/admin-guard";
 
 const levelSchema = z.object({ label: z.string().max(120), value: z.string().max(240) });
 
@@ -52,8 +52,10 @@ export const getAnalysis = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }): Promise<AnalysisRecord> => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { data: row, error } = await context.supabase
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { data: row, error } = await db
       .from("analyses")
       .select("*")
       .eq("id", data.id)
@@ -89,8 +91,10 @@ export const listPublishedAnalyses = createServerFn({ method: "GET" }).handler(
 export const listAllAnalyses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AnalysisRecord[]> => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { data, error } = await context.supabase
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { data, error } = await db
       .from("analyses")
       .select("*")
       .order("sort_order", { ascending: true })
@@ -103,7 +107,9 @@ export const saveAnalysis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => analysisSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
     const payload = {
       slug: data.slug,
       title: data.title,
@@ -135,7 +141,7 @@ export const saveAnalysis = createServerFn({ method: "POST" })
     };
 
     if (data.id) {
-      const { error } = await context.supabase
+      const { error } = await db
         .from("analyses")
         .update(payload as never)
         .eq("id", data.id);
@@ -143,7 +149,7 @@ export const saveAnalysis = createServerFn({ method: "POST" })
       return { ok: true as const, id: data.id };
     }
 
-    const { data: inserted, error } = await context.supabase
+    const { data: inserted, error } = await db
       .from("analyses")
       .insert(payload as never)
       .select("id")
@@ -156,8 +162,10 @@ export const deleteAnalysis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { error } = await context.supabase.from("analyses").delete().eq("id", data.id);
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { error } = await db.from("analyses").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

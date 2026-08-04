@@ -171,7 +171,16 @@ export function ContactInbox() {
                     type="button"
                     className={adminBtn}
                     disabled={deleteMutation.isPending}
-                    onClick={() => deleteMutation.mutate(item)}
+                    onClick={() => {
+                      if (
+                        !window.confirm(
+                          `Delete this message from ${item.name}? This cannot be undone.`,
+                        )
+                      ) {
+                        return;
+                      }
+                      deleteMutation.mutate(item);
+                    }}
                   >
                     <Trash2 className="h-3.5 w-3.5" /> Delete
                   </button>

@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createPublicSupabase } from "@/lib/content.server";
-import { adminContextFromHandler, ensureAdminAccess } from "@/lib/admin-guard";
+import { adminContextFromHandler, ensureAdminAccess, loadAdminDb } from "@/lib/admin-guard";
 export type TradeRecord = {
   id: string;
   date: string;
@@ -113,8 +113,10 @@ export const getTrade = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }): Promise<TradeRecord> => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { data: row, error } = await context.supabase
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { data: row, error } = await db
       .from("trading_results")
       .select("*")
       .eq("id", data.id)
@@ -128,8 +130,10 @@ export const getTrade = createServerFn({ method: "GET" })
 export const getJournalMetrics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<JournalMetrics> => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { data: rows, error } = await context.supabase
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { data: rows, error } = await db
       .from("trading_results")
       .select("*")
       .order("date", { ascending: true });
@@ -176,8 +180,10 @@ export const listPublishedTrades = createServerFn({ method: "GET" }).handler(
 export const listAllTrades = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<TradeRecord[]> => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { data, error } = await context.supabase
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { data, error } = await db
       .from("trading_results")
       .select("*")
       .order("date", { ascending: false });
@@ -189,7 +195,9 @@ export const saveTrade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => tradeSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
     const result =
       data.result ||
       (data.rMultiple > 0 ? "Win" : data.rMultiple < 0 ? "Loss" : "Breakeven");
@@ -209,13 +217,13 @@ export const saveTrade = createServerFn({ method: "POST" })
     };
 
     if (data.id) {
-      const { error } = await context.supabase
+      const { error } = await db
         .from("trading_results")
         .update(payload)
         .eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
-      const { error } = await context.supabase.from("trading_results").insert(payload);
+      const { error } = await db.from("trading_results").insert(payload);
       if (error) throw new Error(error.message);
     }
     return { ok: true as const };
@@ -225,8 +233,10 @@ export const deleteTrade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { error } = await context.supabase.from("trading_results").delete().eq("id", data.id);
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { error } = await db.from("trading_results").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

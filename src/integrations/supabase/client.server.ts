@@ -29,7 +29,9 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
-export function createSupabaseAdminClient() {
+let _loggedMissingServiceRole = false;
+
+export function createSupabaseAdminClient(options?: { silent?: boolean }) {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_ROLE_KEY =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
@@ -42,7 +44,12 @@ export function createSupabaseAdminClient() {
       ...(!SUPABASE_SERVICE_ROLE_KEY ? ['SUPABASE_SERVICE_ROLE_KEY'] : []),
     ];
     const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
-    console.error(`[Supabase] ${message}`);
+    if (!options?.silent && !_loggedMissingServiceRole) {
+      _loggedMissingServiceRole = true;
+      console.warn(
+        `[Supabase] ${message} Admin DB ops fall back to the signed-in user when possible.`,
+      );
+    }
     throw new Error(message);
   }
 

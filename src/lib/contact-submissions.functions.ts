@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { adminContextFromHandler, ensureAdminAccess } from "@/lib/admin-guard";
+import { adminContextFromHandler, ensureAdminAccess, loadAdminDb } from "@/lib/admin-guard";
 
 export type ContactSubmission = {
   id: string;
@@ -60,8 +60,10 @@ export const getContactSubmission = createServerFn({ method: "GET" })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<ContactSubmission> => {
+    const ctx = adminContextFromHandler(context);
     await assertAdmin(context);
-    const { data: row, error } = await context.supabase
+    const db = await loadAdminDb(ctx);
+    const { data: row, error } = await db
       .from(data.source)
       .select("*")
       .eq("id", data.id)
@@ -76,14 +78,16 @@ export const getContactSubmission = createServerFn({ method: "GET" })
 export const listContactSubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ContactSubmission[]> => {
+    const ctx = adminContextFromHandler(context);
     await assertAdmin(context);
+    const db = await loadAdminDb(ctx);
 
     const [primary, fallback] = await Promise.all([
-      context.supabase
+      db
         .from("contact_submissions")
         .select("*")
         .order("created_at", { ascending: false }),
-      context.supabase.from("inquiries").select("*").order("created_at", { ascending: false }),
+      db.from("inquiries").select("*").order("created_at", { ascending: false }),
     ]);
 
     const items: ContactSubmission[] = [];
@@ -116,9 +120,20 @@ export const deleteContactSubmission = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    const { error } = await context.supabase.from(data.source).delete().eq("id", data.id);
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { data: removed, error } = await db
+      .from(data.source)
+      .delete()
+      .eq("id", data.id)
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!removed?.length) {
+      throw new Error(
+        "Nothing was deleted. Apply migration 20260804200000_admin_api_complete.sql in Lovable/Supabase.",
+      );
+    }
     return { ok: true as const };
   });
 
@@ -128,11 +143,15 @@ export const markInquiryHandled = createServerFn({ method: "POST" })
     z.object({ id: z.string().min(1), handled: z.boolean() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    const { error } = await context.supabase
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { data: updated, error } = await db
       .from("inquiries")
       .update({ handled: data.handled })
-      .eq("id", data.id);
+      .eq("id", data.id)
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!updated?.length) throw new Error("Inquiry not found or could not update.");
     return { ok: true as const };
   });

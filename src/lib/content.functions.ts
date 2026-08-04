@@ -73,8 +73,10 @@ export const getSiteContentSection = createServerFn({ method: "GET" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { data: row, error } = await context.supabase
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { data: row, error } = await db
       .from("site_content")
       .select("key, data")
       .eq("key", data.key)
@@ -97,9 +99,11 @@ export const saveSiteContentSection = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
 
-    const { error } = await context.supabase.from("site_content").upsert(
+    const { error } = await db.from("site_content").upsert(
       {
         key: data.key,
         data: data.data as never,
@@ -116,8 +120,10 @@ export const resetSiteContentSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ key: z.string() }).parse(input))
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-    const { error } = await context.supabase.from("site_content").delete().eq("key", data.key);
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const { error } = await db.from("site_content").delete().eq("key", data.key);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

@@ -53,7 +53,7 @@ async function tryBootstrapAdmin(context: AdminFnContext): Promise<boolean> {
   >;
   try {
     const mod = await import("@/integrations/supabase/client.server");
-    supabaseAdmin = mod.createSupabaseAdminClient();
+    supabaseAdmin = mod.createSupabaseAdminClient({ silent: true });
   } catch (error) {
     const msg = error instanceof Error ? error.message : "Could not load admin client";
     if (msg.includes("SUPABASE_SERVICE_ROLE_KEY") || msg.includes("service role")) {
@@ -106,9 +106,11 @@ export async function loadAdminSupabase() {
   return mod.createSupabaseAdminClient();
 }
 
+/** Service-role client when configured; otherwise the authenticated user client (RLS). */
 export async function loadAdminDb(context: AdminFnContext) {
   try {
-    return await loadAdminSupabase();
+    const mod = await import("@/integrations/supabase/client.server");
+    return mod.createSupabaseAdminClient({ silent: true });
   } catch {
     return context.supabase;
   }

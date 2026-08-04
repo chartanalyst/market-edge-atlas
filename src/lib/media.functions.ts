@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { adminContextFromHandler, ensureAdminAccess, loadAdminSupabase } from "@/lib/admin-guard";
+import { adminContextFromHandler, ensureAdminAccess, loadAdminDb } from "@/lib/admin-guard";
 
 const uploadSchema = z.object({
   path: z.string().min(1).max(500),
@@ -14,9 +14,9 @@ export const uploadAdminMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => uploadSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-
-    const admin = await loadAdminSupabase();
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const admin = await loadAdminDb(ctx);
     const body = Buffer.from(data.base64, "base64");
 
     const { error } = await admin.storage.from("media").upload(data.path, body, {
@@ -37,9 +37,9 @@ export const deleteAdminMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ path: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
-    await ensureAdminAccess(adminContextFromHandler(context));
-
-    const admin = await loadAdminSupabase();
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const admin = await loadAdminDb(ctx);
     const storagePath = data.path.replace(/^\/api\/public\/media\//, "");
     const { error } = await admin.storage.from("media").remove([storagePath]);
     if (error) throw new Error(error.message);
