@@ -81,7 +81,34 @@ export const Route = createFileRoute("/api/chat")({
               }),
               execute: async ({ topics }) => getSiteInfo(topics ?? undefined),
             }),
+            bookConsultation: tool({
+              description:
+                "Book a one-to-one consultation with the analyst. Only call once you have the visitor's name, a valid email, their focus market/goal and a one-line context. Saves the request to the desk inbox and emails the analyst.",
+              inputSchema: z.object({
+                name: z.string().describe("Visitor's full name"),
+                email: z.string().describe("Visitor's email address"),
+                focus: z
+                  .string()
+                  .describe("Market, instrument or goal, e.g. BTC swing structure, FX risk framework"),
+                message: z.string().describe("One or two lines of context in the visitor's own words"),
+                availability: z
+                  .string()
+                  .nullable()
+                  .describe("Preferred days/times or timezone, if given"),
+                organisation: z.string().nullable().describe("Company or fund, if given"),
+              }),
+              execute: async ({ name, email, focus, message, availability, organisation }) =>
+                bookConsultation({
+                  name,
+                  email,
+                  focus,
+                  message,
+                  availability: availability ?? undefined,
+                  organisation: organisation ?? undefined,
+                }),
+            }),
           },
+
         });
 
         return result.toUIMessageStreamResponse({
