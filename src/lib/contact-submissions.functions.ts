@@ -44,7 +44,7 @@ function fromInquiryRow(row: Record<string, unknown>): ContactSubmission {
   };
 }
 
-async function assertAdmin(context: { supabase: { rpc: Function }; userId: string; claims?: unknown }) {
+async function assertAdmin(context: { supabase: unknown; userId: string; claims?: unknown }) {
   await ensureAdminAccess(adminContextFromHandler(context));
 }
 
@@ -93,10 +93,10 @@ export const listContactSubmissions = createServerFn({ method: "GET" })
     const items: ContactSubmission[] = [];
 
     if (!primary.error && primary.data) {
-      items.push(...primary.data.map((row) => fromContactRow(row as Record<string, unknown>)));
+      items.push(...primary.data.map((row: unknown) => fromContactRow(row as Record<string, unknown>)));
     }
     if (!fallback.error && fallback.data) {
-      items.push(...fallback.data.map((row) => fromInquiryRow(row as Record<string, unknown>)));
+      items.push(...fallback.data.map((row: unknown) => fromInquiryRow(row as Record<string, unknown>)));
     }
 
     if (primary.error && fallback.error) {
