@@ -6,6 +6,8 @@ import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
 import {
   deleteTrade,
   emptyTrade,
+  getJournalMetrics,
+  getTrade,
   listAllTrades,
   saveTrade,
   type TradeRecord,
@@ -28,12 +30,33 @@ export function TradesManager() {
   const save = useServerFn(saveTrade);
   const remove = useServerFn(deleteTrade);
 
+  const fetchOne = useServerFn(getTrade);
+  const fetchMetrics = useServerFn(getJournalMetrics);
+
   const list = useQuery({
     queryKey: ["admin-trades"],
     queryFn: () => fetchAll(),
     ...liveQueryOptions,
   });
+  const metrics = useQuery({
+    queryKey: ["admin-journal-metrics"],
+    queryFn: () => fetchMetrics(),
+    ...liveQueryOptions,
+  });
   const [draft, setDraft] = useState<TradeRecord | null>(null);
+
+  async function openEditor(record: TradeRecord) {
+    if (!record.id) {
+      setDraft(structuredClone(record));
+      return;
+    }
+    try {
+      setDraft(await fetchOne({ data: { id: record.id } }));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load trade");
+      setDraft(record);
+    }
+  }
 
   const saveMutation = useMutation({
     mutationFn: (record: TradeRecord) =>
@@ -57,6 +80,7 @@ export function TradesManager() {
     onSuccess: async () => {
       toast.success("Trade saved", { description: "Journal and equity curve update automatically." });
       await queryClient.invalidateQueries({ queryKey: ["admin-trades"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-journal-metrics"] });
       await queryClient.invalidateQueries({ queryKey: ["published-trades"] });
       await queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
       setDraft(null);
@@ -69,6 +93,7 @@ export function TradesManager() {
     onSuccess: async () => {
       toast.success("Trade deleted");
       await queryClient.invalidateQueries({ queryKey: ["admin-trades"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-journal-metrics"] });
       await queryClient.invalidateQueries({ queryKey: ["published-trades"] });
       await queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
       setDraft(null);
@@ -104,6 +129,15 @@ export function TradesManager() {
         }
       />
 
+      {metrics.data ? (
+        <div className="mt-6 grid gap-3 border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Metric label="Total trades" value={String(metrics.data.totalTrades)} />
+          <Metric label="Total R" value={`${metrics.data.totalR >= 0 ? "+" : ""}${metrics.data.totalR}R`} />
+          <Metric label="Win rate" value={`${metrics.data.winRate}%`} />
+          <Metric label="Avg R" value={`${metrics.data.avgR >= 0 ? "+" : ""}${metrics.data.avgR}R`} />
+        </div>
+      ) : null}
+
       {list.isLoading ? (
         <AdminPanelSkeleton />
       ) : list.isError ? (
@@ -138,7 +172,7 @@ export function TradesManager() {
                 <tr
                   key={t.id}
                   className="cursor-pointer border-b border-border last:border-0 hover:bg-surface"
-                  onClick={() => setDraft(t)}
+                  onClick={() => openEditor(t)}
                 >
                   <td className="num px-4 py-3">{t.date}</td>
                   <td className="px-4 py-3 font-medium">{t.instrument}</td>
@@ -303,6 +337,15 @@ function TradeEditor({
           onChange={(e) => set("notes", e.target.value)}
         />
       </Field>
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="eyebrow text-[0.6rem]">{label}</p>
+      <p className="num mt-1 text-lg font-semibold">{value}</p>
     </div>
   );
 }

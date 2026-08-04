@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Pin, Plus, Save, Star, Trash2 } from "lucide-react";
 import {
   deleteAnalysis,
+  getAnalysis,
   listAllAnalyses,
   saveAnalysis,
 } from "@/lib/analyses.functions";
@@ -50,8 +51,22 @@ export function AnalysesManager() {
     queryFn: () => fetchAll(),
     ...liveQueryOptions,
   });
+  const fetchOne = useServerFn(getAnalysis);
   const [draft, setDraft] = useState<AnalysisRecord | null>(null);
   const [query, setQuery] = useState("");
+
+  async function openEditor(record: AnalysisRecord) {
+    if (!record.id) {
+      setDraft(structuredClone(record));
+      return;
+    }
+    try {
+      setDraft(await fetchOne({ data: { id: record.id } }));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load analysis");
+      setDraft(structuredClone(record));
+    }
+  }
 
   const saveMutation = useMutation({
     mutationFn: (record: AnalysisRecord) => save({ data: record }),
@@ -146,7 +161,7 @@ export function AnalysesManager() {
       ) : (
         <AdminListShell>
           {items.map((a) => (
-            <AdminListRow key={a.id} onClick={() => setDraft(structuredClone(a))}>
+            <AdminListRow key={a.id} onClick={() => openEditor(a)}>
               <span className="min-w-0">
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="num text-xs text-muted-foreground">{a.date}</span>

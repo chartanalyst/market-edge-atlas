@@ -8,6 +8,7 @@ import {
   sortAnalyses,
   type AnalysisRecord,
 } from "@/lib/analysis-model";
+import { adminContextFromHandler, ensureAdminAccess } from "@/lib/admin-guard";
 
 const levelSchema = z.object({ label: z.string().max(120), value: z.string().max(240) });
 
@@ -46,13 +47,21 @@ const analysisSchema = z.object({
   sortOrder: z.number().default(0),
 });
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data: isAdmin } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
+/** Single analysis by id — admin only. */
+export const getAnalysis = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
+  .handler(async ({ data, context }): Promise<AnalysisRecord> => {
+    await ensureAdminAccess(adminContextFromHandler(context));
+    const { data: row, error } = await context.supabase
+      .from("analyses")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Analysis not found");
+    return analysisFromRow(row as Record<string, unknown>);
   });
-  if (!isAdmin) throw new Error("Forbidden");
-}
 
 /** Published case studies for the public site (DB with static fallback). */
 export const listPublishedAnalyses = createServerFn({ method: "GET" }).handler(
@@ -80,7 +89,7 @@ export const listPublishedAnalyses = createServerFn({ method: "GET" }).handler(
 export const listAllAnalyses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AnalysisRecord[]> => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const { data, error } = await context.supabase
       .from("analyses")
       .select("*")
@@ -94,7 +103,7 @@ export const saveAnalysis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => analysisSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const payload = {
       slug: data.slug,
       title: data.title,
@@ -147,7 +156,7 @@ export const deleteAnalysis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const { error } = await context.supabase.from("analyses").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };

@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { reportFromRow, type ReportRecord } from "@/lib/report-model";
+import { reportFromRow, sortReports, type ReportRecord } from "@/lib/report-model";
+
+import { adminContextFromHandler, ensureAdminAccess } from "@/lib/admin-guard";
+import { createPublicSupabase } from "@/lib/content.server";
 
 const reportSchema = z.object({
   id: z.string().max(60).optional().default(""),
@@ -27,19 +30,46 @@ const reportSchema = z.object({
   sortOrder: z.number().default(0),
 });
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data: isAdmin } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
+/** Single report by id — admin only. */
+export const getReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
+  .handler(async ({ data, context }): Promise<ReportRecord> => {
+    await ensureAdminAccess(adminContextFromHandler(context));
+    const { data: row, error } = await context.supabase
+      .from("weekly_reports")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Report not found");
+    return reportFromRow(row as Record<string, unknown>);
   });
-  if (!isAdmin) throw new Error("Forbidden");
-}
+
+/** Published weekly reports for the public site. */
+export const listPublishedReports = createServerFn({ method: "GET" }).handler(
+  async (): Promise<ReportRecord[]> => {
+    try {
+      const supabase = createPublicSupabase();
+      const { data, error } = await supabase
+        .from("weekly_reports")
+        .select("*")
+        .eq("published", true)
+        .order("sort_order", { ascending: true })
+        .order("date", { ascending: false });
+      if (error) throw new Error(error.message);
+      return sortReports((data ?? []).map((row) => reportFromRow(row as Record<string, unknown>)));
+    } catch {
+      return [];
+    }
+  },
+);
 
 /** All weekly reports, drafts included — admin only. */
 export const listAllReports = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ReportRecord[]> => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const { data, error } = await context.supabase
       .from("weekly_reports")
       .select("*")
@@ -53,7 +83,7 @@ export const saveReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => reportSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const payload = {
       slug: data.slug,
       title: data.title,
@@ -95,7 +125,7 @@ export const deleteReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const { error } = await context.supabase.from("weekly_reports").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };

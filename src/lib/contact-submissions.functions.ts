@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { adminContextFromHandler, ensureAdminAccess } from "@/lib/admin-guard";
 
 export type ContactSubmission = {
   id: string;
@@ -43,13 +44,34 @@ function fromInquiryRow(row: Record<string, unknown>): ContactSubmission {
   };
 }
 
-async function assertAdmin(context: { supabase: { rpc: Function }; userId: string }) {
-  const { data: isAdmin } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
-  if (!isAdmin) throw new Error("Forbidden");
+async function assertAdmin(context: { supabase: { rpc: Function }; userId: string; claims?: unknown }) {
+  await ensureAdminAccess(adminContextFromHandler(context));
 }
+
+/** Single contact submission — admin only. */
+export const getContactSubmission = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) =>
+    z
+      .object({
+        id: z.string().min(1),
+        source: z.enum(["contact_submissions", "inquiries"]),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<ContactSubmission> => {
+    await assertAdmin(context);
+    const { data: row, error } = await context.supabase
+      .from(data.source)
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Submission not found");
+    return data.source === "contact_submissions"
+      ? fromContactRow(row as Record<string, unknown>)
+      : fromInquiryRow(row as Record<string, unknown>);
+  });
 
 export const listContactSubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

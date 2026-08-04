@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
-import { deleteReport, listAllReports, saveReport } from "@/lib/reports.functions";
+import { deleteReport, getReport, listAllReports, saveReport } from "@/lib/reports.functions";
 import { emptyReport, type ReportRecord } from "@/lib/report-model";
 import { marketOptions } from "@/lib/analysis-model";
 import { AdminPanelSkeleton } from "@/components/admin/dashboard-skeleton";
@@ -43,8 +43,22 @@ export function ReportsManager() {
     queryFn: () => fetchAll(),
     ...liveQueryOptions,
   });
+  const fetchOne = useServerFn(getReport);
   const [draft, setDraft] = useState<ReportRecord | null>(null);
   const [query, setQuery] = useState("");
+
+  async function openEditor(record: ReportRecord) {
+    if (!record.id) {
+      setDraft(structuredClone(record));
+      return;
+    }
+    try {
+      setDraft(await fetchOne({ data: { id: record.id } }));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load report");
+      setDraft(structuredClone(record));
+    }
+  }
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: ["admin-reports"] });
@@ -139,7 +153,7 @@ export function ReportsManager() {
       ) : (
         <AdminListShell>
           {items.map((r) => (
-            <AdminListRow key={r.id} onClick={() => setDraft(structuredClone(r))}>
+            <AdminListRow key={r.id} onClick={() => openEditor(r)}>
               <span className="min-w-0">
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="num text-xs text-muted-foreground">{r.date}</span>

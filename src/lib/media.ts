@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { uploadAdminMedia } from "@/lib/media.functions";
 
 const MAX_EDGE = 1800;
 const THUMB_EDGE = 560;
@@ -37,18 +37,22 @@ async function resize(file: File, maxEdge: number): Promise<Blob> {
   return blob;
 }
 
-async function put(path: string, body: Blob, contentType: string) {
-  const { error } = await supabase.storage
-    .from("media")
-    .upload(path, body, { contentType, upsert: true, cacheControl: "31536000" });
-  if (error) throw new Error(error.message);
-  return `/api/public/media/${path}`;
+async function blobToBase64(blob: Blob): Promise<string> {
+  const buffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
+  return btoa(binary);
+}
+
+async function putServer(path: string, body: Blob, contentType: string): Promise<string> {
+  const base64 = await blobToBase64(body);
+  const { url } = await uploadAdminMedia({ data: { path, contentType, base64 } });
+  return url;
 }
 
 /**
- * Notion-style upload: pick a file, everything else is automatic.
- * Images are resized, compressed to WebP and given a thumbnail;
- * documents are stored as-is.
+ * Notion-style upload: pick a file, resize/compress on client, store via admin API.
  */
 export async function uploadMedia(file: File): Promise<UploadedMedia> {
   const stamp = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -56,13 +60,13 @@ export async function uploadMedia(file: File): Promise<UploadedMedia> {
 
   if (file.type.startsWith("image/")) {
     const [full, thumb] = await Promise.all([resize(file, MAX_EDGE), resize(file, THUMB_EDGE)]);
-    const url = await put(`images/${stamp}-${base}.webp`, full, "image/webp");
-    const thumbUrl = await put(`images/${stamp}-${base}-thumb.webp`, thumb, "image/webp");
+    const url = await putServer(`images/${stamp}-${base}.webp`, full, "image/webp");
+    const thumbUrl = await putServer(`images/${stamp}-${base}-thumb.webp`, thumb, "image/webp");
     return { url, thumbUrl, name: file.name };
   }
 
   const ext = (file.name.split(".").pop() ?? "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const url = await put(
+  const url = await putServer(
     `docs/${stamp}-${base}.${ext}`,
     file,
     file.type || "application/octet-stream",

@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createPublicSupabase } from "@/lib/content.server";
-
+import { adminContextFromHandler, ensureAdminAccess } from "@/lib/admin-guard";
 export type TradeRecord = {
   id: string;
   date: string;
@@ -108,13 +108,52 @@ const tradeSchema = z.object({
   published: z.boolean().default(true),
 });
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data: isAdmin } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
+/** Single trade by id — admin only. */
+export const getTrade = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
+  .handler(async ({ data, context }): Promise<TradeRecord> => {
+    await ensureAdminAccess(adminContextFromHandler(context));
+    const { data: row, error } = await context.supabase
+      .from("trading_results")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Trade not found");
+    return tradeFromRow(row as Record<string, unknown>);
   });
-  if (!isAdmin) throw new Error("Forbidden");
-}
+
+/** Journal metrics — admin (all trades). */
+export const getJournalMetrics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<JournalMetrics> => {
+    await ensureAdminAccess(adminContextFromHandler(context));
+    const { data: rows, error } = await context.supabase
+      .from("trading_results")
+      .select("*")
+      .order("date", { ascending: true });
+    if (error) throw new Error(error.message);
+    return computeMetrics((rows ?? []).map((r) => tradeFromRow(r as Record<string, unknown>)));
+  });
+
+/** Published journal metrics for the public site. */
+export const getPublishedJournalMetrics = createServerFn({ method: "GET" }).handler(
+  async (): Promise<JournalMetrics> => {
+    try {
+      const supabase = createPublicSupabase();
+      const { data, error } = await supabase
+        .from("trading_results")
+        .select("*")
+        .eq("published", true)
+        .order("date", { ascending: true });
+      if (error) throw new Error(error.message);
+      return computeMetrics((data ?? []).map((r) => tradeFromRow(r as Record<string, unknown>)));
+    } catch {
+      return computeMetrics([]);
+    }
+  },
+);
 
 /** Published trades for the public journal. */
 export const listPublishedTrades = createServerFn({ method: "GET" }).handler(
@@ -137,7 +176,7 @@ export const listPublishedTrades = createServerFn({ method: "GET" }).handler(
 export const listAllTrades = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<TradeRecord[]> => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const { data, error } = await context.supabase
       .from("trading_results")
       .select("*")
@@ -150,7 +189,7 @@ export const saveTrade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => tradeSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const result =
       data.result ||
       (data.rMultiple > 0 ? "Win" : data.rMultiple < 0 ? "Loss" : "Breakeven");
@@ -186,7 +225,7 @@ export const deleteTrade = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => z.object({ id: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await ensureAdminAccess(adminContextFromHandler(context));
     const { error } = await context.supabase.from("trading_results").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };

@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { ExternalLink, LogOut, RotateCcw, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  getSiteContent,
+  getAdminSiteContent,
+  getSiteContentSection,
   resetSiteContentSection,
   saveSiteContentSection,
 } from "@/lib/content.functions";
@@ -46,7 +47,8 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const fetchContent = useServerFn(getSiteContent);
+  const fetchContent = useServerFn(getAdminSiteContent);
+  const fetchSection = useServerFn(getSiteContentSection);
   const fetchStatus = useServerFn(getAdminStatus);
   const fetchOverview = useServerFn(getAdminOverview);
   const save = useServerFn(saveSiteContentSection);
@@ -72,15 +74,33 @@ function AdminPage() {
   const [activeKey, setActiveKey] = useState<AdminTabKey>("overview");
   const [draft, setDraft] = useState<unknown>(null);
 
+  const isCmsSection =
+    activeKey !== "overview" &&
+    activeKey !== "analyses-db" &&
+    activeKey !== "reports-db" &&
+    activeKey !== "trades-db" &&
+    activeKey !== "contact-inbox";
+
+  const sectionQuery = useQuery({
+    queryKey: ["admin-cms-section", activeKey],
+    queryFn: () => fetchSection({ data: { key: activeKey as string } }),
+    enabled: isCmsSection && status.data?.isAdmin === true,
+    ...liveQueryOptions,
+  });
+
   const section = useMemo(
     () => adminSections.find((s) => s.key === activeKey) as AdminSection | undefined,
     [activeKey],
   );
 
   const savedJson = useMemo(() => {
-    if (!content.data || !section) return "";
-    return JSON.stringify(content.data[activeKey as SiteContentKey]);
-  }, [content.data, activeKey, section]);
+    if (!section) return "";
+    const fromBulk = content.data?.[activeKey as SiteContentKey];
+    const fromSection = sectionQuery.data;
+    const source = fromSection ?? fromBulk;
+    if (source === undefined) return "";
+    return JSON.stringify(source);
+  }, [content.data, sectionQuery.data, activeKey, section]);
 
   const isDirty = useMemo(() => {
     if (!section || draft === null) return false;
@@ -88,18 +108,10 @@ function AdminPage() {
   }, [draft, savedJson, section]);
 
   useEffect(() => {
-    if (
-      !content.data ||
-      activeKey === "overview" ||
-      activeKey === "analyses-db" ||
-      activeKey === "reports-db" ||
-      activeKey === "trades-db" ||
-      activeKey === "contact-inbox"
-    ) {
-      return;
-    }
-    setDraft(structuredClone(content.data[activeKey as SiteContentKey]));
-  }, [content.data, activeKey]);
+    if (!isCmsSection) return;
+    if (sectionQuery.data === undefined) return;
+    setDraft(structuredClone(sectionQuery.data));
+  }, [sectionQuery.data, activeKey, isCmsSection]);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -118,6 +130,7 @@ function AdminPage() {
         description: "The live site is updated.",
       });
       await queryClient.invalidateQueries({ queryKey: ["site-content"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-cms-section", activeKey] });
       await queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
     },
     onError: (error) =>
@@ -130,6 +143,7 @@ function AdminPage() {
       setDraft(structuredClone(defaultSiteContent[activeKey as SiteContentKey]));
       toast.success(`${section?.label ?? "Section"} restored to defaults`);
       await queryClient.invalidateQueries({ queryKey: ["site-content"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-cms-section", activeKey] });
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "Could not restore defaults"),
