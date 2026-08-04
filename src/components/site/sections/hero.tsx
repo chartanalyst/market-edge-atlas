@@ -3,7 +3,9 @@ import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
 import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Counter } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
+import { useBtcMarketChart } from "@/hooks/use-btc-chart";
 import { parsePriceNumber, useLivePrices } from "@/hooks/use-live-prices";
+import { ChartAreaSkeleton } from "@/components/site/skeletons";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -11,11 +13,18 @@ export function Hero() {
   const { copy } = useSiteContent();
   const hero = copy.hero;
   const live = useLivePrices();
+  const { data: btcChart, loading: chartLoading } = useBtcMarketChart();
   const btc = live["BTC/USD"];
-  const livePrice = btc ? parsePriceNumber(btc.price) : null;
+  const livePrice = btc ? parsePriceNumber(btc.price) : btcChart ? parsePriceNumber(btcChart.price) : null;
   const panelPrice = livePrice ?? hero.panelPrice;
-  const panelChange = btc?.change ?? hero.panelChange;
-  const panelChangeUp = btc ? btc.up : !hero.panelChange.trim().startsWith("-");
+  const panelChange = btc?.change ?? btcChart?.change ?? hero.panelChange;
+  const panelChangeUp = btc ? btc.up : btcChart ? btcChart.up : !hero.panelChange.trim().startsWith("-");
+  const panelSeries =
+    btcChart && btcChart.prices.length > 1 ? btcChart.prices : hero.panelSeries;
+  const panelCandles = btcChart?.candles?.length ? btcChart.candles : undefined;
+  const chartsLoading = chartLoading && !btcChart && !btc;
+
+  const chartKey = "hero-btc";
 
   return (
     <section className="relative overflow-hidden border-b border-border pt-36 sm:pt-44">
@@ -141,13 +150,37 @@ export function Hero() {
                     </span>
                   </div>
 
-                  <div className="border-b border-border p-4">
-                    <AreaChart series={hero.panelSeries} height={150} />
-                  </div>
+                  {chartsLoading ? (
+                    <>
+                      <ChartAreaSkeleton height={150} className="border-0 border-b border-border" />
+                      <div className="border-b border-border p-4">
+                        <div className="flex h-[130px] items-end justify-between gap-1 px-1">
+                          {Array.from({ length: 12 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className="w-full max-w-[14px] animate-pulse bg-hairline"
+                              style={{ height: `${28 + ((i * 17) % 55)}%` }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="border-b border-border p-4">
+                        <AreaChart
+                          series={panelSeries}
+                          height={150}
+                          accent="blue"
+                          chartKey={chartKey}
+                        />
+                      </div>
 
-                  <div className="border-b border-border p-4">
-                    <CandleChart />
-                  </div>
+                      <div className="border-b border-border p-4">
+                        <CandleChart candles={panelCandles} chartKey={chartKey} />
+                      </div>
+                    </>
+                  )}
 
                   <div className="grid grid-cols-3 text-center">
                     {hero.panelMetrics.map((c, i) => (

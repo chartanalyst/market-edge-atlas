@@ -4,11 +4,14 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthPageSkeleton } from "@/components/admin/dashboard-skeleton";
 
 const title = "Admin sign in — Market Edge Atlas";
 const description = "Private sign-in for Market Edge Atlas content management.";
 
 export const Route = createFileRoute("/auth")({
+  pendingComponent: AuthPageSkeleton,
+  pendingMs: 120,
   head: () => ({
     meta: [
       { title },
@@ -112,7 +115,7 @@ function logAuth(entry: AuthLog) {
 
 function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("mdimam.cse9.bu@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [lastLog, setLastLog] = useState<AuthLog | null>(null);
@@ -230,7 +233,7 @@ function AuthPage() {
         {mode === "signin" ? "Sign in to manage content" : "Create the owner account"}
       </h1>
       <p className="mt-3 text-sm text-muted-foreground">
-        This area is for the site owner only. Initial admin: mdimam.cse9.bu@gmail.com
+        This area is for the site owner only. Use your owner email (chartanalyst1000@gmail.com).
       </p>
 
       <form onSubmit={onSubmit} className="mt-10 border border-border bg-card p-7">

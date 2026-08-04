@@ -8,12 +8,15 @@ import {
   listPublishedTrades,
   type TradeRecord,
 } from "@/lib/trades.functions";
+import { JournalEquitySkeleton } from "@/components/site/skeletons";
+import { liveQueryOptions } from "@/lib/live-poll";
 
 export function TradingJournal() {
   const fetchTrades = useServerFn(listPublishedTrades);
   const { data: trades = [], isLoading } = useQuery({
     queryKey: ["published-trades"],
     queryFn: () => fetchTrades(),
+    ...liveQueryOptions,
   });
 
   const metrics = useMemo(() => computeMetrics(trades), [trades]);
@@ -70,9 +73,15 @@ export function TradingJournal() {
           </div>
           <div className="mt-6">
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading curve…</p>
+              <JournalEquitySkeleton />
             ) : (
-              <AreaChart series={series.length > 1 ? series : [0, ...series]} height={200} />
+              <AreaChart
+                series={series.length > 1 ? series : [0, ...series]}
+                height={200}
+                accent="blue"
+                endLabel={`${metrics.netPerformanceR >= 0 ? "+" : ""}${metrics.netPerformanceR}R`}
+                chartKey="journal-equity"
+              />
             )}
           </div>
         </Reveal>

@@ -12,10 +12,14 @@ import { Contact } from "@/components/site/sections/contact";
 import { useSiteContent } from "@/components/site/content-context";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-meta";
 
+import { HomePageSkeleton } from "@/components/site/skeletons";
+
 const title = SITE_TITLE;
 const description = SITE_DESCRIPTION;
 
 export const Route = createFileRoute("/")({
+  pendingComponent: HomePageSkeleton,
+  pendingMs: 120,
   head: () => ({
     meta: [
       { title },

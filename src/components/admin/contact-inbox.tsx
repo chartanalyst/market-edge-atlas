@@ -1,17 +1,25 @@
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { format } from "date-fns";
-import { Mail, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Mail, Trash2 } from "lucide-react";
+import { AdminInboxSkeleton } from "@/components/admin/dashboard-skeleton";
+import {
+  AdminBadge,
+  AdminEmptyState,
+  AdminErrorState,
+  AdminSearch,
+  AdminSectionHeader,
+  adminBtn,
+} from "@/components/admin/admin-ui";
 import {
   deleteContactSubmission,
   listContactSubmissions,
   markInquiryHandled,
   type ContactSubmission,
 } from "@/lib/contact-submissions.functions";
-
-const btn =
-  "inline-flex items-center gap-2 border border-border bg-background px-3 py-2 font-mono text-[0.65rem] uppercase tracking-[0.14em] transition-colors hover:border-emerald hover:text-emerald disabled:opacity-60";
+import { liveQueryOptions } from "@/lib/live-poll";
 
 export function ContactInbox() {
   const queryClient = useQueryClient();
@@ -19,14 +27,24 @@ export function ContactInbox() {
   const remove = useServerFn(deleteContactSubmission);
   const toggleHandled = useServerFn(markInquiryHandled);
 
-  const list = useQuery({ queryKey: ["admin-contact-inbox"], queryFn: () => fetchAll() });
+  const list = useQuery({
+    queryKey: ["admin-contact-inbox"],
+    queryFn: () => fetchAll(),
+    ...liveQueryOptions,
+  });
+  const [query, setQuery] = useState("");
+
+  const invalidate = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["admin-contact-inbox"] });
+    await queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (item: ContactSubmission) =>
       remove({ data: { id: item.id, source: item.source } }),
     onSuccess: async () => {
       toast.success("Enquiry removed");
-      await queryClient.invalidateQueries({ queryKey: ["admin-contact-inbox"] });
+      await invalidate();
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not delete"),
   });
@@ -34,23 +52,40 @@ export function ContactInbox() {
   const handledMutation = useMutation({
     mutationFn: ({ id, handled }: { id: string; handled: boolean }) =>
       toggleHandled({ data: { id, handled } }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["admin-contact-inbox"] });
-    },
+    onSuccess: invalidate,
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not update"),
   });
 
+  const items = useMemo(() => {
+    const all = list.data ?? [];
+    const q = query.trim().toLowerCase();
+    if (!q) return all;
+    return all.filter(
+      (item) =>
+        item.name.toLowerCase().includes(q) ||
+        item.email.toLowerCase().includes(q) ||
+        item.message.toLowerCase().includes(q) ||
+        (item.topic?.toLowerCase().includes(q) ?? false),
+    );
+  }, [list.data, query]);
+
+  const unhandled = useMemo(
+    () => (list.data ?? []).filter((i) => i.source === "inquiries" && !i.handled).length,
+    [list.data],
+  );
+
   if (list.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading enquiries…</p>;
+    return <AdminInboxSkeleton />;
   }
 
   if (list.isError) {
     return (
-      <div className="border border-border bg-card p-6">
-        <h2 className="text-xl font-semibold">Contact inbox</h2>
-        <p className="mt-3 text-sm text-muted-foreground">
-          {list.error instanceof Error ? list.error.message : "Could not load enquiries."}
-        </p>
+      <div>
+        <AdminSectionHeader title="Contact inbox" />
+        <AdminErrorState
+          message={list.error instanceof Error ? list.error.message : "Could not load enquiries."}
+          onRetry={() => list.refetch()}
+        />
         <p className="mt-4 text-sm text-muted-foreground">
           Run{" "}
           <code className="rounded bg-surface px-1.5 py-0.5 text-xs">
@@ -62,33 +97,48 @@ export function ContactInbox() {
     );
   }
 
-  const items = list.data ?? [];
-
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">Contact inbox</h2>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Form submissions saved to the database. Email delivery also requires{" "}
-            <code className="text-xs">WEB3FORMS_ACCESS_KEY</code> in server env.
-          </p>
-        </div>
-        <span className="num text-sm text-muted-foreground">{items.length} total</span>
+      <AdminSectionHeader
+        title="Contact inbox"
+        description="Form submissions saved to the database. Email delivery also requires WEB3FORMS_ACCESS_KEY in server env."
+        actions={
+          <span className="num text-sm text-muted-foreground">
+            {list.data?.length ?? 0} total
+            {unhandled > 0 ? ` · ${unhandled} unhandled` : ""}
+          </span>
+        }
+      />
+
+      <div className="mt-6">
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search name, email, message…" />
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-8 border border-dashed border-border bg-surface px-6 py-10 text-center text-sm text-muted-foreground">
-          No enquiries yet. Submissions appear here once the contact migration is applied and someone
-          uses the form.
-        </p>
+        <AdminEmptyState
+          title={query ? "No matches" : "No enquiries yet"}
+          description={
+            query
+              ? "Try a different search term."
+              : "Submissions appear here once the contact migration is applied and someone uses the form."
+          }
+        />
       ) : (
         <ul className="mt-8 grid gap-3">
           {items.map((item) => (
             <li key={`${item.source}-${item.id}`} className="border border-border bg-card p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="font-semibold">{item.name}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold">{item.name}</p>
+                    {item.source === "inquiries" ? (
+                      <AdminBadge variant={item.handled ? "muted" : "warn"}>
+                        {item.handled ? "Handled" : "New"}
+                      </AdminBadge>
+                    ) : (
+                      <AdminBadge>Contact form</AdminBadge>
+                    )}
+                  </div>
                   <a
                     href={`mailto:${item.email}`}
                     className="mt-1 inline-flex items-center gap-1.5 text-sm text-emerald hover:underline"
@@ -102,14 +152,13 @@ export function ContactInbox() {
                       : "—"}
                     {item.topic ? ` · ${item.topic}` : ""}
                     {item.organisation ? ` · ${item.organisation}` : ""}
-                    {item.source === "inquiries" && item.handled ? " · Handled" : ""}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {item.source === "inquiries" ? (
                     <button
                       type="button"
-                      className={btn}
+                      className={adminBtn}
                       disabled={handledMutation.isPending}
                       onClick={() =>
                         handledMutation.mutate({ id: item.id, handled: !item.handled })
@@ -120,7 +169,7 @@ export function ContactInbox() {
                   ) : null}
                   <button
                     type="button"
-                    className={btn}
+                    className={adminBtn}
                     disabled={deleteMutation.isPending}
                     onClick={() => deleteMutation.mutate(item)}
                   >

@@ -56,6 +56,7 @@ export function About() {
                 series={about.chartSeries}
                 height={110}
                 showGrid={false}
+                chartKey="about-cumulative-r"
               />
             </div>
           </div>

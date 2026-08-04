@@ -6,15 +6,22 @@ import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
 import { deleteReport, listAllReports, saveReport } from "@/lib/reports.functions";
 import { emptyReport, type ReportRecord } from "@/lib/report-model";
 import { marketOptions } from "@/lib/analysis-model";
+import { AdminPanelSkeleton } from "@/components/admin/dashboard-skeleton";
 import { FieldControl } from "@/components/admin/field-control";
 import { FileUpload, GalleryUpload, ImageUpload } from "@/components/admin/upload-zone";
-
-const btn =
-  "inline-flex items-center gap-2 border border-border bg-background px-4 py-2.5 font-mono text-[0.68rem] uppercase tracking-[0.16em] transition-colors hover:border-emerald hover:text-emerald disabled:opacity-60";
-const btnPrimary =
-  "inline-flex items-center gap-2 border border-border bg-navy px-5 py-2.5 font-mono text-[0.68rem] uppercase tracking-[0.16em] text-navy-foreground transition-colors hover:bg-emerald disabled:opacity-60";
-const input =
-  "mt-2 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-emerald";
+import {
+  AdminBadge,
+  AdminEmptyState,
+  AdminErrorState,
+  AdminListRow,
+  AdminListShell,
+  AdminSearch,
+  AdminSectionHeader,
+  adminBtn,
+  adminBtnPrimary,
+  adminInput,
+} from "@/components/admin/admin-ui";
+import { liveQueryOptions } from "@/lib/live-poll";
 
 function slugify(value: string) {
   return value
@@ -31,12 +38,18 @@ export function ReportsManager() {
   const save = useServerFn(saveReport);
   const remove = useServerFn(deleteReport);
 
-  const list = useQuery({ queryKey: ["admin-reports"], queryFn: () => fetchAll() });
+  const list = useQuery({
+    queryKey: ["admin-reports"],
+    queryFn: () => fetchAll(),
+    ...liveQueryOptions,
+  });
   const [draft, setDraft] = useState<ReportRecord | null>(null);
+  const [query, setQuery] = useState("");
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: ["admin-reports"] });
     await queryClient.invalidateQueries({ queryKey: ["site-content"] });
+    await queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
   };
 
   const saveMutation = useMutation({
@@ -59,7 +72,17 @@ export function ReportsManager() {
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not delete"),
   });
 
-  const items = useMemo(() => list.data ?? [], [list.data]);
+  const items = useMemo(() => {
+    const all = list.data ?? [];
+    const q = query.trim().toLowerCase();
+    if (!q) return all;
+    return all.filter(
+      (r) =>
+        r.title.toLowerCase().includes(q) ||
+        r.asset.toLowerCase().includes(q) ||
+        r.market.toLowerCase().includes(q),
+    );
+  }, [list.data, query]);
 
   if (draft) {
     return (
@@ -76,50 +99,61 @@ export function ReportsManager() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">Weekly reports</h2>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Create, publish, edit and delete weekly market reports with cover images, charts and
-            PDFs.
-          </p>
-        </div>
-        <button className={btnPrimary} onClick={() => setDraft(emptyReport())}>
-          <Plus className="h-3.5 w-3.5" /> New report
-        </button>
+      <AdminSectionHeader
+        title="Weekly reports"
+        description="Create, publish, edit and delete weekly market reports with cover images, charts and PDFs."
+        actions={
+          <button className={adminBtnPrimary} onClick={() => setDraft(emptyReport())}>
+            <Plus className="h-3.5 w-3.5" /> New report
+          </button>
+        }
+      />
+
+      <div className="mt-6">
+        <AdminSearch value={query} onChange={setQuery} placeholder="Search title, asset, market…" />
       </div>
 
       {list.isLoading ? (
-        <p className="mt-8 text-sm text-muted-foreground">Loading reports…</p>
+        <AdminPanelSkeleton />
+      ) : list.isError ? (
+        <AdminErrorState
+          message={list.error instanceof Error ? list.error.message : "Could not load reports."}
+          onRetry={() => list.refetch()}
+        />
       ) : items.length === 0 ? (
-        <p className="mt-8 text-sm text-muted-foreground">
-          No reports yet. The Weekly Reports section appears on the site as soon as you publish one.
-        </p>
-      ) : (
-        <ul className="mt-8 grid gap-px border border-border bg-border">
-          {items.map((r) => (
-            <li key={r.id} className="bg-card">
-              <button
-                onClick={() => setDraft(structuredClone(r))}
-                className="flex w-full flex-wrap items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-surface"
-              >
-                <span className="min-w-0">
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="num text-xs text-muted-foreground">{r.date}</span>
-                    <span className="border border-border px-2 py-0.5 font-mono text-[0.6rem] uppercase tracking-widest">
-                      {r.market}
-                    </span>
-                    <span className="border border-border px-2 py-0.5 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-                      {r.published ? "Published" : "Draft"}
-                    </span>
-                  </span>
-                  <span className="mt-2 block truncate text-sm font-semibold">{r.title}</span>
-                </span>
-                <span className="num text-xs text-muted-foreground">{r.asset || "—"}</span>
+        <AdminEmptyState
+          title={query ? "No matches" : "No reports yet"}
+          description={
+            query
+              ? "Try a different search term."
+              : "The Weekly Reports section appears on the site as soon as you publish one."
+          }
+          action={
+            !query ? (
+              <button className={adminBtnPrimary} onClick={() => setDraft(emptyReport())}>
+                <Plus className="h-3.5 w-3.5" /> New report
               </button>
-            </li>
+            ) : undefined
+          }
+        />
+      ) : (
+        <AdminListShell>
+          {items.map((r) => (
+            <AdminListRow key={r.id} onClick={() => setDraft(structuredClone(r))}>
+              <span className="min-w-0">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="num text-xs text-muted-foreground">{r.date}</span>
+                  <AdminBadge>{r.market}</AdminBadge>
+                  <AdminBadge variant={r.published ? "default" : "muted"}>
+                    {r.published ? "Published" : "Draft"}
+                  </AdminBadge>
+                </span>
+                <span className="mt-2 block truncate text-sm font-semibold">{r.title}</span>
+              </span>
+              <span className="num text-xs text-muted-foreground">{r.asset || "—"}</span>
+            </AdminListRow>
           ))}
-        </ul>
+        </AdminListShell>
       )}
     </div>
   );
@@ -154,18 +188,18 @@ function ReportEditor({
         </button>
         <div className="flex flex-wrap gap-2">
           {onDelete ? (
-            <button className={btn} disabled={busy} onClick={onDelete}>
+            <button className={adminBtn} disabled={busy} onClick={onDelete}>
               <Trash2 className="h-3.5 w-3.5" /> Delete
             </button>
           ) : null}
           <button
-            className={btn}
+            className={adminBtn}
             disabled={busy}
             onClick={() => onChange({ ...record, published: false })}
           >
             Save as draft
           </button>
-          <button className={btnPrimary} disabled={busy} onClick={onSave}>
+          <button className={adminBtnPrimary} disabled={busy} onClick={onSave}>
             <Save className="h-3.5 w-3.5" /> {busy ? "Saving…" : "Save"}
           </button>
         </div>
@@ -181,7 +215,7 @@ function ReportEditor({
                 const title = e.target.value;
                 onChange({ ...record, title, slug: record.slug ? record.slug : slugify(title) });
               }}
-              className={input}
+              className={adminInput}
             />
           </label>
           <label className="block">
@@ -189,7 +223,7 @@ function ReportEditor({
             <input
               value={record.slug}
               onChange={(e) => set("slug", slugify(e.target.value))}
-              className={input}
+              className={adminInput}
             />
           </label>
           <label className="block">
@@ -198,7 +232,7 @@ function ReportEditor({
               value={record.weekLabel}
               onChange={(e) => set("weekLabel", e.target.value)}
               placeholder="Week 24 · 2026"
-              className={input}
+              className={adminInput}
             />
           </label>
           <label className="block">
@@ -207,7 +241,7 @@ function ReportEditor({
               value={record.asset}
               onChange={(e) => set("asset", e.target.value)}
               placeholder="BTCUSD"
-              className={input}
+              className={adminInput}
             />
           </label>
           <label className="block">
@@ -215,7 +249,7 @@ function ReportEditor({
             <select
               value={record.market}
               onChange={(e) => set("market", e.target.value)}
-              className={input}
+              className={adminInput}
             >
               {marketOptions.map((m) => (
                 <option key={m} value={m}>
@@ -230,7 +264,7 @@ function ReportEditor({
               type="date"
               value={record.date}
               onChange={(e) => set("date", e.target.value)}
-              className={`${input} num`}
+              className={`${adminInput} num`}
             />
           </label>
           <label className="block">
@@ -239,7 +273,7 @@ function ReportEditor({
               value={record.tradingviewUrl}
               onChange={(e) => set("tradingviewUrl", e.target.value)}
               placeholder="https://www.tradingview.com/chart/…"
-              className={input}
+              className={adminInput}
             />
           </label>
 
@@ -263,7 +297,7 @@ function ReportEditor({
               rows={3}
               value={record.summary}
               onChange={(e) => set("summary", e.target.value)}
-              className={`${input} resize-y`}
+              className={`${adminInput} resize-y`}
             />
           </label>
           <label className="block">
@@ -272,7 +306,7 @@ function ReportEditor({
               rows={10}
               value={record.body}
               onChange={(e) => set("body", e.target.value)}
-              className={`${input} resize-y`}
+              className={`${adminInput} resize-y`}
             />
           </label>
           <FieldControl

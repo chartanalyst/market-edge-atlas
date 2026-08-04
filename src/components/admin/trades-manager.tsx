@@ -10,13 +10,17 @@ import {
   saveTrade,
   type TradeRecord,
 } from "@/lib/trades.functions";
-
-const btn =
-  "inline-flex items-center gap-2 border border-border bg-background px-4 py-2.5 font-mono text-[0.68rem] uppercase tracking-[0.16em] transition-colors hover:border-emerald hover:text-emerald disabled:opacity-60";
-const btnPrimary =
-  "inline-flex items-center gap-2 border border-border bg-navy px-5 py-2.5 font-mono text-[0.68rem] uppercase tracking-[0.16em] text-navy-foreground transition-colors hover:bg-emerald disabled:opacity-60";
-const input =
-  "mt-2 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-emerald";
+import { AdminPanelSkeleton } from "@/components/admin/dashboard-skeleton";
+import {
+  AdminBadge,
+  AdminEmptyState,
+  AdminErrorState,
+  AdminSectionHeader,
+  adminBtn,
+  adminBtnPrimary,
+  adminInput,
+} from "@/components/admin/admin-ui";
+import { liveQueryOptions } from "@/lib/live-poll";
 
 export function TradesManager() {
   const queryClient = useQueryClient();
@@ -24,7 +28,11 @@ export function TradesManager() {
   const save = useServerFn(saveTrade);
   const remove = useServerFn(deleteTrade);
 
-  const list = useQuery({ queryKey: ["admin-trades"], queryFn: () => fetchAll() });
+  const list = useQuery({
+    queryKey: ["admin-trades"],
+    queryFn: () => fetchAll(),
+    ...liveQueryOptions,
+  });
   const [draft, setDraft] = useState<TradeRecord | null>(null);
 
   const saveMutation = useMutation({
@@ -50,6 +58,7 @@ export function TradesManager() {
       toast.success("Trade saved", { description: "Journal and equity curve update automatically." });
       await queryClient.invalidateQueries({ queryKey: ["admin-trades"] });
       await queryClient.invalidateQueries({ queryKey: ["published-trades"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
       setDraft(null);
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save"),
@@ -61,6 +70,7 @@ export function TradesManager() {
       toast.success("Trade deleted");
       await queryClient.invalidateQueries({ queryKey: ["admin-trades"] });
       await queryClient.invalidateQueries({ queryKey: ["published-trades"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
       setDraft(null);
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not delete"),
@@ -83,23 +93,34 @@ export function TradesManager() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold tracking-[-0.02em]">Trading journal</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add trades here — the public equity curve and metrics stay in sync.
-          </p>
-        </div>
-        <button type="button" className={btnPrimary} onClick={() => setDraft(emptyTrade())}>
-          <Plus className="h-3.5 w-3.5" />
-          New trade
-        </button>
-      </div>
+      <AdminSectionHeader
+        title="Trading journal"
+        description="Add trades here — the public equity curve and metrics stay in sync."
+        actions={
+          <button type="button" className={adminBtnPrimary} onClick={() => setDraft(emptyTrade())}>
+            <Plus className="h-3.5 w-3.5" />
+            New trade
+          </button>
+        }
+      />
 
       {list.isLoading ? (
-        <p className="mt-8 text-sm text-muted-foreground">Loading trades…</p>
+        <AdminPanelSkeleton />
+      ) : list.isError ? (
+        <AdminErrorState
+          message={list.error instanceof Error ? list.error.message : "Could not load trades."}
+          onRetry={() => list.refetch()}
+        />
       ) : items.length === 0 ? (
-        <p className="mt-8 text-sm text-muted-foreground">No trades yet. Add your first result.</p>
+        <AdminEmptyState
+          title="No trades yet"
+          description="Add your first journal entry — published trades appear on the site equity curve."
+          action={
+            <button type="button" className={adminBtnPrimary} onClick={() => setDraft(emptyTrade())}>
+              <Plus className="h-3.5 w-3.5" /> New trade
+            </button>
+          }
+        />
       ) : (
         <div className="mt-8 overflow-x-auto border border-border">
           <table className="w-full min-w-[640px] text-left text-sm">
@@ -109,7 +130,7 @@ export function TradesManager() {
                 <th className="px-4 py-3 font-medium">Asset</th>
                 <th className="px-4 py-3 font-medium">Dir</th>
                 <th className="px-4 py-3 font-medium">R</th>
-                <th className="px-4 py-3 font-medium">Published</th>
+                <th className="px-4 py-3 font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -122,11 +143,17 @@ export function TradesManager() {
                   <td className="num px-4 py-3">{t.date}</td>
                   <td className="px-4 py-3 font-medium">{t.instrument}</td>
                   <td className="px-4 py-3">{t.direction}</td>
-                  <td className="num px-4 py-3">
+                  <td
+                    className={`num px-4 py-3 font-semibold ${t.rMultiple >= 0 ? "text-emerald" : "text-destructive"}`}
+                  >
                     {t.rMultiple >= 0 ? "+" : ""}
                     {t.rMultiple}R
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{t.published ? "Yes" : "Draft"}</td>
+                  <td className="px-4 py-3">
+                    <AdminBadge variant={t.published ? "emerald" : "muted"}>
+                      {t.published ? "Live" : "Draft"}
+                    </AdminBadge>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -158,7 +185,7 @@ function TradeEditor({
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button type="button" className={btn} onClick={onBack}>
+        <button type="button" className={adminBtn} onClick={onBack}>
           <ArrowLeft className="h-3.5 w-3.5" />
           Back
         </button>
@@ -166,7 +193,7 @@ function TradeEditor({
           {onDelete ? (
             <button
               type="button"
-              className={btn}
+              className={adminBtn}
               disabled={busy}
               onClick={() => {
                 if (confirm("Delete this trade?")) onDelete();
@@ -176,7 +203,7 @@ function TradeEditor({
               Delete
             </button>
           ) : null}
-          <button type="button" className={btnPrimary} disabled={busy} onClick={onSave}>
+          <button type="button" className={adminBtnPrimary} disabled={busy} onClick={onSave}>
             <Save className="h-3.5 w-3.5" />
             Save trade
           </button>
@@ -187,14 +214,14 @@ function TradeEditor({
         <Field label="Date">
           <input
             type="date"
-            className={input}
+            className={adminInput}
             value={record.date}
             onChange={(e) => set("date", e.target.value)}
           />
         </Field>
         <Field label="Asset / instrument">
           <input
-            className={input}
+            className={adminInput}
             value={record.instrument}
             onChange={(e) => set("instrument", e.target.value)}
             placeholder="BTC/USD"
@@ -202,7 +229,7 @@ function TradeEditor({
         </Field>
         <Field label="Market">
           <select
-            className={input}
+            className={adminInput}
             value={record.market}
             onChange={(e) => set("market", e.target.value)}
           >
@@ -213,7 +240,7 @@ function TradeEditor({
         </Field>
         <Field label="Direction">
           <select
-            className={input}
+            className={adminInput}
             value={record.direction}
             onChange={(e) => set("direction", e.target.value)}
           >
@@ -223,16 +250,16 @@ function TradeEditor({
           </select>
         </Field>
         <Field label="Entry">
-          <input className={input} value={record.entry} onChange={(e) => set("entry", e.target.value)} />
+          <input className={adminInput} value={record.entry} onChange={(e) => set("entry", e.target.value)} />
         </Field>
         <Field label="Exit">
-          <input className={input} value={record.exit} onChange={(e) => set("exit", e.target.value)} />
+          <input className={adminInput} value={record.exit} onChange={(e) => set("exit", e.target.value)} />
         </Field>
         <Field label="R multiple">
           <input
             type="number"
             step="0.1"
-            className={input}
+            className={adminInput}
             value={record.rMultiple}
             onChange={(e) => set("rMultiple", Number(e.target.value))}
           />
@@ -241,14 +268,14 @@ function TradeEditor({
           <input
             type="number"
             step="0.01"
-            className={input}
+            className={adminInput}
             value={record.percentage}
             onChange={(e) => set("percentage", Number(e.target.value))}
           />
         </Field>
         <Field label="Result">
           <select
-            className={input}
+            className={adminInput}
             value={record.result}
             onChange={(e) => set("result", e.target.value)}
           >
@@ -259,7 +286,7 @@ function TradeEditor({
         </Field>
         <Field label="Published">
           <select
-            className={input}
+            className={adminInput}
             value={record.published ? "yes" : "no"}
             onChange={(e) => set("published", e.target.value === "yes")}
           >
@@ -271,7 +298,7 @@ function TradeEditor({
 
       <Field label="Notes">
         <textarea
-          className={`${input} min-h-28 resize-y`}
+          className={`${adminInput} min-h-28 resize-y`}
           value={record.notes}
           onChange={(e) => set("notes", e.target.value)}
         />

@@ -1,16 +1,20 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, ArrowUpRight, Target, TriangleAlert } from "lucide-react";
 import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Reveal } from "@/components/site/primitives";
 import type { AnalysisRecord } from "@/lib/analysis-model";
-import { getSiteContent } from "@/lib/content.functions";
+import { listPublishedAnalyses } from "@/lib/analyses.functions";
+import { getChartForPair, useMarketCharts } from "@/hooks/use-market-charts";
+import { liveQueryOptions } from "@/lib/live-poll";
 
 export const Route = createFileRoute("/analysis/$slug")({
   loader: async ({ params }) => {
-    const content = await getSiteContent();
-    const analysis = content.analyses.find((a) => a.slug === params.slug);
+    const all = await listPublishedAnalyses();
+    const analysis = all.find((a) => a.slug === params.slug);
     if (!analysis) throw notFound();
-    return { analysis, all: content.analyses };
+    return { analysis, all };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -35,8 +39,24 @@ export const Route = createFileRoute("/analysis/$slug")({
 });
 
 function AnalysisDetail() {
-  const { analysis: a, all } = Route.useLoaderData() as { analysis: AnalysisRecord; all: AnalysisRecord[] };
+  const { analysis: initial, all: initialAll } = Route.useLoaderData() as {
+    analysis: AnalysisRecord;
+    all: AnalysisRecord[];
+  };
+  const fetchAnalyses = useServerFn(listPublishedAnalyses);
+  const { data: all = initialAll } = useQuery({
+    queryKey: ["published-analyses"],
+    queryFn: () => fetchAnalyses(),
+    initialData: initialAll,
+    ...liveQueryOptions,
+  });
+  const a = all.find((x) => x.slug === initial.slug) ?? initial;
   const related = all.filter((x) => x.slug !== a.slug).slice(0, 3);
+  const relatedPairs = related.map((r) => r.pair);
+  const { charts } = useMarketCharts([a.pair, ...relatedPairs]);
+  const live = getChartForPair(charts, a.pair);
+  const series = live && live.prices.length > 1 ? live.prices : a.series;
+  const chartKey = a.slug;
 
   return (
     <main className="pt-32">
@@ -56,6 +76,12 @@ function AnalysisDetail() {
               {a.market}
             </span>
             <span className="num text-xs font-semibold">{a.pair}</span>
+            {live ? (
+              <span className="num text-xs font-semibold">
+                {live.price}{" "}
+                <span className={live.up ? "text-emerald" : "text-destructive"}>{live.change}</span>
+              </span>
+            ) : null}
             <span className="num text-xs text-muted-foreground">{a.timeframe}</span>
             <span className="num text-xs text-muted-foreground">
               {new Date(a.date).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}
@@ -76,7 +102,7 @@ function AnalysisDetail() {
               loading="lazy"
             />
           ) : (
-            <AreaChart series={a.series} height={220} />
+            <AreaChart series={series} height={220} accent="blue" chartKey={chartKey} />
           )}
           {a.gallery?.length ? (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -92,7 +118,7 @@ function AnalysisDetail() {
             </div>
           ) : !a.coverImage ? (
             <div className="mt-4 border border-border bg-surface p-4">
-              <CandleChart />
+              <CandleChart chartKey={chartKey} />
             </div>
           ) : null}
         </Reveal>
@@ -157,19 +183,32 @@ function AnalysisDetail() {
         <section className="mt-24">
           <h2 className="text-2xl font-semibold">Related case studies</h2>
           <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {related.map((r) => (
-              <Link
-                key={r.slug}
-                to="/analysis/$slug"
-                params={{ slug: r.slug }}
-                className="surface-card group p-6"
-              >
-                <span className="num text-xs font-semibold">{r.pair}</span>
-                <AreaChart series={r.series} height={80} animate={false} showGrid={false} />
-                <h3 className="mt-4 text-sm font-semibold leading-snug">{r.title}</h3>
-                <p className="num mt-3 text-xs text-emerald">{r.rr}</p>
-              </Link>
-            ))}
+            {related.map((r) => {
+              const relLive = getChartForPair(charts, r.pair);
+              const relSeries = relLive && relLive.prices.length > 1 ? relLive.prices : r.series;
+              const relKey = r.slug;
+
+              return (
+                <Link
+                  key={r.slug}
+                  to="/analysis/$slug"
+                  params={{ slug: r.slug }}
+                  className="surface-card group p-6"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="num text-xs font-semibold">{r.pair}</span>
+                    {relLive ? (
+                      <span className={`num text-[0.65rem] ${relLive.up ? "text-emerald" : "text-destructive"}`}>
+                        {relLive.change}
+                      </span>
+                    ) : null}
+                  </div>
+                  <AreaChart series={relSeries} height={80} showGrid={false} chartKey={relKey} accent="blue" />
+                  <h3 className="mt-4 text-sm font-semibold leading-snug">{r.title}</h3>
+                  <p className="num mt-3 text-xs text-emerald">{r.rr}</p>
+                </Link>
+              );
+            })}
           </div>
         </section>
       </article>

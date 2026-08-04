@@ -1,31 +1,20 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getLivePrices, type LiveQuote } from "@/lib/prices.functions";
+import { getLivePrices } from "@/lib/prices.functions";
+import { LIVE_POLL_MS, liveQueryOptions } from "@/lib/live-poll";
 
 /** Shared live quotes for ticker, hero, and any other price surfaces. */
-export function useLivePrices(pollMs = 60_000) {
+export function useLivePrices(pollMs = LIVE_POLL_MS) {
   const fetchPrices = useServerFn(getLivePrices);
-  const [quotes, setQuotes] = useState<Record<string, LiveQuote>>({});
+  const { data } = useQuery({
+    queryKey: ["live-prices"],
+    queryFn: () => fetchPrices(),
+    ...liveQueryOptions,
+    refetchInterval: pollMs,
+    staleTime: pollMs / 2,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const res = await fetchPrices();
-        if (!cancelled) setQuotes(res.quotes ?? {});
-      } catch {
-        /* keep fallbacks */
-      }
-    };
-    load();
-    const id = window.setInterval(load, pollMs);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, [fetchPrices, pollMs]);
-
-  return quotes;
+  return data?.quotes ?? {};
 }
 
 export function parsePriceNumber(price: string): number | null {

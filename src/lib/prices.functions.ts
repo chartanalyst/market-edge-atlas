@@ -7,9 +7,20 @@ export type LiveQuote = {
   up: boolean;
 };
 
+export type BtcChartData = {
+  prices: number[];
+  /** [open, high, low, close] per candle */
+  candles: [number, number, number, number][];
+  price: string;
+  change: string;
+  up: boolean;
+};
+
 type CacheEntry = { at: number; quotes: Record<string, LiveQuote> };
+type ChartCacheEntry = { at: number; data: BtcChartData };
 
 let cache: CacheEntry | null = null;
+let chartCache: ChartCacheEntry | null = null;
 const TTL_MS = 45_000;
 
 function formatPrice(n: number): string {
@@ -90,5 +101,67 @@ export const getLivePrices = createServerFn({ method: "GET" }).handler(async () 
     console.error("[prices]", err);
     if (cache) return { quotes: cache.quotes, cached: true as const };
     return { quotes: {} as Record<string, LiveQuote>, cached: false as const };
+  }
+});
+
+function sampleSeries(values: number[], target = 36): number[] {
+  if (values.length <= target) return values;
+  const step = (values.length - 1) / (target - 1);
+  return Array.from({ length: target }, (_, i) => values[Math.round(i * step)]);
+}
+
+async function fetchBtcChart(): Promise<BtcChartData> {
+  const [chartRes, ohlcRes, spotRes] = await Promise.all([
+    fetch(
+      "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7",
+      { headers: { Accept: "application/json" } },
+    ),
+    fetch(
+      "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=7",
+      { headers: { Accept: "application/json" } },
+    ),
+    fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
+      { headers: { Accept: "application/json" } },
+    ),
+  ]);
+
+  if (!chartRes.ok || !ohlcRes.ok) throw new Error(`CoinGecko chart ${chartRes.status}`);
+
+  const chartJson = (await chartRes.json()) as { prices?: [number, number][] };
+  const ohlcJson = (await ohlcRes.json()) as [number, number, number, number, number][];
+  const spotJson = (await spotRes.json().catch(() => ({}))) as {
+    bitcoin?: { usd?: number; usd_24h_change?: number };
+  };
+
+  const rawPrices = (chartJson.prices ?? []).map(([, p]) => p);
+  const prices = sampleSeries(rawPrices);
+  const candles = ohlcJson.map((row) => [row[1], row[2], row[3], row[4]] as [number, number, number, number]);
+
+  const usd = spotJson.bitcoin?.usd ?? rawPrices[rawPrices.length - 1] ?? 0;
+  const changePct = spotJson.bitcoin?.usd_24h_change ?? 0;
+
+  return {
+    prices: prices.length > 1 ? prices : rawPrices,
+    candles: candles.length > 0 ? candles.slice(-14) : [],
+    price: formatPrice(usd),
+    change: formatChange(changePct),
+    up: changePct >= 0,
+  };
+}
+
+export const getBtcMarketChart = createServerFn({ method: "GET" }).handler(async (): Promise<BtcChartData> => {
+  if (chartCache && Date.now() - chartCache.at < TTL_MS) {
+    return chartCache.data;
+  }
+
+  try {
+    const data = await fetchBtcChart();
+    chartCache = { at: Date.now(), data };
+    return data;
+  } catch (err) {
+    console.error("[prices] btc chart", err);
+    if (chartCache) return chartCache.data;
+    throw err;
   }
 });

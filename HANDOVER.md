@@ -43,18 +43,28 @@ Local `.env` does **not** sync to production. In Lovable Cloud / hosting env, se
 | `WEB3FORMS_ACCESS_KEY` | Contact form email (optional if SMTP is set) |
 | `SMTP_USER` / `SMTP_PASS` | Gmail or other SMTP (checked first) |
 | `CONTACT_TO` | `ubaid.ullah2005op@gmail.com` |
-| `BOOTSTRAP_ADMIN_EMAIL` | First admin email (developer or client) |
+| `BOOTSTRAP_ADMIN_EMAIL` | `chartanalyst1000@gmail.com` (site owner) |
 
 Restart the app after saving env vars.
 
 ### 3. Admin access
 
 1. Go to `/auth`
-2. Sign up or sign in with the bootstrap admin email
-3. First sign-in auto-grants admin if no admin exists yet
+2. Sign in with **chartanalyst1000@gmail.com** (site owner)
+3. First owner sign-in auto-grants admin if no admin exists yet
 4. Open `/admin` to edit copy, links, analyses, reports, trades, and contact inbox
 
-Client admin (when ready): `chartanalyst1000@gmail.com` — add to `user_roles` in Supabase or transfer bootstrap email.
+**If admin was already claimed by another email during development**, run in Supabase SQL Editor:
+
+```sql
+INSERT INTO public.user_roles (user_id, role)
+SELECT id, 'admin'::public.app_role
+FROM auth.users
+WHERE email = 'chartanalyst1000@gmail.com'
+ON CONFLICT (user_id, role) DO NOTHING;
+```
+
+Then sign out and sign in again at `/auth`.
 
 ### 4. Contact form email
 

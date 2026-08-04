@@ -1,7 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { analysisFromRow, type AnalysisRecord } from "@/lib/analysis-model";
+import { createPublicSupabase } from "@/lib/content.server";
+import {
+  analysisFromRow,
+  defaultAnalysisRecords,
+  sortAnalyses,
+  type AnalysisRecord,
+} from "@/lib/analysis-model";
 
 const levelSchema = z.object({ label: z.string().max(120), value: z.string().max(240) });
 
@@ -47,6 +53,28 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   });
   if (!isAdmin) throw new Error("Forbidden");
 }
+
+/** Published case studies for the public site (DB with static fallback). */
+export const listPublishedAnalyses = createServerFn({ method: "GET" }).handler(
+  async (): Promise<AnalysisRecord[]> => {
+    try {
+      const supabase = createPublicSupabase();
+      const { data, error } = await supabase
+        .from("analyses")
+        .select("*")
+        .eq("published", true)
+        .order("sort_order", { ascending: true })
+        .order("date", { ascending: false });
+      if (error) throw new Error(error.message);
+      if (data && data.length > 0) {
+        return sortAnalyses(data.map((row) => analysisFromRow(row as Record<string, unknown>)));
+      }
+    } catch (err) {
+      console.error("[analyses] published", err);
+    }
+    return sortAnalyses(defaultAnalysisRecords);
+  },
+);
 
 /** All analyses, drafts included — admin only. */
 export const listAllAnalyses = createServerFn({ method: "GET" })
