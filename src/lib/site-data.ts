@@ -165,6 +165,31 @@ export const analyses: Analysis[] = [
       { label: "Target 2", value: "Range high" },
     ],
   },
+  {
+    slug: "gbpusd-london-open-expansion",
+    market: "Forex",
+    pair: "GBP / USD",
+    title: "London open expansion from overnight range",
+    timeframe: "1H · 5M execution",
+    summary:
+      "Overnight consolidation resolved with a London open displacement through the Asian high, offering a clean continuation into the New York session.",
+    outcome: "Full target · +2.4R",
+    rr: "2.4R",
+    date: "2025-11-18",
+    series: [52, 50, 54, 51, 56, 55, 61, 58, 66, 64, 72, 70, 78, 76, 84],
+    thesis: [
+      "Asian range compressed into equilibrium ahead of the London open.",
+      "Displacement candle closed above the overnight high with expanding volume.",
+      "New York continuation held the reclaimed level as demand.",
+    ],
+    invalidation: "5M close back inside the overnight range.",
+    levels: [
+      { label: "Entry zone", value: "Asian high reclaim" },
+      { label: "Invalidation", value: "Inside overnight range" },
+      { label: "Target 1", value: "Session premium" },
+      { label: "Target 2", value: "Prior weekly high" },
+    ],
+  },
 ];
 
 export const insights = [
@@ -452,9 +477,16 @@ export const differentiators = [
 export const stats = [
   { value: 2400, suffix: "+", label: "Charts Published", detail: "Public and private, since 2021" },
   { value: 5, suffix: "", label: "Markets Covered", detail: "Crypto, FX, Stocks, Commodities, Indices" },
-  { value: 24, suffix: "", label: "Communities Worked With", detail: "From 500 to 12,000 members" },
-  { value: 7, suffix: "yrs", label: "Years of Experience", detail: "Full-time technical research" },
-  { value: 71, suffix: "%", label: "Thesis Hit Rate", detail: "Target reached before invalidation" },
+  { value: 6, suffix: "", label: "Communities Worked With", detail: "From 10,000 to 100,000+ members" },
+  { value: 5, suffix: "yrs", label: "Years of Experience", detail: "Full-time technical research" },
+  { value: 90, suffix: "%", label: "Thesis Hit Rate", detail: "Target reached before invalidation" },
+];
+
+export const assetDistribution = [
+  { label: "Crypto", pct: 40, color: "oklch(0.55 0.14 250)" },
+  { label: "Stocks & Indices", pct: 30, color: "oklch(0.58 0.16 145)" },
+  { label: "Commodities", pct: 20, color: "oklch(0.68 0.14 65)" },
+  { label: "Forex", pct: 10, color: "oklch(0.75 0.12 85)" },
 ];
 
 export const tickerItems = [

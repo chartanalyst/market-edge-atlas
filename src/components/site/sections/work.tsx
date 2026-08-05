@@ -6,11 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useServerFn } from "@tanstack/react-start";
 
+import { motion } from "motion/react";
 import { ArrowUpRight, Search } from "lucide-react";
 
 import { AreaChart } from "@/components/site/charts";
 
-import { Counter, Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
+import { Counter, Reveal, SectionHeading, Stagger, StaggerItem, revealVariants } from "@/components/site/primitives";
 
 import { useSiteContent } from "@/components/site/content-context";
 
@@ -29,109 +30,55 @@ const filters = ["All", "Crypto", "Forex", "Stocks", "Commodities", "Indices"] a
 
 
 function AnalysisCardChart({
-
   analysis,
-
-  large,
-
   liveSeries,
-
   chartKey,
-
   livePrice,
-
   liveChange,
-
   liveUp,
-
 }: {
-
   analysis: AnalysisRecord;
-
-  large: boolean;
-
   liveSeries?: number[];
-
   chartKey: string;
-
   livePrice?: string;
-
   liveChange?: string;
-
   liveUp?: boolean;
-
 }) {
-
   const series = liveSeries && liveSeries.length > 1 ? liveSeries : analysis.series;
-
-  const height = large ? 200 : 130;
-
-
+  const height = 72;
 
   return (
-
-    <div className="relative overflow-hidden bg-surface p-6">
-
+    <div className="relative overflow-hidden bg-surface p-3.5 sm:p-4">
       <div className="flex items-start justify-between gap-3">
-
         <div className="min-w-0">
-
           <span className="num text-xs font-semibold">{analysis.pair}</span>
-
           {livePrice ? (
-
             <p className="num mt-1 text-sm font-semibold">
-
               {livePrice}{" "}
-
               {liveChange ? (
-
                 <span className={liveUp ? "text-emerald" : "text-destructive"}>{liveChange}</span>
-
               ) : null}
-
             </p>
-
           ) : null}
-
         </div>
-
         <span className="shrink-0 border border-emerald bg-transparent px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-emerald">
-
           {analysis.market}
-
         </span>
-
       </div>
-
-      <div className="mt-4 transition-transform duration-700 group-hover:scale-[1.03]">
-
+      <div className="mt-2.5 transition-transform duration-700 group-hover:scale-[1.02]">
         {analysis.coverImage ? (
-
           <img
-
             src={analysis.coverImage}
-
             alt={analysis.title}
-
-            className={`w-full object-cover ${large ? "h-[200px]" : "h-[130px]"}`}
-
+            className="h-[72px] w-full object-cover"
             loading="lazy"
-
           />
-
         ) : (
-
           <AreaChart series={series} height={height} accent="blue" chartKey={chartKey} />
-
         )}
-
       </div>
-
     </div>
-
   );
-
 }
 
 
@@ -276,119 +223,63 @@ export function FeaturedAnalysis() {
 
         {isLoading && !isFetched ? (
           <FeaturedAnalysisGridSkeleton />
+        ) : visible.length === 0 ? (
+          <p className="mt-12 text-center text-sm text-muted-foreground">
+            No analysis matches that filter yet.
+          </p>
         ) : (
-
-          <Stagger className="mt-10 grid gap-6 lg:grid-cols-2">
-
-            {visible.map((a, i) => {
-
+          <motion.div
+            key={`${filter}-${query.trim().toLowerCase()}`}
+            className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+          >
+            {visible.map((a) => {
               const live = getChartForPair(charts, a.pair);
-
               const chartKey = a.slug;
 
-
-
               return (
-
-                <StaggerItem key={a.slug} className={i === 0 ? "lg:col-span-2" : undefined}>
-
+                <motion.div key={a.slug} variants={revealVariants}>
                   <Link
-
                     to="/analysis/$slug"
-
                     params={{ slug: a.slug }}
-
-                    className={cn(
-
-                      "surface-card group grid h-full overflow-hidden",
-
-                      i === 0 ? "lg:grid-cols-[1.05fr_1fr]" : "",
-
-                    )}
-
+                    className="surface-card group flex h-full flex-col overflow-hidden"
                   >
-
                     <AnalysisCardChart
-
                       analysis={a}
-
-                      large={i === 0}
-
                       liveSeries={live?.prices}
-
                       chartKey={chartKey}
-
                       livePrice={live?.price}
-
                       liveChange={live?.change}
-
                       liveUp={live?.up}
-
                     />
 
-
-
-                    <div className="flex flex-col p-7">
-
-                      <p className="eyebrow">{a.timeframe}</p>
-
-                      <h3 className="mt-3 text-pretty text-lg font-semibold leading-snug sm:text-xl">
-
+                    <div className="flex flex-1 flex-col p-4 sm:p-5">
+                      <p className="eyebrow text-[0.58rem]">{a.timeframe}</p>
+                      <h3 className="mt-2 text-pretty font-display text-base font-semibold leading-snug">
                         {a.title}
-
                       </h3>
-
-                      <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-
+                      <p className="mt-2 line-clamp-3 flex-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                         {a.summary}
-
                       </p>
-
-                      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3.5">
                         <div>
-
-                          <p className="eyebrow text-[0.6rem]">Outcome</p>
-
-                          <p className="num mt-1 text-sm font-semibold text-emerald">{a.outcome}</p>
-
+                          <p className="eyebrow text-[0.55rem]">Outcome</p>
+                          <p className="num mt-0.5 text-xs font-semibold text-emerald">{a.outcome}</p>
                         </div>
-
-                        <span className="inline-flex items-center gap-1.5 text-sm font-semibold transition-colors group-hover:text-emerald">
-
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold transition-colors group-hover:text-emerald">
                           Read more
-
-                          <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-
+                          <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                         </span>
-
                       </div>
-
                     </div>
-
                   </Link>
-
-                </StaggerItem>
-
+                </motion.div>
               );
-
             })}
-
-          </Stagger>
-
+          </motion.div>
         )}
-
-
-
-        {!isLoading && visible.length === 0 ? (
-
-          <p className="mt-12 text-center text-sm text-muted-foreground">
-
-            No analysis matches that filter yet.
-
-          </p>
-
-        ) : null}
 
       </div>
 
@@ -398,7 +289,24 @@ export function FeaturedAnalysis() {
 
 }
 
-
+function StatCard({
+  stat,
+}: {
+  stat: { value: number; suffix: string; label: string; detail: string };
+}) {
+  return (
+    <div className="group h-full border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur transition-colors duration-500 hover:border-emerald/50">
+      <p className="text-4xl font-semibold sm:text-5xl">
+        <Counter value={stat.value} suffix={stat.suffix} />
+      </p>
+      <p className="mt-4 font-display text-sm font-semibold">{stat.label}</p>
+      <p className="mt-1.5 text-xs text-navy-foreground/60">{stat.detail}</p>
+      <div className="mt-6 h-px w-full bg-navy-foreground/12">
+        <div className="h-px w-0 bg-emerald transition-all duration-700 group-hover:w-full" />
+      </div>
+    </div>
+  );
+}
 
 export function Performance() {
 
@@ -446,36 +354,21 @@ export function Performance() {
 
 
 
-        <Stagger className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-          {stats.map((s) => (
-
-            <StaggerItem key={s.label}>
-
-              <div className="group h-full border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7 backdrop-blur transition-colors duration-500 hover:border-emerald/50">
-
-                <p className="text-4xl font-semibold sm:text-5xl">
-
-                  <Counter value={s.value} suffix={s.suffix} />
-
-                </p>
-
-                <p className="mt-4 font-display text-sm font-semibold">{s.label}</p>
-
-                <p className="mt-1.5 text-xs text-navy-foreground/60">{s.detail}</p>
-
-                <div className="mt-6 h-px w-full bg-navy-foreground/12">
-
-                  <div className="h-px w-0 bg-emerald transition-all duration-700 group-hover:w-full" />
-
-                </div>
-
-              </div>
-
-            </StaggerItem>
-
-          ))}
-
+        <Stagger className="mt-14 grid gap-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {stats.slice(0, 3).map((s) => (
+              <StaggerItem key={s.label}>
+                <StatCard stat={s} />
+              </StaggerItem>
+            ))}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {stats.slice(3, 5).map((s) => (
+              <StaggerItem key={s.label}>
+                <StatCard stat={s} />
+              </StaggerItem>
+            ))}
+          </div>
         </Stagger>
 
       </div>

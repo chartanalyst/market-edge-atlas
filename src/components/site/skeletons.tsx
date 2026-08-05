@@ -119,27 +119,26 @@ export function HeroSectionSkeleton() {
 
 function AnalysisCardSkeleton({ large }: { large?: boolean }) {
   return (
-    <div className={cn("surface-card grid overflow-hidden", large && "lg:grid-cols-[1.05fr_1fr]")}>
-      <div className="bg-surface p-6">
+    <div className="surface-card flex flex-col overflow-hidden">
+      <div className="bg-surface p-4">
         <div className="flex items-center justify-between">
           <Bone className="h-3 w-16" />
           <Bone className="h-5 w-14" />
         </div>
-        <ChartAreaSkeleton height={large ? 200 : 130} className="mt-4 border-0 bg-transparent p-0" />
+        <ChartAreaSkeleton height={72} className="mt-3 border-0 bg-transparent p-0" />
       </div>
-      <div className="flex flex-col p-7">
+      <div className="flex flex-col p-5">
         <Bone className="h-3 w-24" />
-        <Bone className="mt-3 h-6 w-full" />
-        <Bone className="mt-2 h-6 w-full max-w-[85%]" />
-        <Bone className="mt-3 h-4 w-full" />
-        <Bone className="mt-2 h-4 w-full" />
-        <Bone className="mt-2 h-4 w-full max-w-[75%]" />
-        <div className="mt-6 flex justify-between border-t border-border pt-5">
+        <Bone className="mt-3 h-5 w-full" />
+        <Bone className="mt-2 h-5 w-full max-w-[85%]" />
+        <Bone className="mt-3 h-3.5 w-full" />
+        <Bone className="mt-2 h-3.5 w-full max-w-[75%]" />
+        <div className="mt-4 flex justify-between border-t border-border pt-3.5">
           <div>
             <Bone className="h-2.5 w-12" />
-            <Bone className="mt-2 h-4 w-20" />
+            <Bone className="mt-2 h-3.5 w-20" />
           </div>
-          <Bone className="h-4 w-24" />
+          <Bone className="h-3.5 w-20" />
         </div>
       </div>
     </div>
@@ -171,11 +170,7 @@ export function FeaturedAnalysisSkeleton() {
 }
 
 export function JournalEquitySkeleton() {
-  return (
-    <div className="mt-6">
-      <ChartAreaSkeleton height={200} />
-    </div>
-  );
+  return <ChartAreaSkeleton height={112} />;
 }
 
 export function PerformanceBandSkeleton() {
@@ -199,9 +194,8 @@ export function PerformanceBandSkeleton() {
 
 export function FeaturedAnalysisGridSkeleton() {
   return (
-    <div className="mt-10 grid gap-6 lg:grid-cols-2">
-      <AnalysisCardSkeleton large />
-      {Array.from({ length: 3 }).map((_, i) => (
+    <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
         <AnalysisCardSkeleton key={i} />
       ))}
     </div>

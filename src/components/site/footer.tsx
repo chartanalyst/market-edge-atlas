@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { BrandLogo } from "@/components/site/brand-logo";
 import {
   Github,
   Globe,
@@ -41,9 +42,7 @@ export function SiteFooter() {
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="max-w-sm">
             <div className="flex items-center gap-2.5">
-              <span className="grid h-9 w-9 place-items-center bg-navy text-navy-foreground">
-                <span className="font-display text-sm font-bold">{brand.initials}</span>
-              </span>
+              <BrandLogo showText={false} imageClassName="h-11 w-11" />
               <span className="font-display text-sm font-semibold">{brand.name}</span>
             </div>
             <p className="mt-5 text-sm leading-relaxed text-muted-foreground">{brand.tagline}</p>

@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Check, Clock, Mail, MapPin, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { Reveal, SectionHeading } from "@/components/site/primitives";
 import { iconForPlatform } from "@/components/site/footer";
 import { useSiteContent } from "@/components/site/content-context";
 import { submitContact } from "@/lib/contact.functions";
+import { cn } from "@/lib/utils";
 
 export function Contact() {
   const { copy, links } = useSiteContent();
@@ -62,20 +63,21 @@ export function Contact() {
             description={contact.description}
           />
 
-          <Reveal delay={0.1} className="mt-10 grid gap-4">
+          <Reveal delay={0.1} className="mt-10 border border-border bg-card">
             {[
-              { icon: Mail, l: "Email", v: contact.email },
-              { icon: Clock, l: "Response time", v: contact.responseTime },
-              { icon: MapPin, l: "Coverage", v: contact.coverage },
-            ].map((c) => (
-              <div key={c.l} className="flex items-center gap-4 border border-border bg-card p-5 backdrop-blur">
-                <span className="grid h-10 w-10 shrink-0 place-items-center border border-emerald bg-transparent text-emerald">
-                  <c.icon className="h-4 w-4" />
-                </span>
-                <div className="min-w-0">
-                  <p className="eyebrow text-[0.6rem]">{c.l}</p>
-                  <p className="truncate text-sm font-medium">{c.v}</p>
-                </div>
+              { l: "Email", v: contact.email },
+              { l: "Response time", v: contact.responseTime },
+              { l: "Coverage", v: contact.coverage },
+            ].map((c, i) => (
+              <div
+                key={c.l}
+                className={cn(
+                  "grid gap-1 px-6 py-5 sm:grid-cols-[9rem_1fr] sm:items-baseline sm:gap-6",
+                  i > 0 && "border-t border-border",
+                )}
+              >
+                <p className="eyebrow text-[0.62rem]">{c.l}</p>
+                <p className="font-display text-sm font-semibold leading-relaxed sm:text-base">{c.v}</p>
               </div>
             ))}
           </Reveal>

@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { ArrowUp, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MarketTicker } from "@/components/site/ticker";
+import { BrandLogo } from "@/components/site/brand-logo";
 import { useSiteContent } from "@/components/site/content-context";
 
 const links = [
   { label: "About", href: "/#about" },
-  { label: "Markets", href: "/#markets" },
+  { label: "Research", href: "/#markets" },
   { label: "Analysis", href: "/#featured" },
   { label: "Journal", href: "/#journal" },
   { label: "Reports", href: "/#reports" },
@@ -73,16 +74,8 @@ export function SiteNav() {
             scrolled ? "py-3" : "py-5",
           )}
         >
-          <Link to="/" className="flex min-w-0 items-center gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center border border-border bg-navy text-navy-foreground">
-              <span className="font-display text-sm font-bold">TA</span>
-            </span>
-            <span className="hidden min-w-0 flex-col leading-tight sm:flex">
-              <span className="truncate font-display text-sm font-semibold tracking-tight">
-                Market Edge Atlas
-              </span>
-              <span className="eyebrow text-[0.6rem]">Technical Analyst</span>
-            </span>
+          <Link to="/" className="flex min-w-0 items-center">
+            <BrandLogo />
           </Link>
 
           <div className="hidden items-center lg:flex">

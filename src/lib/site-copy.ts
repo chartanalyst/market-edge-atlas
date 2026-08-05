@@ -54,8 +54,8 @@ export type SiteCopy = {
 
 export const defaultCopy: SiteCopy = {
   brand: {
-    initials: "TA",
-    name: "Market Edge Atlas",
+    initials: "CA",
+    name: "Chart Analyst",
     tagline:
       "Institutional-grade technical research across crypto, forex, equities, commodities and indices. Structure first, risk always.",
     disclaimer:

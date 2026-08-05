@@ -1,7 +1,7 @@
-import * as Icons from "lucide-react";
-import { Reveal, SectionHeading, Stagger, StaggerItem, TiltCard } from "@/components/site/primitives";
+import { Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
-import { AreaChart } from "@/components/site/charts";
+import { AreaChart, DonutChart } from "@/components/site/charts";
+import { assetDistribution } from "@/lib/site-data";
 
 export function About() {
   const { copy } = useSiteContent();
@@ -54,7 +54,7 @@ export function About() {
               </div>
               <AreaChart
                 series={about.chartSeries}
-                height={110}
+                height={72}
                 showGrid={false}
                 chartKey="about-cumulative-r"
               />
@@ -67,44 +67,38 @@ export function About() {
 }
 
 export function Markets() {
-  const { markets } = useSiteContent();
   return (
     <section id="markets" className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32">
       <div className="mx-auto w-[min(1320px,94vw)]">
         <SectionHeading
-          eyebrow="Markets covered"
-          title="Five asset classes, one analytical framework."
-          description="The same structure, liquidity and risk model is applied to every market — which is precisely what makes cross-market confirmation possible."
+          eyebrow="Research universe"
+          title="Research Universe"
+          description="Published analysis by asset class — distribution of market research across the coverage universe."
         />
 
-        <Stagger className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {markets.map((m, i) => {
-            const Icon = (Icons[m.icon as keyof typeof Icons] ?? Icons.Activity) as Icons.LucideIcon;
-            return (
-              <StaggerItem key={m.name} className={i === 0 ? "lg:col-span-2" : undefined}>
-                <TiltCard className="h-full">
-                  <article className="surface-card group flex h-full flex-col p-7">
-                    <div className="flex items-start justify-between gap-4">
-                      <span className="grid h-12 w-12 shrink-0 place-items-center border border-emerald bg-transparent text-emerald transition-transform duration-500 group-hover:scale-110">
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <span className="num text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-                        {m.stat}
-                      </span>
-                    </div>
-                    <h3 className="mt-6 text-xl font-semibold">{m.name}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{m.desc}</p>
-                    <div className="mt-6 h-px w-full bg-hairline" />
-                    <div className="mt-4 flex items-center gap-2 text-xs font-medium text-emerald opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      Coverage active
-                      <Icons.ArrowRight className="h-3.5 w-3.5" />
-                    </div>
-                  </article>
-                </TiltCard>
+        <Reveal delay={0.1} className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">
+          <div className="border border-border bg-card p-8 sm:p-10">
+            <DonutChart segments={assetDistribution} chartKey="research-universe" />
+          </div>
+
+          <Stagger className="grid gap-3">
+            {assetDistribution.map((item) => (
+              <StaggerItem key={item.label}>
+                <div className="flex items-center justify-between gap-4 border border-border bg-card px-5 py-4">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span
+                      className="h-3 w-3 shrink-0 rounded-sm"
+                      style={{ backgroundColor: item.color }}
+                      aria-hidden
+                    />
+                    <p className="font-display text-sm font-semibold">{item.label}</p>
+                  </div>
+                  <p className="num text-sm font-semibold text-emerald">{item.pct}%</p>
+                </div>
               </StaggerItem>
-            );
-          })}
-        </Stagger>
+            ))}
+          </Stagger>
+        </Reveal>
       </div>
     </section>
   );

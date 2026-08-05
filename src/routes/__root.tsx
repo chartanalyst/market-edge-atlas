@@ -20,7 +20,7 @@ import { ChatWidget } from "@/components/site/chat-widget";
 import { SiteContentProvider } from "@/components/site/content-context";
 import { getSiteContent } from "@/lib/content.functions";
 import { defaultSiteContent } from "@/lib/site-content";
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-meta";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/site-meta";
 
 function NotFoundComponent() {
   return (
@@ -89,9 +89,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: SITE_TITLE },
       { name: "description", content: SITE_DESCRIPTION },
-      { name: "author", content: "Market Edge Atlas" },
+      { name: "author", content: SITE_NAME },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Market Edge Atlas" },
+      { property: "og:site_name", content: SITE_NAME },
       { name: "twitter:card", content: "summary" },
       { name: "theme-color", content: "#F8F5EF" },
       { property: "og:title", content: SITE_TITLE },
@@ -103,8 +103,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "icon", href: "/1-removebg-preview.png", type: "image/png", sizes: "any" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },

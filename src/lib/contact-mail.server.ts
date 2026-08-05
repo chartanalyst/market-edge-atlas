@@ -18,7 +18,7 @@ function normalizeSmtpPass(raw: string) {
 }
 
 function smtpFromAddress(user: string) {
-  const fromLabel = (process.env.SMTP_FROM || "Market Edge Atlas").trim().replace(/^["']|["']$/g, "");
+  const fromLabel = (process.env.SMTP_FROM || "Chart Analyst").trim().replace(/^["']|["']$/g, "");
   return fromLabel.includes("@") ? fromLabel : `"${fromLabel}" <${user}>`;
 }
 
@@ -62,7 +62,7 @@ async function sendViaWeb3Forms(payload: ContactPayload) {
     body: JSON.stringify({
       access_key: accessKey,
       subject: `New enquiry from ${payload.name}${payload.topic ? ` — ${payload.topic}` : ""}`,
-      from_name: "Market Edge Atlas",
+      from_name: "Chart Analyst",
       name: payload.name,
       email: payload.email,
       organisation: payload.organisation || "—",
@@ -80,7 +80,7 @@ async function sendViaWeb3Forms(payload: ContactPayload) {
 async function sendViaResend(payload: ContactPayload) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return false;
-  const from = process.env.RESEND_FROM || "Market Edge Atlas <onboarding@resend.dev>";
+  const from = process.env.RESEND_FROM || "Chart Analyst <onboarding@resend.dev>";
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",

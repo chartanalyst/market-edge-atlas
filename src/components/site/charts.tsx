@@ -225,6 +225,207 @@ export function AreaChart({
   );
 }
 
+export type DonutSegment = { label: string; pct: number; color: string };
+
+export function DonutChart({
+  segments,
+  className,
+  chartKey = "donut",
+}: {
+  segments: DonutSegment[];
+  className?: string;
+  chartKey?: string;
+}) {
+  const reduceMotion = useReducedMotion();
+  const size = 220;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 78;
+  const stroke = 28;
+  const c = 2 * Math.PI * r;
+  let offset = 0;
+
+  const arcs = segments.map((seg) => {
+    const len = (seg.pct / 100) * c;
+    const dash = `${len} ${c - len}`;
+    const arc = { ...seg, dash, offset: -offset };
+    offset += len;
+    return arc;
+  });
+
+  return (
+    <div className={cn("mx-auto w-full max-w-[280px]", className)}>
+      <svg viewBox={`0 0 ${size} ${size}`} className="w-full" role="img" aria-label="Asset class distribution">
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--hairline)" strokeWidth={stroke} />
+        <g transform={`rotate(-90 ${cx} ${cy})`}>
+          {arcs.map((arc, i) => (
+            <motion.circle
+              key={`${chartKey}-${arc.label}`}
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="none"
+              stroke={arc.color}
+              strokeWidth={stroke}
+              strokeLinecap="butt"
+              strokeDasharray={arc.dash}
+              strokeDashoffset={arc.offset}
+              initial={reduceMotion ? false : { strokeDasharray: `0 ${c}` }}
+              animate={{ strokeDasharray: arc.dash }}
+              transition={{ duration: 1.1, delay: i * 0.12, ease }}
+            />
+          ))}
+        </g>
+      </svg>
+      <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2">
+        {segments.map((seg) => (
+          <div key={seg.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: seg.color }} aria-hidden />
+            <span>{seg.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function polyline(points: readonly (readonly [number, number])[]) {
+  if (points.length < 2) return "";
+  return points.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x} ${y}`).join(" ");
+}
+
+/** Glowing equity line — jagged rise / break / rise, synced to trading R data. */
+export function GlowLineChart({
+  series,
+  className,
+  height = 120,
+  chartKey = "glow-equity",
+}: {
+  series: number[];
+  className?: string;
+  height?: number;
+  chartKey?: string;
+}) {
+  const reduceMotion = useReducedMotion();
+  const id = useId().replace(/:/g, "");
+  const w = 320;
+  const values = useMemo(() => normalizeSeries(series), [series]);
+  const shouldAnimate = !reduceMotion && values.length >= 2;
+
+  const { line, last } = useMemo(() => {
+    if (values.length < 2) {
+      return { line: "", last: [w - 8, height / 2] as const };
+    }
+    const pts = toPath(values, w, height, 6);
+    // Sharp segments read as rise → pullback → rise (equity style)
+    return { line: polyline(pts), last: pts[pts.length - 1] };
+  }, [values, height, w]);
+
+  if (values.length < 2) {
+    return <ChartAreaSkeleton height={height} className={className} />;
+  }
+
+  const lastY = last[1];
+
+  return (
+    <svg
+      viewBox={`0 0 ${w} ${height}`}
+      className={cn("w-full overflow-visible", className)}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label="Equity curve"
+    >
+      <defs>
+        <linearGradient id={`glow-stroke-${id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="oklch(0.72 0.16 75)" />
+          <stop offset="45%" stopColor="oklch(0.62 0.16 250)" />
+          <stop offset="100%" stopColor="oklch(0.55 0.2 265)" />
+        </linearGradient>
+        <filter id={`glow-filter-${id}`} x="-30%" y="-40%" width="160%" height="180%">
+          <feGaussianBlur stdDeviation="2.8" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <line
+        x1={0}
+        x2={0}
+        y1={4}
+        y2={height - 2}
+        stroke="oklch(0.55 0.14 250 / 0.55)"
+        strokeWidth="1.5"
+      />
+
+      {[0.25, 0.5, 0.75].map((f) => (
+        <line
+          key={f}
+          x1={0}
+          x2={w}
+          y1={height * f}
+          y2={height * f}
+          stroke="oklch(0.78 0.01 80 / 0.7)"
+          strokeWidth="1"
+          strokeDasharray="3 6"
+        />
+      ))}
+
+      <motion.path
+        key={`glow-shadow-${chartKey}`}
+        d={line}
+        fill="none"
+        stroke={`url(#glow-stroke-${id})`}
+        strokeWidth="5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.28}
+        filter={`url(#glow-filter-${id})`}
+        initial={shouldAnimate ? { pathLength: 0, opacity: 0 } : false}
+        animate={{ d: line, pathLength: 1, opacity: 0.28 }}
+        transition={{ pathLength: { duration: 2.2, ease }, d: { duration: 0.8, ease }, opacity: { duration: 0.4 } }}
+      />
+
+      <motion.path
+        key={`glow-line-${chartKey}`}
+        d={line}
+        fill="none"
+        stroke={`url(#glow-stroke-${id})`}
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+        initial={shouldAnimate ? { pathLength: 0, opacity: 0.5 } : false}
+        animate={{ d: line, pathLength: 1, opacity: 1 }}
+        transition={{ pathLength: { duration: 2.2, ease }, d: { duration: 0.8, ease }, opacity: { duration: 0.5 } }}
+      />
+
+      <motion.g key={`glow-dot-${chartKey}`}>
+        <motion.circle
+          cx={last[0]}
+          r="8"
+          fill="oklch(0.62 0.24 25)"
+          initial={shouldAnimate ? { cy: lastY, opacity: 0 } : false}
+          animate={{ cy: lastY, opacity: [0.22, 0.5, 0.22] }}
+          transition={{
+            cy: { duration: 0.8, ease },
+            opacity: { duration: 2, repeat: Infinity, ease: "easeInOut", delay: 2.2 },
+          }}
+        />
+        <motion.circle
+          cx={last[0]}
+          r="3.5"
+          fill="oklch(0.62 0.24 25)"
+          initial={shouldAnimate ? { cy: lastY, opacity: 0, scale: 0 } : false}
+          animate={{ cy: lastY, opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 2.1, ease }}
+        />
+      </motion.g>
+    </svg>
+  );
+}
+
 const DEFAULT_CANDLES: [number, number, number, number][] = [
   [46, 62, 42, 58],
   [58, 66, 54, 55],

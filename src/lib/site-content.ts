@@ -19,7 +19,7 @@ import {
   sortAnalyses,
   type AnalysisRecord,
 } from "@/lib/analysis-model";
-import { reportFromRow, sortReports, type ReportRecord } from "@/lib/report-model";
+import { reportFromRow, sortReports, defaultReportRecords, type ReportRecord } from "@/lib/report-model";
 import {
   defaultLinks,
   defaultSections,
@@ -54,7 +54,7 @@ export const defaultSiteContent: SiteContent = {
   analyses: defaultAnalysisRecords,
   insights,
   certifications,
-  reports: [],
+  reports: defaultReportRecords,
   markets,
   services,
   processSteps,
@@ -115,7 +115,10 @@ export function mergeSiteContent(
     merged.analyses = sortAnalyses(defaultAnalysisRecords);
   }
 
-  merged.reports = sortReports((reportRows ?? []).map((r) => reportFromRow(r)));
+  merged.reports =
+    reportRows && reportRows.length > 0
+      ? sortReports(reportRows.map((r) => reportFromRow(r)))
+      : sortReports(defaultReportRecords);
 
   return merged as SiteContent;
 }

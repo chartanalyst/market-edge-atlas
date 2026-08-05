@@ -25,7 +25,7 @@ import { AdminSidebar, buildAdminNav, type AdminTabKey } from "@/components/admi
 import { AdminErrorState, adminBtn, adminBtnPrimary } from "@/components/admin/admin-ui";
 import { liveQueryOptions } from "@/lib/live-poll";
 
-const title = "Content admin — Market Edge Atlas";
+const title = "Content admin — Chart Analyst";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   pendingComponent: AdminDashboardSkeleton,
@@ -202,7 +202,7 @@ function AdminPage() {
       <header className="border-b border-border bg-surface/80 backdrop-blur-sm">
         <div className="mx-auto flex w-[min(1320px,94vw)] flex-wrap items-center justify-between gap-4 py-4">
           <div>
-            <p className="eyebrow">Market Edge Atlas</p>
+            <p className="eyebrow">Chart Analyst</p>
             <p className="mt-1 text-sm font-semibold">Content admin</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">

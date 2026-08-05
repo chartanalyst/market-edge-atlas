@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AreaChart } from "@/components/site/charts";
+import { AreaChart, GlowLineChart } from "@/components/site/charts";
 import { Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
 import {
   computeMetrics,
@@ -58,29 +58,27 @@ export function TradingJournal() {
           ))}
         </Stagger>
 
-        <Reveal delay={0.1} className="mt-10 border border-border bg-card p-6 sm:p-8">
+        <Reveal delay={0.1} className="mt-10 border border-border bg-card p-5 sm:p-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="eyebrow">Equity curve</p>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-1.5 text-xs text-muted-foreground">
                 Cumulative R from published trades · starting at 0R
               </p>
             </div>
-            <p className="num text-2xl font-semibold text-emerald">
+            <p className="num text-xl font-semibold text-emerald">
               {metrics.netPerformanceR >= 0 ? "+" : ""}
               {metrics.netPerformanceR}R
             </p>
           </div>
-          <div className="mt-6">
+          <div className="mt-4 overflow-hidden border border-border bg-white px-3 py-4 sm:px-4">
             {isLoading ? (
               <JournalEquitySkeleton />
             ) : (
-              <AreaChart
+              <GlowLineChart
                 series={series.length > 1 ? series : [0, ...series]}
-                height={200}
-                accent="blue"
-                endLabel={`${metrics.netPerformanceR >= 0 ? "+" : ""}${metrics.netPerformanceR}R`}
-                chartKey="journal-equity"
+                height={112}
+                chartKey={`journal-equity-${series.length}-${metrics.netPerformanceR}`}
               />
             )}
           </div>

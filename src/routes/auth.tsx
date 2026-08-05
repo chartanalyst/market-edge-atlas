@@ -6,8 +6,8 @@ import { AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthPageSkeleton } from "@/components/admin/dashboard-skeleton";
 
-const title = "Admin sign in — Market Edge Atlas";
-const description = "Private sign-in for Market Edge Atlas content management.";
+const title = "Admin sign in — Chart Analyst";
+const description = "Private sign-in for Chart Analyst content management.";
 
 export const Route = createFileRoute("/auth")({
   pendingComponent: AuthPageSkeleton,

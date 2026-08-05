@@ -1,7 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, FileText } from "lucide-react";
-import { SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowUpRight } from "lucide-react";
+import { Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
+import { listPublishedReports } from "@/lib/reports.functions";
+import { liveQueryOptions } from "@/lib/live-poll";
 
 export function formatReportDate(value: string) {
   if (!value) return "";
@@ -11,14 +15,18 @@ export function formatReportDate(value: string) {
 }
 
 export function WeeklyReports() {
-  const { reports } = useSiteContent();
-  if (!reports || reports.length === 0) return null;
+  const { reports: fallback } = useSiteContent();
+  const fetchReports = useServerFn(listPublishedReports);
+  const { data: reports = fallback } = useQuery({
+    queryKey: ["published-reports"],
+    queryFn: () => fetchReports(),
+    ...liveQueryOptions,
+  });
+
+  const items = reports.length > 0 ? reports : fallback;
 
   return (
-    <section
-      id="reports"
-      className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32"
-    >
+    <section id="reports" className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32">
       <div className="mx-auto w-[min(1320px,94vw)]">
         <SectionHeading
           eyebrow="Weekly reports"
@@ -27,57 +35,52 @@ export function WeeklyReports() {
         />
 
         <Stagger className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3" gap={0.08}>
-          {reports.map((r) => (
+          {items.map((r) => (
             <StaggerItem key={r.slug}>
               <Link
                 to="/reports/$slug"
                 params={{ slug: r.slug }}
-                className="surface-card group flex h-full flex-col overflow-hidden"
+                className="surface-card group flex h-full flex-col p-5 sm:p-6"
               >
-                {r.coverImage ? (
-                  <img
-                    src={r.coverImage}
-                    alt={r.title}
-                    loading="lazy"
-                    className="aspect-[16/9] w-full border-b border-border object-cover"
-                  />
-                ) : (
-                  <span className="grid aspect-[16/9] w-full place-items-center border-b border-border bg-background text-muted-foreground">
-                    <FileText className="h-6 w-6" />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="border border-emerald px-2.5 py-1 text-[0.58rem] font-semibold uppercase tracking-widest text-emerald">
+                    {r.market}
                   </span>
-                )}
-
-                <div className="flex flex-1 flex-col p-6 sm:p-7">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="border border-emerald px-2.5 py-1 text-[0.58rem] font-semibold uppercase tracking-widest text-emerald">
-                      {r.market}
-                    </span>
-                    <span className="num text-[0.65rem] text-muted-foreground">
-                      {formatReportDate(r.date)}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1">
-                    {r.asset ? <span className="num text-xs font-semibold">{r.asset}</span> : null}
-                    {r.weekLabel ? (
-                      <span className="num text-[0.65rem] text-muted-foreground">{r.weekLabel}</span>
-                    ) : null}
-                  </div>
-
-                  <h3 className="mt-3 text-pretty text-lg font-semibold leading-snug">{r.title}</h3>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-                    {r.summary}
-                  </p>
-
-                  <span className="mt-6 inline-flex items-center gap-2 border-t border-border pt-4 font-mono text-[0.66rem] uppercase tracking-[0.16em] transition-colors group-hover:text-emerald">
-                    Read more
-                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  <span className="num text-[0.65rem] text-muted-foreground">
+                    {formatReportDate(r.date)}
                   </span>
                 </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {r.asset ? <span className="num text-xs font-semibold">{r.asset}</span> : null}
+                  {r.weekLabel ? (
+                    <span className="num text-[0.65rem] text-muted-foreground">{r.weekLabel}</span>
+                  ) : null}
+                </div>
+
+                <h3 className="mt-3 text-pretty font-display text-base font-semibold leading-snug sm:text-lg">
+                  {r.title}
+                </h3>
+                <p className="mt-2.5 flex-1 text-sm leading-relaxed text-muted-foreground">
+                  {r.summary}
+                </p>
+
+                <span className="mt-5 inline-flex items-center gap-2 border-t border-border pt-4 font-mono text-[0.66rem] uppercase tracking-[0.16em] transition-colors group-hover:text-emerald">
+                  Read more
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </span>
               </Link>
             </StaggerItem>
           ))}
         </Stagger>
+
+        {items.length === 0 ? (
+          <Reveal className="mt-10">
+            <p className="text-center text-sm text-muted-foreground">
+              Reports will appear here once published from the admin panel.
+            </p>
+          </Reveal>
+        ) : null}
       </div>
     </section>
   );
