@@ -23,9 +23,9 @@ const STORAGE_KEY = "research-desk-chat-v1";
 
 const SUGGESTIONS = [
   "What is the current BTC bias?",
-  "Show the latest weekly report",
+  "Book a consultation",
   "What are the trading stats?",
-  "Which services are offered?",
+  "Show the latest weekly report",
 ];
 
 type StoredChat = { id: string; messages: UIMessage[] };

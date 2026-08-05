@@ -172,7 +172,7 @@ export const getJournalMetrics = createServerFn({ method: "GET" })
       .select("*")
       .order("date", { ascending: true });
     if (error) throw new Error(error.message);
-    return computeMetrics((rows ?? []).map((r) => tradeFromRow(r as Record<string, unknown>)));
+    return computeMetrics((rows ?? []).map((r: unknown) => tradeFromRow(r as Record<string, unknown>)));
   });
 
 /** Published journal metrics for the public site. */

@@ -155,3 +155,77 @@ export async function getSiteInfo(topics?: string[]) {
   return out;
 }
 
+
+/**
+ * Book a consultation from the chat. Saves to the contact inbox and emails the desk.
+ * Returns a compact status the model can relay to the visitor.
+ */
+export async function bookConsultation(input: {
+  name: string;
+  email: string;
+  focus: string;
+  message: string;
+  availability?: string;
+  organisation?: string;
+}) {
+  const topic = `Consultation${input.focus ? ` — ${input.focus}` : ""}`;
+  const message = [
+    input.message,
+    input.availability ? `\nPreferred timing: ${input.availability}` : "",
+    "\n(Booked via the site assistant)",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const payload = {
+    name: input.name,
+    email: input.email,
+    organisation: input.organisation ?? "",
+    topic,
+    message,
+  };
+
+  let saved = false;
+  try {
+    const supabase = createPublicSupabase() as any;
+    const primary = await supabase.from("contact_submissions").insert({
+      name: payload.name,
+      email: payload.email,
+      organisation: payload.organisation || null,
+      topic: payload.topic || null,
+      message: payload.message,
+    });
+    if (primary.error) {
+      const fallback = await supabase.from("inquiries").insert({
+        name: payload.name,
+        email: payload.email,
+        organization: payload.organisation,
+        message: `[${payload.topic}]\n\n${payload.message}`,
+      });
+      saved = !fallback.error;
+    } else {
+      saved = true;
+    }
+  } catch (error) {
+    console.warn("[chat] consultation save failed", error);
+  }
+
+  let emailed = false;
+  try {
+    const { sendContactEmail } = await import("@/lib/contact-mail.server");
+    const result = await sendContactEmail(payload);
+    emailed = Boolean(result.emailed);
+  } catch (error) {
+    console.warn("[chat] consultation email failed", error);
+  }
+
+  return {
+    ok: saved || emailed,
+    saved,
+    emailed,
+    reference: input.email,
+    nextStep: saved || emailed
+      ? "The request is with the desk. Expect a reply by email within one business day with two proposed slots."
+      : "Could not register the request — ask the visitor to use the contact form in the Contact section.",
+  };
+}

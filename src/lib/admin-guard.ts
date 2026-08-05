@@ -5,25 +5,26 @@ export const BOOTSTRAP_ADMIN_EMAIL = (
   .trim()
   .toLowerCase();
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type SupabaseLike = {
+  rpc: (fn: any, args?: any) => any;
+  from: (table: any) => any;
+  storage?: any;
+};
+
 export type AdminFnContext = {
-  supabase: {
-    rpc: (
-      fn: string,
-      args: Record<string, unknown>,
-    ) => Promise<{ data: unknown; error: { message: string } | null }>;
-    from: (table: string) => unknown;
-  };
+  supabase: SupabaseLike;
   userId: string;
   claims?: { email?: string };
 };
 
 export function adminContextFromHandler(context: {
-  supabase: AdminFnContext["supabase"];
+  supabase: any;
   userId: string;
   claims?: unknown;
 }): AdminFnContext {
   return {
-    supabase: context.supabase,
+    supabase: context.supabase as SupabaseLike,
     userId: context.userId,
     claims: context.claims as { email?: string } | undefined,
   };

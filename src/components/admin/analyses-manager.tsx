@@ -28,7 +28,7 @@ import {
 } from "@/components/admin/admin-ui";
 import { AdminPanelSkeleton } from "@/components/admin/dashboard-skeleton";
 import { FieldControl } from "@/components/admin/field-control";
-import { FileUpload } from "@/components/admin/upload-zone";
+import { FileUpload, GalleryUpload, ImageUpload } from "@/components/admin/upload-zone";
 import { liveQueryOptions } from "@/lib/live-poll";
 
 function slugify(value: string) {
