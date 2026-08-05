@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AreaChart, GlowLineChart } from "@/components/site/charts";
+import { GlowLineChart } from "@/components/site/charts";
 import { Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
 import {
   computeMetrics,
+  equitySeriesForChart,
   listPublishedTrades,
   type TradeRecord,
 } from "@/lib/trades.functions";
@@ -20,7 +21,7 @@ export function TradingJournal() {
   });
 
   const metrics = useMemo(() => computeMetrics(trades), [trades]);
-  const series = metrics.equityCurve.map((p) => p.equity);
+  const chart = useMemo(() => equitySeriesForChart(trades), [trades]);
   const recent = useMemo(
     () => [...trades].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8),
     [trades],
@@ -63,22 +64,24 @@ export function TradingJournal() {
             <div>
               <p className="eyebrow">Equity curve</p>
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Cumulative R from published trades · starting at 0R
+                {chart.fromSeed
+                  ? "Sample path · rise → consolidation → breakout (live trades replace this)"
+                  : "Cumulative R from published trades · starting at 0R"}
               </p>
             </div>
             <p className="num text-xl font-semibold text-emerald">
-              {metrics.netPerformanceR >= 0 ? "+" : ""}
-              {metrics.netPerformanceR}R
+              {chart.endR >= 0 ? "+" : ""}
+              {chart.endR}R
             </p>
           </div>
-          <div className="mt-4 overflow-hidden border border-border bg-white px-3 py-4 sm:px-4">
+          <div className="mt-4 overflow-hidden border border-border bg-white px-2 py-3 sm:px-3">
             {isLoading ? (
               <JournalEquitySkeleton />
             ) : (
               <GlowLineChart
-                series={series.length > 1 ? series : [0, ...series]}
-                height={112}
-                chartKey={`journal-equity-${series.length}-${metrics.netPerformanceR}`}
+                series={chart.series}
+                height={96}
+                chartKey={`journal-equity-${chart.fromSeed ? "seed" : "live"}-${chart.series.length}-${chart.endR}`}
               />
             )}
           </div>

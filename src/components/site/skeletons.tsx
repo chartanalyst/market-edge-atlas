@@ -170,7 +170,7 @@ export function FeaturedAnalysisSkeleton() {
 }
 
 export function JournalEquitySkeleton() {
-  return <ChartAreaSkeleton height={112} />;
+  return <ChartAreaSkeleton height={96} />;
 }
 
 export function PerformanceBandSkeleton() {

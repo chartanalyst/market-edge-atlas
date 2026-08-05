@@ -92,6 +92,40 @@ export function computeMetrics(trades: TradeRecord[]): JournalMetrics {
   };
 }
 
+/**
+ * Flag-style equity path: pole up → pullback/consolidation → breakout higher.
+ * Used when published trades are too few to draw a meaningful curve.
+ */
+export const SEED_EQUITY_SERIES = [
+  0, 1.2, 2.8, 4.1, 6.4, 8.9, 11.2, 13.8, 16.5, 18.2, 20.4, 22.1, 24.8, 26.3, 28.6,
+  // consolidation / flag (slight downward drift)
+  27.4, 26.1, 25.2, 24.6, 23.8, 23.1, 22.4, 21.9, 21.2, 20.6, 20.1, 19.5, 19.0, 18.6,
+  // breakout continuation higher
+  20.2, 22.8, 25.6, 28.4, 31.2, 34.8, 38.1, 41.6, 45.2, 48.9, 52.4, 56.1, 60.2, 64.8, 69.4,
+];
+
+export function equitySeriesForChart(trades: TradeRecord[]): {
+  series: number[];
+  endR: number;
+  fromSeed: boolean;
+} {
+  const metrics = computeMetrics(trades);
+  const live = metrics.equityCurve.map((p) => p.equity);
+  // Need enough points for rise → dip → rise to read on the chart
+  if (live.length >= 8) {
+    return {
+      series: live[0] === 0 ? live : [0, ...live],
+      endR: metrics.netPerformanceR,
+      fromSeed: false,
+    };
+  }
+  return {
+    series: SEED_EQUITY_SERIES,
+    endR: SEED_EQUITY_SERIES[SEED_EQUITY_SERIES.length - 1],
+    fromSeed: true,
+  };
+}
+
 const tradeSchema = z.object({
   id: z.string().max(60).optional().default(""),
   date: z.string().max(30),
