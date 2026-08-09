@@ -1,30 +1,15 @@
 import { motion } from "motion/react";
 import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
-import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Counter } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
-import { useBtcMarketChart } from "@/hooks/use-btc-chart";
-import { parsePriceNumber, useLivePrices } from "@/hooks/use-live-prices";
-import { ChartAreaSkeleton } from "@/components/site/skeletons";
+
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Hero() {
-  const { copy } = useSiteContent();
+  const { copy, stats } = useSiteContent();
   const hero = copy.hero;
-  const live = useLivePrices();
-  const { data: btcChart, loading: chartLoading } = useBtcMarketChart();
-  const btc = live["BTC/USD"];
-  const livePrice = btc ? parsePriceNumber(btc.price) : btcChart ? parsePriceNumber(btcChart.price) : null;
-  const panelPrice = livePrice ?? hero.panelPrice;
-  const panelChange = btc?.change ?? btcChart?.change ?? hero.panelChange;
-  const panelChangeUp = btc ? btc.up : btcChart ? btcChart.up : !hero.panelChange.trim().startsWith("-");
-  const panelSeries =
-    btcChart && btcChart.prices.length > 1 ? btcChart.prices : hero.panelSeries;
-  const panelCandles = btcChart?.candles?.length ? btcChart.candles : undefined;
-  const chartsLoading = chartLoading && !btcChart && !btc;
 
-  const chartKey = "hero-btc";
 
   return (
     <section className="relative overflow-hidden border-b border-border pt-36 sm:pt-44">
