@@ -9,7 +9,7 @@ import { useSiteContent } from "@/components/site/content-context";
 
 const links = [
   { label: "About", href: "/#about" },
-  { label: "Research", href: "/#markets" },
+  
   { label: "Analysis", href: "/#featured" },
   { label: "Journal", href: "/#journal" },
   { label: "Reports", href: "/#reports" },

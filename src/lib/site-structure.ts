@@ -5,7 +5,7 @@ export const defaultSections: SectionSetting[] = [
   { id: "hero", label: "Hero", enabled: true },
   { id: "ticker", label: "Market ticker", enabled: true },
   { id: "about", label: "About", enabled: true },
-  { id: "markets", label: "Research Universe", enabled: true },
+  
   { id: "featured", label: "Featured analysis", enabled: true },
   { id: "certifications", label: "Certifications", enabled: true },
   { id: "reports", label: "Reports", enabled: true },
