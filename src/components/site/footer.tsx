@@ -70,7 +70,7 @@ export function SiteFooter() {
             title="Navigate"
             items={[
               { label: "About", href: "/#about" },
-              { label: "Markets", href: "/#markets" },
+              
               { label: "Featured analysis", href: "/#featured" },
               { label: "Performance", href: "/#performance" },
               { label: "Trading journal", href: "/#journal" },
