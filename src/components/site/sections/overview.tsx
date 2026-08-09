@@ -1,6 +1,6 @@
 import { Reveal, SectionHeading, Stagger, StaggerItem } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
-import { AreaChart, DonutChart } from "@/components/site/charts";
+import { DonutChart } from "@/components/site/charts";
 import { assetDistribution } from "@/lib/site-data";
 
 export function About() {
@@ -49,16 +49,18 @@ export function About() {
 
             <div className="mt-8 border border-border bg-surface p-4">
               <div className="flex items-center justify-between">
-                <p className="eyebrow text-[0.6rem]">{about.chartLabel}</p>
-                <p className="num text-sm font-semibold text-emerald">{about.chartValue}</p>
+                <p className="eyebrow text-[0.6rem]">Research universe</p>
+                <p className="num text-sm font-semibold text-emerald">
+                  {assetDistribution.length} classes
+                </p>
               </div>
-              <AreaChart
-                series={about.chartSeries}
-                height={72}
-                showGrid={false}
-                chartKey="about-cumulative-r"
+              <DonutChart
+                segments={assetDistribution}
+                chartKey="about-research-universe"
+                className="mt-4 max-w-[210px]"
               />
             </div>
+
           </div>
         </Reveal>
       </div>

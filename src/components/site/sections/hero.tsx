@@ -1,30 +1,15 @@
 import { motion } from "motion/react";
 import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
-import { AreaChart, CandleChart } from "@/components/site/charts";
 import { Counter } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
-import { useBtcMarketChart } from "@/hooks/use-btc-chart";
-import { parsePriceNumber, useLivePrices } from "@/hooks/use-live-prices";
-import { ChartAreaSkeleton } from "@/components/site/skeletons";
+
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Hero() {
-  const { copy } = useSiteContent();
+  const { copy, stats } = useSiteContent();
   const hero = copy.hero;
-  const live = useLivePrices();
-  const { data: btcChart, loading: chartLoading } = useBtcMarketChart();
-  const btc = live["BTC/USD"];
-  const livePrice = btc ? parsePriceNumber(btc.price) : btcChart ? parsePriceNumber(btcChart.price) : null;
-  const panelPrice = livePrice ?? hero.panelPrice;
-  const panelChange = btc?.change ?? btcChart?.change ?? hero.panelChange;
-  const panelChangeUp = btc ? btc.up : btcChart ? btcChart.up : !hero.panelChange.trim().startsWith("-");
-  const panelSeries =
-    btcChart && btcChart.prices.length > 1 ? btcChart.prices : hero.panelSeries;
-  const panelCandles = btcChart?.candles?.length ? btcChart.candles : undefined;
-  const chartsLoading = chartLoading && !btcChart && !btc;
 
-  const chartKey = "hero-btc";
 
   return (
     <section className="relative overflow-hidden border-b border-border pt-36 sm:pt-44">
@@ -122,80 +107,30 @@ export function Hero() {
             transition={{ duration: 1, ease, delay: 0.2 }}
             className="relative flex items-center py-14 lg:py-20 lg:pl-14"
           >
-            <div className="relative w-full border border-border bg-card">
-              {hero.panelImage ? (
-                <img
-                  src={hero.panelImage}
-                  alt={hero.panelLabel || "Market chart"}
-                  className="aspect-[4/5] w-full object-cover sm:aspect-square lg:aspect-[4/5]"
-                />
-              ) : (
-                <>
-                  <div className="flex items-start justify-between border-b border-border p-5">
-                    <div>
-                      <p className="eyebrow">{hero.panelLabel}</p>
-                      <p className="num mt-2 text-2xl font-semibold">
-                        <Counter value={panelPrice} />{" "}
-                        <span
-                          className={
-                            panelChangeUp ? "text-sm text-emerald" : "text-sm text-destructive"
-                          }
-                        >
-                          {panelChange}
-                        </span>
-                      </p>
-                    </div>
-                    <span className="border border-emerald px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-emerald">
-                      {hero.panelBadge}
-                    </span>
-                  </div>
-
-                  {chartsLoading ? (
-                    <>
-                      <ChartAreaSkeleton height={150} className="border-0 border-b border-border" />
-                      <div className="border-b border-border p-4">
-                        <div className="flex h-[130px] items-end justify-between gap-1 px-1">
-                          {Array.from({ length: 12 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className="w-full max-w-[14px] animate-pulse bg-hairline"
-                              style={{ height: `${28 + ((i * 17) % 55)}%` }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="border-b border-border p-4">
-                        <AreaChart
-                          series={panelSeries}
-                          height={150}
-                          accent="blue"
-                          chartKey={chartKey}
-                        />
-                      </div>
-
-                      <div className="border-b border-border p-4">
-                        <CandleChart candles={panelCandles} chartKey={chartKey} />
-                      </div>
-                    </>
-                  )}
-
-                  <div className="grid grid-cols-3 text-center">
-                    {hero.panelMetrics.map((c, i) => (
-                      <div
-                        key={c.label}
-                        className={i < 2 ? "border-r border-hairline px-2 py-4" : "px-2 py-4"}
-                      >
-                        <p className="eyebrow text-[0.58rem]">{c.label}</p>
-                        <p className="num mt-1.5 text-sm font-semibold">{c.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
+            <div className="grid w-full grid-cols-1 border border-border bg-card sm:grid-cols-2">
+              {stats.slice(0, 5).map((s, i) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease, delay: 0.3 + i * 0.08 }}
+                  className={
+                    i === 4
+                      ? "border-t border-hairline p-6 sm:col-span-2"
+                      : i < 2
+                        ? "border-b border-hairline p-6 sm:odd:border-r"
+                        : "border-hairline p-6 sm:odd:border-r"
+                  }
+                >
+                  <p className="num text-3xl font-semibold tracking-tight sm:text-4xl">
+                    <Counter value={s.value} suffix={s.suffix} />
+                  </p>
+                  <p className="mt-3 font-display text-sm font-semibold">{s.label}</p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.detail}</p>
+                </motion.div>
+              ))}
             </div>
+
 
             <motion.div
               className="absolute -left-4 top-[22%] hidden border border-border bg-card px-4 py-3 shadow-[4px_4px_0_0_var(--emerald)] sm:block"

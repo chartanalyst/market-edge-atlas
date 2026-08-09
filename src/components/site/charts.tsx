@@ -337,9 +337,8 @@ export function GlowLineChart({
     >
       <defs>
         <linearGradient id={`glow-stroke-${id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="oklch(0.72 0.16 75)" />
-          <stop offset="45%" stopColor="oklch(0.62 0.16 250)" />
-          <stop offset="100%" stopColor="oklch(0.55 0.2 265)" />
+          <stop offset="0%" stopColor="var(--foreground)" />
+          <stop offset="100%" stopColor="var(--foreground)" />
         </linearGradient>
         <filter id={`glow-filter-${id}`} x="-30%" y="-40%" width="160%" height="180%">
           <feGaussianBlur stdDeviation="2.8" result="blur" />
@@ -355,8 +354,8 @@ export function GlowLineChart({
         x2={0}
         y1={4}
         y2={height - 2}
-        stroke="oklch(0.55 0.14 250 / 0.55)"
-        strokeWidth="1.5"
+        stroke="var(--foreground)"
+        strokeWidth="1"
       />
 
       {[0.25, 0.5, 0.75].map((f) => (
@@ -373,26 +372,11 @@ export function GlowLineChart({
       ))}
 
       <motion.path
-        key={`glow-shadow-${chartKey}`}
-        d={line}
-        fill="none"
-        stroke={`url(#glow-stroke-${id})`}
-        strokeWidth="5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity={0.28}
-        filter={`url(#glow-filter-${id})`}
-        initial={shouldAnimate ? { pathLength: 0, opacity: 0 } : false}
-        animate={{ d: line, pathLength: 1, opacity: 0.28 }}
-        transition={{ pathLength: { duration: 2.2, ease }, d: { duration: 0.8, ease }, opacity: { duration: 0.4 } }}
-      />
-
-      <motion.path
         key={`glow-line-${chartKey}`}
         d={line}
         fill="none"
-        stroke={`url(#glow-stroke-${id})`}
-        strokeWidth="2.2"
+        stroke="var(--foreground)"
+        strokeWidth="1"
         strokeLinecap="round"
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"

@@ -27,6 +27,15 @@ export function TradingJournal() {
     [trades],
   );
 
+  const axisTicks = useMemo(() => {
+    const values = chart.series.filter((v) => Number.isFinite(v));
+    if (values.length === 0) return ["0"];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = max - min || 1;
+    return [3, 2, 1, 0].map((i) => (min + (span * i) / 3).toLocaleString("en-US", { maximumFractionDigits: 1 }));
+  }, [chart.series]);
+
   const cards = [
     { label: "Total Trades", value: String(metrics.totalTrades) },
     { label: "Total R", value: `${metrics.totalR >= 0 ? "+" : ""}${metrics.totalR}R` },
@@ -78,11 +87,20 @@ export function TradingJournal() {
             {isLoading ? (
               <JournalEquitySkeleton />
             ) : (
-              <GlowLineChart
-                series={chart.series}
-                height={96}
-                chartKey={`journal-equity-${chart.fromSeed ? "seed" : "live"}-${chart.series.length}-${chart.endR}`}
-              />
+              <div className="flex items-stretch gap-3">
+                <div className="flex h-[96px] w-12 shrink-0 flex-col justify-between text-right font-mono text-[0.6rem] text-muted-foreground">
+                  {axisTicks.map((t) => (
+                    <span key={t}>${t}</span>
+                  ))}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <GlowLineChart
+                    series={chart.series}
+                    height={96}
+                    chartKey={`journal-equity-${chart.fromSeed ? "seed" : "live"}-${chart.series.length}-${chart.endR}`}
+                  />
+                </div>
+              </div>
             )}
           </div>
         </Reveal>
