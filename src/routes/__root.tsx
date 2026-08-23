@@ -98,14 +98,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: SITE_TITLE },
       { property: "og:description", content: SITE_DESCRIPTION },
       { name: "twitter:description", content: SITE_DESCRIPTION },
-      { property: "og:image", content: "/apple-touch-icon.png" },
-      { name: "twitter:image", content: "/apple-touch-icon.png" },
+      { property: "og:image", content: "/market-logo.svg" },
+      { name: "twitter:image", content: "/market-logo.svg" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "icon", href: "/1-removebg-preview.png", type: "image/png", sizes: "any" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "icon", href: "/market-logo.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/market-logo.svg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

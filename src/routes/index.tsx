@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/site/sections/hero";
 import { About } from "@/components/site/sections/overview";
-import { FeaturedAnalysis, Performance } from "@/components/site/sections/work";
+import { FeaturedAnalysis } from "@/components/site/sections/work";
 import { TradingJournal } from "@/components/site/sections/journal";
 import { Process } from "@/components/site/sections/journey";
 import { Services, WhyWorkWithMe } from "@/components/site/sections/offer";
@@ -38,10 +38,9 @@ function Index() {
   const registry: Record<string, React.ComponentType> = {
     hero: Hero,
     about: About,
-    
+
     featured: FeaturedAnalysis,
     reports: WeeklyReports,
-    performance: Performance,
     journal: TradingJournal,
     process: Process,
     certifications: Certifications,

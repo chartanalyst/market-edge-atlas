@@ -2,12 +2,13 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, FileUp, Plus, Save, Trash2 } from "lucide-react";
 import {
   deleteTrade,
   emptyTrade,
   getJournalMetrics,
   getTrade,
+  importTradesFromCsv,
   listAllTrades,
   saveTrade,
   type TradeRecord,
@@ -29,6 +30,7 @@ export function TradesManager() {
   const fetchAll = useServerFn(listAllTrades);
   const save = useServerFn(saveTrade);
   const remove = useServerFn(deleteTrade);
+  const importCsv = useServerFn(importTradesFromCsv);
 
   const fetchOne = useServerFn(getTrade);
   const fetchMetrics = useServerFn(getJournalMetrics);
@@ -44,6 +46,7 @@ export function TradesManager() {
     ...liveQueryOptions,
   });
   const [draft, setDraft] = useState<TradeRecord | null>(null);
+  const [replaceSynced, setReplaceSynced] = useState(false);
 
   async function openEditor(record: TradeRecord) {
     if (!record.id) {
@@ -63,6 +66,7 @@ export function TradesManager() {
       save({
         data: {
           id: record.id,
+          externalId: record.externalId,
           date: record.date,
           market: record.market,
           instrument: record.instrument,
@@ -78,7 +82,9 @@ export function TradesManager() {
         },
       }),
     onSuccess: async () => {
-      toast.success("Trade saved", { description: "Journal and equity curve update automatically." });
+      toast.success("Trade saved", {
+        description: "Journal and equity curve update automatically.",
+      });
       await queryClient.invalidateQueries({ queryKey: ["admin-trades"] });
       await queryClient.invalidateQueries({ queryKey: ["admin-journal-metrics"] });
       await queryClient.invalidateQueries({ queryKey: ["published-trades"] });
@@ -101,6 +107,39 @@ export function TradesManager() {
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not delete"),
   });
 
+  const importMutation = useMutation({
+    mutationFn: (text: string) =>
+      importCsv({
+        data: {
+          text,
+          replaceExistingSynced: replaceSynced,
+        },
+      }),
+    onSuccess: async (result) => {
+      toast.success("Transactions imported", {
+        description: `${result.imported} rows synced to the public equity curve.`,
+      });
+      await queryClient.invalidateQueries({ queryKey: ["admin-trades"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-journal-metrics"] });
+      await queryClient.invalidateQueries({ queryKey: ["published-trades"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not import transactions"),
+  });
+
+  async function handleImport(file: File | undefined) {
+    if (!file) return;
+    const name = file.name.toLowerCase();
+    if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+      toast.error("Please export the Excel sheet as CSV or TSV first.", {
+        description: "CSV keeps imports auditable and avoids browser workbook parsing issues.",
+      });
+      return;
+    }
+    importMutation.mutate(await file.text());
+  }
+
   const items = useMemo(() => list.data ?? [], [list.data]);
 
   if (draft) {
@@ -122,19 +161,65 @@ export function TradesManager() {
         title="Trading journal"
         description="Add trades here — the public equity curve and metrics stay in sync."
         actions={
-          <button type="button" className={adminBtnPrimary} onClick={() => setDraft(emptyTrade())}>
-            <Plus className="h-3.5 w-3.5" />
-            New trade
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className={adminBtn}>
+              <FileUp className="h-3.5 w-3.5" />
+              Import CSV
+              <input
+                type="file"
+                accept=".csv,.tsv,text/csv,text/tab-separated-values"
+                className="sr-only"
+                disabled={importMutation.isPending}
+                onChange={(event) => {
+                  void handleImport(event.target.files?.[0]);
+                  event.currentTarget.value = "";
+                }}
+              />
+            </label>
+            <button
+              type="button"
+              className={adminBtnPrimary}
+              onClick={() => setDraft(emptyTrade())}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New trade
+            </button>
+          </div>
         }
       />
+
+      <div className="mt-5 border border-border bg-card p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-display text-sm font-semibold">Excel transaction sync</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Export Excel as CSV/TSV with date, instrument, direction, entry, exit, r_multiple,
+              percentage and optional external_id. Matching external_id rows update automatically.
+            </p>
+          </div>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={replaceSynced}
+              onChange={(event) => setReplaceSynced(event.target.checked)}
+            />
+            Replace existing synced rows
+          </label>
+        </div>
+      </div>
 
       {metrics.data ? (
         <div className="mt-6 grid gap-3 border border-border bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4">
           <Metric label="Total trades" value={String(metrics.data.totalTrades)} />
-          <Metric label="Total R" value={`${metrics.data.totalR >= 0 ? "+" : ""}${metrics.data.totalR}R`} />
+          <Metric
+            label="Total R"
+            value={`${metrics.data.totalR >= 0 ? "+" : ""}${metrics.data.totalR}R`}
+          />
           <Metric label="Win rate" value={`${metrics.data.winRate}%`} />
-          <Metric label="Avg R" value={`${metrics.data.avgR >= 0 ? "+" : ""}${metrics.data.avgR}R`} />
+          <Metric
+            label="Avg R"
+            value={`${metrics.data.avgR >= 0 ? "+" : ""}${metrics.data.avgR}R`}
+          />
         </div>
       ) : null}
 
@@ -150,7 +235,11 @@ export function TradesManager() {
           title="No trades yet"
           description="Add your first journal entry — published trades appear on the site equity curve."
           action={
-            <button type="button" className={adminBtnPrimary} onClick={() => setDraft(emptyTrade())}>
+            <button
+              type="button"
+              className={adminBtnPrimary}
+              onClick={() => setDraft(emptyTrade())}
+            >
               <Plus className="h-3.5 w-3.5" /> New trade
             </button>
           }
@@ -261,6 +350,14 @@ function TradeEditor({
             placeholder="BTC/USD"
           />
         </Field>
+        <Field label="External sync ID">
+          <input
+            className={adminInput}
+            value={record.externalId}
+            onChange={(e) => set("externalId", e.target.value)}
+            placeholder="Optional stable Excel row ID"
+          />
+        </Field>
         <Field label="Market">
           <select
             className={adminInput}
@@ -284,10 +381,18 @@ function TradeEditor({
           </select>
         </Field>
         <Field label="Entry">
-          <input className={adminInput} value={record.entry} onChange={(e) => set("entry", e.target.value)} />
+          <input
+            className={adminInput}
+            value={record.entry}
+            onChange={(e) => set("entry", e.target.value)}
+          />
         </Field>
         <Field label="Exit">
-          <input className={adminInput} value={record.exit} onChange={(e) => set("exit", e.target.value)} />
+          <input
+            className={adminInput}
+            value={record.exit}
+            onChange={(e) => set("exit", e.target.value)}
+          />
         </Field>
         <Field label="R multiple">
           <input

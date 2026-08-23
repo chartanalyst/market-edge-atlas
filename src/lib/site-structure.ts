@@ -5,11 +5,10 @@ export const defaultSections: SectionSetting[] = [
   { id: "hero", label: "Hero", enabled: true },
   { id: "ticker", label: "Market ticker", enabled: true },
   { id: "about", label: "About", enabled: true },
-  
+
   { id: "featured", label: "Featured analysis", enabled: true },
   { id: "certifications", label: "Certifications", enabled: true },
   { id: "reports", label: "Reports", enabled: true },
-  { id: "performance", label: "Performance dashboard", enabled: true },
   { id: "journal", label: "Trading journal", enabled: true },
   { id: "process", label: "Analysis process", enabled: true },
 
@@ -28,5 +27,9 @@ export const defaultLinks: LinkSetting[] = [
   { platform: "Telegram", label: "Telegram", href: "https://t.me/chartanalyst01" },
   { platform: "Discord", label: "Discord", href: "https://discord.gg/2RntKagEdU" },
   { platform: "Instagram", label: "Instagram", href: "https://instagram.com/twxubaid" },
-  { platform: "LinkedIn", label: "LinkedIn", href: "https://www.linkedin.com/in/ubaid-ullah-656748301/" },
+  {
+    platform: "LinkedIn",
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/ubaid-ullah-656748301/",
+  },
 ];

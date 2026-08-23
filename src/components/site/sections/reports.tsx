@@ -7,6 +7,8 @@ import { useSiteContent } from "@/components/site/content-context";
 import { listPublishedReports } from "@/lib/reports.functions";
 import { liveQueryOptions } from "@/lib/live-poll";
 
+const HOME_REPORT_LIMIT = 3;
+
 export function formatReportDate(value: string) {
   if (!value) return "";
   const date = new Date(value);
@@ -24,6 +26,7 @@ export function WeeklyReports() {
   });
 
   const items = reports.length > 0 ? reports : fallback;
+  const homepageItems = items.slice(0, HOME_REPORT_LIMIT);
 
   return (
     <section id="reports" className="scroll-mt-28 border-y border-border bg-surface py-24 lg:py-32">
@@ -35,7 +38,7 @@ export function WeeklyReports() {
         />
 
         <Stagger className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3" gap={0.08}>
-          {items.map((r) => (
+          {homepageItems.map((r) => (
             <StaggerItem key={r.slug}>
               <Link
                 to="/reports/$slug"
@@ -73,6 +76,18 @@ export function WeeklyReports() {
             </StaggerItem>
           ))}
         </Stagger>
+
+        {items.length > HOME_REPORT_LIMIT ? (
+          <Reveal delay={0.12} className="mt-10 flex justify-center">
+            <Link
+              to="/reports"
+              className="group inline-flex items-center gap-2 border border-border bg-navy px-6 py-3 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-navy-foreground transition-all hover:bg-emerald"
+            >
+              View more reports
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </Link>
+          </Reveal>
+        ) : null}
 
         {items.length === 0 ? (
           <Reveal className="mt-10">

@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AnalysisSlugRouteImport } from './routes/analysis.$slug'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -27,9 +29,19 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnalysisRoute = AnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -38,9 +50,9 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AnalysisSlugRoute = AnalysisSlugRouteImport.update({
-  id: '/analysis/$slug',
-  path: '/analysis/$slug',
-  getParentRoute: () => rootRouteImport,
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AnalysisRoute,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
@@ -48,9 +60,9 @@ const ApiChatRoute = ApiChatRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsSlugRoute = ReportsSlugRouteImport.update({
-  id: '/reports/$slug',
-  path: '/reports/$slug',
-  getParentRoute: () => rootRouteImport,
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ReportsRoute,
 } as any)
 const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
   id: '/api/public/media/$',
@@ -60,7 +72,9 @@ const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRouteWithChildren
   '/auth': typeof AuthRoute
+  '/reports': typeof ReportsRouteWithChildren
   '/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
   '/api/chat': typeof ApiChatRoute
@@ -69,7 +83,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRouteWithChildren
   '/auth': typeof AuthRoute
+  '/reports': typeof ReportsRouteWithChildren
   '/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
   '/api/chat': typeof ApiChatRoute
@@ -80,7 +96,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/analysis': typeof AnalysisRouteWithChildren
   '/auth': typeof AuthRoute
+  '/reports': typeof ReportsRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/analysis/$slug': typeof AnalysisSlugRoute
   '/api/chat': typeof ApiChatRoute
@@ -91,7 +109,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/analysis'
     | '/auth'
+    | '/reports'
     | '/admin'
     | '/analysis/$slug'
     | '/api/chat'
@@ -100,7 +120,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/analysis'
     | '/auth'
+    | '/reports'
     | '/admin'
     | '/analysis/$slug'
     | '/api/chat'
@@ -110,7 +132,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/analysis'
     | '/auth'
+    | '/reports'
     | '/_authenticated/admin'
     | '/analysis/$slug'
     | '/api/chat'
@@ -121,10 +145,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AnalysisRoute: typeof AnalysisRouteWithChildren
   AuthRoute: typeof AuthRoute
-  AnalysisSlugRoute: typeof AnalysisSlugRoute
+  ReportsRoute: typeof ReportsRouteWithChildren
   ApiChatRoute: typeof ApiChatRoute
-  ReportsSlugRoute: typeof ReportsSlugRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
 }
 
@@ -144,11 +168,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analysis': {
+      id: '/analysis'
+      path: '/analysis'
+      fullPath: '/analysis'
+      preLoaderRoute: typeof AnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -160,10 +198,10 @@ declare module '@tanstack/react-router' {
     }
     '/analysis/$slug': {
       id: '/analysis/$slug'
-      path: '/analysis/$slug'
+      path: '/$slug'
       fullPath: '/analysis/$slug'
       preLoaderRoute: typeof AnalysisSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AnalysisRoute
     }
     '/api/chat': {
       id: '/api/chat'
@@ -174,10 +212,10 @@ declare module '@tanstack/react-router' {
     }
     '/reports/$slug': {
       id: '/reports/$slug'
-      path: '/reports/$slug'
+      path: '/$slug'
       fullPath: '/reports/$slug'
       preLoaderRoute: typeof ReportsSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ReportsRoute
     }
     '/api/public/media/$': {
       id: '/api/public/media/$'
@@ -200,13 +238,36 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AnalysisRouteChildren {
+  AnalysisSlugRoute: typeof AnalysisSlugRoute
+}
+
+const AnalysisRouteChildren: AnalysisRouteChildren = {
+  AnalysisSlugRoute: AnalysisSlugRoute,
+}
+
+const AnalysisRouteWithChildren = AnalysisRoute._addFileChildren(
+  AnalysisRouteChildren,
+)
+
+interface ReportsRouteChildren {
+  ReportsSlugRoute: typeof ReportsSlugRoute
+}
+
+const ReportsRouteChildren: ReportsRouteChildren = {
+  ReportsSlugRoute: ReportsSlugRoute,
+}
+
+const ReportsRouteWithChildren =
+  ReportsRoute._addFileChildren(ReportsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AnalysisRoute: AnalysisRouteWithChildren,
   AuthRoute: AuthRoute,
-  AnalysisSlugRoute: AnalysisSlugRoute,
+  ReportsRoute: ReportsRouteWithChildren,
   ApiChatRoute: ApiChatRoute,
-  ReportsSlugRoute: ReportsSlugRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
 }
 export const routeTree = rootRouteImport

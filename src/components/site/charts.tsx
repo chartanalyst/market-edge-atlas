@@ -179,9 +179,7 @@ export function AreaChart({
           fill={colors.glow}
           initial={shouldAnimate ? { cy: lastY, opacity: 0 } : false}
           animate={
-            shouldAnimate
-              ? { cy: bobKeyframes, opacity: 0.18 }
-              : { cy: lastY, opacity: 0.18 }
+            shouldAnimate ? { cy: bobKeyframes, opacity: 0.18 } : { cy: lastY, opacity: 0.18 }
           }
           transition={{
             cy: { duration: 2.8, repeat: Infinity, ease: "easeInOut", delay: 1.5 },
@@ -255,8 +253,25 @@ export function DonutChart({
 
   return (
     <div className={cn("mx-auto w-full max-w-[280px]", className)}>
-      <svg viewBox={`0 0 ${size} ${size}`} className="w-full" role="img" aria-label="Asset class distribution">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--hairline)" strokeWidth={stroke} />
+      <svg
+        viewBox={`0 0 ${size} ${size}`}
+        className="w-full"
+        role="img"
+        aria-label="Asset class distribution"
+      >
+        <motion.circle
+          cx={cx}
+          cy={cy}
+          r={r}
+          fill="none"
+          stroke="var(--hairline)"
+          strokeWidth={stroke}
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.94 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6, ease }}
+          style={{ transformOrigin: "center" }}
+        />
         <g transform={`rotate(-90 ${cx} ${cy})`}>
           {arcs.map((arc, i) => (
             <motion.circle
@@ -270,17 +285,46 @@ export function DonutChart({
               strokeLinecap="butt"
               strokeDasharray={arc.dash}
               strokeDashoffset={arc.offset}
-              initial={reduceMotion ? false : { strokeDasharray: `0 ${c}` }}
-              animate={{ strokeDasharray: arc.dash }}
-              transition={{ duration: 1.1, delay: i * 0.12, ease }}
+              initial={reduceMotion ? false : { strokeDasharray: `0 ${c}`, opacity: 0.45 }}
+              whileInView={{ strokeDasharray: arc.dash, opacity: 1 }}
+              whileHover={{ strokeWidth: stroke + 4 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 1.15, delay: i * 0.1, ease }}
             />
           ))}
         </g>
+        <motion.g
+          initial={reduceMotion ? false : { opacity: 0, y: 5 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55, delay: 0.5, ease }}
+        >
+          <text
+            x={cx}
+            y={cy - 4}
+            textAnchor="middle"
+            className="fill-current font-mono text-[18px] font-semibold"
+          >
+            {segments.length}
+          </text>
+          <text
+            x={cx}
+            y={cy + 16}
+            textAnchor="middle"
+            className="fill-muted-foreground font-mono text-[9px] uppercase tracking-[0.18em]"
+          >
+            Classes
+          </text>
+        </motion.g>
       </svg>
       <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2">
         {segments.map((seg) => (
           <div key={seg.label} className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: seg.color }} aria-hidden />
+            <span
+              className="h-2 w-2 rounded-sm"
+              style={{ backgroundColor: seg.color }}
+              aria-hidden
+            />
             <span>{seg.label}</span>
           </div>
         ))}
@@ -349,14 +393,7 @@ export function GlowLineChart({
         </filter>
       </defs>
 
-      <line
-        x1={0}
-        x2={0}
-        y1={4}
-        y2={height - 2}
-        stroke="var(--foreground)"
-        strokeWidth="1"
-      />
+      <line x1={0} x2={0} y1={4} y2={height - 2} stroke="var(--foreground)" strokeWidth="1" />
 
       {[0.25, 0.5, 0.75].map((f) => (
         <line
@@ -382,7 +419,11 @@ export function GlowLineChart({
         vectorEffect="non-scaling-stroke"
         initial={shouldAnimate ? { pathLength: 0, opacity: 0.5 } : false}
         animate={{ d: line, pathLength: 1, opacity: 1 }}
-        transition={{ pathLength: { duration: 2.2, ease }, d: { duration: 0.8, ease }, opacity: { duration: 0.5 } }}
+        transition={{
+          pathLength: { duration: 2.2, ease },
+          d: { duration: 0.8, ease },
+          opacity: { duration: 0.5 },
+        }}
       />
 
       <motion.g key={`glow-dot-${chartKey}`}>
@@ -455,7 +496,11 @@ export function CandleChart({
   const identityKey = chartKey ?? "candles";
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className={cn("w-full overflow-visible", className)} role="presentation">
+    <svg
+      viewBox={`0 0 ${w} ${h}`}
+      className={cn("w-full overflow-visible", className)}
+      role="presentation"
+    >
       {candles.map(([o, hi, lo, c], i) => {
         const up = c >= o;
         const x = i * step + step / 2;

@@ -70,9 +70,8 @@ export function SiteFooter() {
             title="Navigate"
             items={[
               { label: "About", href: "/#about" },
-              
+
               { label: "Featured analysis", href: "/#featured" },
-              { label: "Performance", href: "/#performance" },
               { label: "Trading journal", href: "/#journal" },
             ]}
           />
@@ -98,12 +97,18 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <a href="/#faq" className="text-muted-foreground transition-colors hover:text-foreground">
+                <a
+                  href="/#faq"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="/#contact" className="text-muted-foreground transition-colors hover:text-foreground">
+                <a
+                  href="/#contact"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
                   Book a consultation
                 </a>
               </li>
@@ -129,7 +134,10 @@ function FooterCol({ title, items }: { title: string; items: { label: string; hr
       <ul className="mt-5 grid gap-3 text-sm">
         {items.map((i) => (
           <li key={i.label}>
-            <a href={i.href} className="text-muted-foreground transition-colors hover:text-foreground">
+            <a
+              href={i.href}
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
               {i.label}
             </a>
           </li>

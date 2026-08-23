@@ -3,8 +3,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createPublicSupabase } from "@/lib/content.server";
 import { adminContextFromHandler, ensureAdminAccess, loadAdminDb } from "@/lib/admin-guard";
+import { LIVE_POLL_MS } from "@/lib/live-poll";
 export type TradeRecord = {
   id: string;
+  externalId: string;
   date: string;
   market: string;
   instrument: string;
@@ -22,6 +24,7 @@ export type TradeRecord = {
 export function tradeFromRow(row: Record<string, unknown>): TradeRecord {
   return {
     id: String(row.id ?? ""),
+    externalId: String(row.external_id ?? ""),
     date: String(row.date ?? "").slice(0, 10),
     market: String(row.market ?? ""),
     instrument: String(row.instrument ?? ""),
@@ -40,6 +43,7 @@ export function tradeFromRow(row: Record<string, unknown>): TradeRecord {
 export function emptyTrade(): TradeRecord {
   return {
     id: "",
+    externalId: "",
     date: new Date().toISOString().slice(0, 10),
     market: "Crypto",
     instrument: "",
@@ -65,8 +69,12 @@ export type JournalMetrics = {
   equityCurve: { date: string; equity: number }[];
 };
 
+let transactionCsvCache: { at: number; url: string; trades: TradeRecord[] } | null = null;
+
 export function computeMetrics(trades: TradeRecord[]): JournalMetrics {
-  const sorted = [...trades].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  const sorted = [...trades].sort(
+    (a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id),
+  );
   let running = 0;
   const equityCurve = sorted.map((t) => {
     running += t.rMultiple;
@@ -92,18 +100,6 @@ export function computeMetrics(trades: TradeRecord[]): JournalMetrics {
   };
 }
 
-/**
- * Flag-style equity path: pole up → pullback/consolidation → breakout higher.
- * Used when published trades are too few to draw a meaningful curve.
- */
-export const SEED_EQUITY_SERIES = [
-  0, 1.2, 2.8, 4.1, 6.4, 8.9, 11.2, 13.8, 16.5, 18.2, 20.4, 22.1, 24.8, 26.3, 28.6,
-  // consolidation / flag (slight downward drift)
-  27.4, 26.1, 25.2, 24.6, 23.8, 23.1, 22.4, 21.9, 21.2, 20.6, 20.1, 19.5, 19.0, 18.6,
-  // breakout continuation higher
-  20.2, 22.8, 25.6, 28.4, 31.2, 34.8, 38.1, 41.6, 45.2, 48.9, 52.4, 56.1, 60.2, 64.8, 69.4,
-];
-
 export function equitySeriesForChart(trades: TradeRecord[]): {
   series: number[];
   endR: number;
@@ -111,23 +107,16 @@ export function equitySeriesForChart(trades: TradeRecord[]): {
 } {
   const metrics = computeMetrics(trades);
   const live = metrics.equityCurve.map((p) => p.equity);
-  // Need enough points for rise → dip → rise to read on the chart
-  if (live.length >= 8) {
-    return {
-      series: live[0] === 0 ? live : [0, ...live],
-      endR: metrics.netPerformanceR,
-      fromSeed: false,
-    };
-  }
   return {
-    series: SEED_EQUITY_SERIES,
-    endR: SEED_EQUITY_SERIES[SEED_EQUITY_SERIES.length - 1],
-    fromSeed: true,
+    series: live[0] === 0 ? live : [0, ...live],
+    endR: metrics.netPerformanceR,
+    fromSeed: false,
   };
 }
 
 const tradeSchema = z.object({
   id: z.string().max(60).optional().default(""),
+  externalId: z.string().max(160).optional().default(""),
   date: z.string().max(30),
   market: z.string().max(60).default("Crypto"),
   instrument: z.string().trim().min(1).max(80),
@@ -141,6 +130,182 @@ const tradeSchema = z.object({
   screenshot: z.string().max(500).default(""),
   published: z.boolean().default(true),
 });
+
+const importTradesSchema = z.object({
+  text: z.string().min(1).max(1_500_000),
+  replaceExistingSynced: z.boolean().default(false),
+});
+
+type TradePayload = {
+  external_id?: string | null;
+  date: string;
+  market: string;
+  instrument: string;
+  direction: string;
+  entry: string;
+  exit: string;
+  r_multiple: number;
+  percentage: number;
+  result: string;
+  notes: string;
+  screenshot: string | null;
+  published: boolean;
+};
+
+function splitDelimitedRows(text: string): string[][] {
+  const delimiter = text.includes("\t") && !text.includes(",") ? "\t" : ",";
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
+      i += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === delimiter && !quoted) {
+      row.push(cell.trim());
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") i += 1;
+      row.push(cell.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell.trim());
+  if (row.some(Boolean)) rows.push(row);
+  return rows;
+}
+
+function normalizeHeader(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function readNumber(value: string | undefined, fallback = 0) {
+  if (!value) return fallback;
+  const n = Number(value.replace(/[%,$\s]/g, ""));
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function readBool(value: string | undefined, fallback = true) {
+  if (!value) return fallback;
+  return !["false", "no", "0", "draft", "unpublished"].includes(value.trim().toLowerCase());
+}
+
+function readDate(value: string | undefined) {
+  if (!value) return new Date().toISOString().slice(0, 10);
+  const direct = new Date(value);
+  if (!Number.isNaN(direct.getTime())) return direct.toISOString().slice(0, 10);
+  return value.slice(0, 10);
+}
+
+function pick(row: Record<string, string>, keys: string[]) {
+  for (const key of keys) {
+    const value = row[key];
+    if (value != null && value !== "") return value;
+  }
+  return "";
+}
+
+function toTradePayload(row: Record<string, string>, index: number): TradePayload | null {
+  const date = readDate(pick(row, ["date", "trade_date", "closed_date", "exit_date"]));
+  const instrument = pick(row, ["instrument", "asset", "symbol", "pair", "ticker"]);
+  if (!instrument) return null;
+
+  const rMultiple = readNumber(pick(row, ["r_multiple", "r", "r_value", "multiple", "result_r"]));
+  const percentage = readNumber(
+    pick(row, ["percentage", "p_l", "pnl", "pnl_pct", "profit_loss_pct"]),
+  );
+  const externalId =
+    pick(row, ["external_id", "transaction_id", "trade_id", "id"]) ||
+    `${date}-${instrument}-${index + 1}`.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const result =
+    pick(row, ["result", "outcome"]) ||
+    (rMultiple > 0 ? "Win" : rMultiple < 0 ? "Loss" : "Breakeven");
+
+  return {
+    external_id: externalId,
+    date,
+    market: pick(row, ["market", "asset_class"]) || "Crypto",
+    instrument,
+    direction: pick(row, ["direction", "side"]) || "Long",
+    entry: pick(row, ["entry", "entry_price"]),
+    exit: pick(row, ["exit", "exit_price"]),
+    r_multiple: rMultiple,
+    percentage,
+    result,
+    notes: pick(row, ["notes", "comment", "thesis"]),
+    screenshot: pick(row, ["screenshot", "image", "chart_url"]) || null,
+    published: readBool(pick(row, ["published", "live", "show"]), true),
+  };
+}
+
+function parseTradeCsv(text: string): TradePayload[] {
+  const rows = splitDelimitedRows(text);
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(normalizeHeader);
+  const payloads: TradePayload[] = [];
+
+  rows.slice(1).forEach((cells, index) => {
+    const row = Object.fromEntries(headers.map((header, i) => [header, cells[i] ?? ""]));
+    const payload = toTradePayload(row, index);
+    if (payload) payloads.push(payload);
+  });
+
+  return payloads;
+}
+
+function payloadToTrade(payload: TradePayload, index: number): TradeRecord {
+  return {
+    id: payload.external_id || `sync-${index}`,
+    externalId: payload.external_id || "",
+    date: payload.date,
+    market: payload.market,
+    instrument: payload.instrument,
+    direction: payload.direction,
+    entry: payload.entry,
+    exit: payload.exit,
+    rMultiple: payload.r_multiple,
+    percentage: payload.percentage,
+    result: payload.result,
+    notes: payload.notes,
+    screenshot: payload.screenshot ?? "",
+    published: payload.published,
+  };
+}
+
+async function loadTradesFromTransactionCsv(): Promise<TradeRecord[] | null> {
+  const url = process.env.TRANSACTION_CSV_URL || process.env.VITE_TRANSACTION_CSV_URL || "";
+  if (!url) return null;
+  if (
+    transactionCsvCache &&
+    transactionCsvCache.url === url &&
+    Date.now() - transactionCsvCache.at < LIVE_POLL_MS
+  ) {
+    return transactionCsvCache.trades;
+  }
+
+  const res = await fetch(url, { headers: { Accept: "text/csv,text/plain,*/*" } });
+  if (!res.ok) throw new Error(`Transaction CSV ${res.status}`);
+  const text = await res.text();
+  const trades = parseTradeCsv(text)
+    .map(payloadToTrade)
+    .filter((trade) => trade.published);
+  transactionCsvCache = { at: Date.now(), url, trades };
+  return trades;
+}
 
 /** Single trade by id — admin only. */
 export const getTrade = createServerFn({ method: "GET" })
@@ -172,13 +337,18 @@ export const getJournalMetrics = createServerFn({ method: "GET" })
       .select("*")
       .order("date", { ascending: true });
     if (error) throw new Error(error.message);
-    return computeMetrics((rows ?? []).map((r: unknown) => tradeFromRow(r as Record<string, unknown>)));
+    return computeMetrics(
+      (rows ?? []).map((r: unknown) => tradeFromRow(r as Record<string, unknown>)),
+    );
   });
 
 /** Published journal metrics for the public site. */
 export const getPublishedJournalMetrics = createServerFn({ method: "GET" }).handler(
   async (): Promise<JournalMetrics> => {
     try {
+      const syncedTrades = await loadTradesFromTransactionCsv();
+      if (syncedTrades) return computeMetrics(syncedTrades);
+
       const supabase = createPublicSupabase();
       const { data, error } = await supabase
         .from("trading_results")
@@ -197,6 +367,9 @@ export const getPublishedJournalMetrics = createServerFn({ method: "GET" }).hand
 export const listPublishedTrades = createServerFn({ method: "GET" }).handler(
   async (): Promise<TradeRecord[]> => {
     try {
+      const syncedTrades = await loadTradesFromTransactionCsv();
+      if (syncedTrades) return syncedTrades;
+
       const supabase = createPublicSupabase();
       const { data, error } = await supabase
         .from("trading_results")
@@ -233,10 +406,10 @@ export const saveTrade = createServerFn({ method: "POST" })
     await ensureAdminAccess(ctx);
     const db = await loadAdminDb(ctx);
     const result =
-      data.result ||
-      (data.rMultiple > 0 ? "Win" : data.rMultiple < 0 ? "Loss" : "Breakeven");
+      data.result || (data.rMultiple > 0 ? "Win" : data.rMultiple < 0 ? "Loss" : "Breakeven");
     const payload = {
       date: data.date || new Date().toISOString().slice(0, 10),
+      external_id: data.externalId || null,
       market: data.market,
       instrument: data.instrument,
       direction: data.direction,
@@ -251,16 +424,35 @@ export const saveTrade = createServerFn({ method: "POST" })
     };
 
     if (data.id) {
-      const { error } = await db
-        .from("trading_results")
-        .update(payload)
-        .eq("id", data.id);
+      const { error } = await db.from("trading_results").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await db.from("trading_results").insert(payload);
       if (error) throw new Error(error.message);
     }
     return { ok: true as const };
+  });
+
+export const importTradesFromCsv = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) => importTradesSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const ctx = adminContextFromHandler(context);
+    await ensureAdminAccess(ctx);
+    const db = await loadAdminDb(ctx);
+    const payloads = parseTradeCsv(data.text);
+    if (payloads.length === 0) throw new Error("No valid trade rows found in the uploaded sheet.");
+
+    if (data.replaceExistingSynced) {
+      const { error } = await db.from("trading_results").delete().not("external_id", "is", null);
+      if (error) throw new Error(error.message);
+    }
+
+    const { error } = await db
+      .from("trading_results")
+      .upsert(payloads as never, { onConflict: "external_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true as const, imported: payloads.length };
   });
 
 export const deleteTrade = createServerFn({ method: "POST" })

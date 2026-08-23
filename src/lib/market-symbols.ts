@@ -1,6 +1,5 @@
 export type PairSource =
-  | { provider: "coingecko"; coinId: string }
-  | { provider: "yahoo"; symbol: string };
+  { provider: "coingecko"; coinId: string } | { provider: "yahoo"; symbol: string };
 
 /** "BTC / USD" → "BTC/USD" */
 export function normalizePairKey(pair: string): string {
@@ -17,10 +16,12 @@ const PAIR_MAP: Record<string, PairSource> = {
   "XAU/USD": { provider: "yahoo", symbol: "GC=F" },
   "XAG/USD": { provider: "yahoo", symbol: "SI=F" },
   NAS100: { provider: "yahoo", symbol: "^NDX" },
-  "US100": { provider: "yahoo", symbol: "^NDX" },
-  "NDX": { provider: "yahoo", symbol: "^NDX" },
+  US100: { provider: "yahoo", symbol: "^NDX" },
+  NDX: { provider: "yahoo", symbol: "^NDX" },
   SPX: { provider: "yahoo", symbol: "^GSPC" },
-  "US500": { provider: "yahoo", symbol: "^GSPC" },
+  US500: { provider: "yahoo", symbol: "^GSPC" },
+  WTI: { provider: "yahoo", symbol: "CL=F" },
+  DAX: { provider: "yahoo", symbol: "^GDAXI" },
   AAPL: { provider: "yahoo", symbol: "AAPL" },
   MSFT: { provider: "yahoo", symbol: "MSFT" },
   TSLA: { provider: "yahoo", symbol: "TSLA" },

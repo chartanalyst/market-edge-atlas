@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/site-meta";
 
-const LOGO_SRC = "/1-removebg-preview.png";
+const LOGO_SRC = "/market-logo.svg";
 
 export function BrandLogo({
   className,
@@ -17,10 +17,7 @@ export function BrandLogo({
       <img
         src={LOGO_SRC}
         alt={SITE_NAME}
-        className={cn(
-          "h-12 w-12 shrink-0 bg-navy object-contain p-1 sm:h-14 sm:w-14",
-          imageClassName,
-        )}
+        className={cn("h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14", imageClassName)}
         width={56}
         height={56}
       />

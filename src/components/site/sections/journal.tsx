@@ -33,7 +33,9 @@ export function TradingJournal() {
     const min = Math.min(...values);
     const max = Math.max(...values);
     const span = max - min || 1;
-    return [3, 2, 1, 0].map((i) => (min + (span * i) / 3).toLocaleString("en-US", { maximumFractionDigits: 1 }));
+    return [3, 2, 1, 0].map((i) =>
+      (min + (span * i) / 3).toLocaleString("en-US", { maximumFractionDigits: 1 }),
+    );
   }, [chart.series]);
 
   const cards = [
@@ -74,8 +76,8 @@ export function TradingJournal() {
               <p className="eyebrow">Equity curve</p>
               <p className="mt-1.5 text-xs text-muted-foreground">
                 {chart.fromSeed
-                  ? "Sample path · rise → consolidation → breakout (live trades replace this)"
-                  : "Cumulative R from published trades · starting at 0R"}
+                  ? "Waiting for synced transaction data"
+                  : "Cumulative R from published trades or the configured transaction CSV feed · starting at 0R"}
               </p>
             </div>
             <p className="num text-xl font-semibold text-emerald">
@@ -90,7 +92,7 @@ export function TradingJournal() {
               <div className="flex items-stretch gap-3">
                 <div className="flex h-[96px] w-12 shrink-0 flex-col justify-between text-right font-mono text-[0.6rem] text-muted-foreground">
                   {axisTicks.map((t) => (
-                    <span key={t}>${t}</span>
+                    <span key={t}>{t}R</span>
                   ))}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -148,7 +150,9 @@ function TradeRow({ trade }: { trade: TradeRecord }) {
       <td className="px-4 py-3">{trade.direction}</td>
       <td className="num px-4 py-3">{trade.entry || "—"}</td>
       <td className="num px-4 py-3">{trade.exit || "—"}</td>
-      <td className={`num px-4 py-3 font-semibold ${positive ? "text-emerald" : "text-destructive"}`}>
+      <td
+        className={`num px-4 py-3 font-semibold ${positive ? "text-emerald" : "text-destructive"}`}
+      >
         {positive ? "+" : ""}
         {trade.rMultiple}R
       </td>

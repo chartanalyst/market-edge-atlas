@@ -3,13 +3,11 @@ import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
 import { Counter } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
 
-
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Hero() {
   const { copy, stats } = useSiteContent();
   const hero = copy.hero;
-
 
   return (
     <section className="relative overflow-hidden border-b border-border pt-36 sm:pt-44">
@@ -107,7 +105,7 @@ export function Hero() {
             transition={{ duration: 1, ease, delay: 0.2 }}
             className="relative flex items-center py-14 lg:py-20 lg:pl-14"
           >
-            <div className="grid w-full grid-cols-1 border border-border bg-navy text-navy-foreground sm:grid-cols-2">
+            <div className="grid w-full grid-cols-1 border border-border bg-card shadow-[8px_8px_0_0_var(--surface)] sm:grid-cols-2">
               {stats.slice(0, 5).map((s, i) => (
                 <motion.div
                   key={s.label}
@@ -116,21 +114,22 @@ export function Hero() {
                   transition={{ duration: 0.6, ease, delay: 0.3 + i * 0.08 }}
                   className={
                     i === 4
-                      ? "border-t border-white/15 p-6 sm:col-span-2"
+                      ? "border-t border-border bg-surface/70 p-6 sm:col-span-2"
                       : i < 2
-                        ? "border-b border-white/15 p-6 sm:odd:border-r sm:odd:border-white/15"
-                        : "border-white/15 p-6 sm:odd:border-r sm:odd:border-white/15"
+                        ? "border-b border-border p-6 sm:odd:border-r sm:odd:border-border"
+                        : "border-border p-6 sm:odd:border-r sm:odd:border-border"
                   }
                 >
-                  <p className="num text-3xl font-semibold tracking-tight sm:text-4xl">
+                  <p className="num text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                     <Counter value={s.value} suffix={s.suffix} />
                   </p>
-                  <p className="mt-3 font-display text-sm font-semibold">{s.label}</p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-navy-foreground/55">{s.detail}</p>
+                  <p className="mt-3 font-display text-sm font-semibold text-foreground">
+                    {s.label}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{s.detail}</p>
                 </motion.div>
               ))}
             </div>
-
 
             <motion.div
               className="absolute -left-4 top-[22%] hidden border border-border bg-card px-4 py-3 shadow-[4px_4px_0_0_var(--emerald)] sm:block"
