@@ -2,13 +2,7 @@ import { cn } from "@/lib/utils";
 
 /** Theme-aligned skeleton block — sharp corners, hairline fill, site palette. */
 export function Bone({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      aria-hidden
-      className={cn("animate-pulse bg-hairline", className)}
-      {...props}
-    />
-  );
+  return <div aria-hidden className={cn("animate-pulse bg-hairline", className)} {...props} />;
 }
 
 export function SectionHeadingSkeleton({ className }: { className?: string }) {
@@ -22,9 +16,18 @@ export function SectionHeadingSkeleton({ className }: { className?: string }) {
   );
 }
 
-export function ChartAreaSkeleton({ height = 160, className }: { height?: number; className?: string }) {
+export function ChartAreaSkeleton({
+  height = 160,
+  className,
+}: {
+  height?: number;
+  className?: string;
+}) {
   return (
-    <div className={cn("relative border border-border bg-surface p-4", className)} style={{ height: height + 32 }}>
+    <div
+      className={cn("relative border border-border bg-surface p-4", className)}
+      style={{ height: height + 32 }}
+    >
       <div className="flex items-center justify-between">
         <Bone className="h-3 w-20" />
         <Bone className="h-6 w-16" />
@@ -173,25 +176,6 @@ export function JournalEquitySkeleton() {
   return <ChartAreaSkeleton height={96} />;
 }
 
-export function PerformanceBandSkeleton() {
-  return (
-    <section className="border-y border-border bg-navy py-24 lg:py-32">
-      <div className="mx-auto w-[min(1320px,94vw)]">
-        <SectionHeadingSkeleton className="max-w-3xl [&_*]:bg-navy-foreground/15" />
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="border border-navy-foreground/12 bg-navy-foreground/[0.045] p-7">
-              <Bone className="h-10 w-24 bg-navy-foreground/15" />
-              <Bone className="mt-4 h-4 w-32 bg-navy-foreground/15" />
-              <Bone className="mt-2 h-3 w-full max-w-xs bg-navy-foreground/15" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export function FeaturedAnalysisGridSkeleton() {
   return (
     <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -208,7 +192,6 @@ export function HomePageSkeleton() {
     <main>
       <HeroSectionSkeleton />
       <FeaturedAnalysisSkeleton />
-      <PerformanceBandSkeleton />
     </main>
   );
 }

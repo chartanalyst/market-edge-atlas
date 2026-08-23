@@ -338,6 +338,14 @@ function polyline(points: readonly (readonly [number, number])[]) {
   return points.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x} ${y}`).join(" ");
 }
 
+function areaPath(points: readonly (readonly [number, number])[], baseline: number) {
+  if (points.length < 2) return "";
+  const line = polyline(points);
+  const first = points[0];
+  const last = points[points.length - 1];
+  return `${line} L ${last[0]} ${baseline} L ${first[0]} ${baseline} Z`;
+}
+
 /** Glowing equity line — jagged rise / break / rise, synced to trading R data. */
 export function GlowLineChart({
   series,
@@ -356,13 +364,13 @@ export function GlowLineChart({
   const values = useMemo(() => normalizeSeries(series), [series]);
   const shouldAnimate = !reduceMotion && values.length >= 2;
 
-  const { line, last } = useMemo(() => {
+  const { line, area, last } = useMemo(() => {
     if (values.length < 2) {
-      return { line: "", last: [w - 8, height / 2] as const };
+      return { line: "", area: "", last: [w - 8, height / 2] as const };
     }
     const pts = toPath(values, w, height, 6);
     // Sharp segments read as rise → pullback → rise (equity style)
-    return { line: polyline(pts), last: pts[pts.length - 1] };
+    return { line: polyline(pts), area: areaPath(pts, height - 4), last: pts[pts.length - 1] };
   }, [values, height, w]);
 
   if (values.length < 2) {
@@ -370,6 +378,8 @@ export function GlowLineChart({
   }
 
   const lastY = last[1];
+  const positive = values[values.length - 1] >= values[0];
+  const stroke = positive ? "var(--emerald)" : "var(--destructive)";
 
   return (
     <svg
@@ -380,9 +390,14 @@ export function GlowLineChart({
       aria-label="Equity curve"
     >
       <defs>
+        <linearGradient id={`glow-fill-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={stroke} stopOpacity="0.2" />
+          <stop offset="72%" stopColor={stroke} stopOpacity="0.045" />
+          <stop offset="100%" stopColor={stroke} stopOpacity="0" />
+        </linearGradient>
         <linearGradient id={`glow-stroke-${id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="var(--foreground)" />
-          <stop offset="100%" stopColor="var(--foreground)" />
+          <stop offset="0%" stopColor="var(--muted-foreground)" stopOpacity="0.7" />
+          <stop offset="100%" stopColor={stroke} />
         </linearGradient>
         <filter id={`glow-filter-${id}`} x="-30%" y="-40%" width="160%" height="180%">
           <feGaussianBlur stdDeviation="2.8" result="blur" />
@@ -393,7 +408,7 @@ export function GlowLineChart({
         </filter>
       </defs>
 
-      <line x1={0} x2={0} y1={4} y2={height - 2} stroke="var(--foreground)" strokeWidth="1" />
+      <line x1={0} x2={0} y1={4} y2={height - 2} stroke="var(--border)" strokeWidth="1" />
 
       {[0.25, 0.5, 0.75].map((f) => (
         <line
@@ -409,14 +424,24 @@ export function GlowLineChart({
       ))}
 
       <motion.path
+        key={`glow-area-${chartKey}`}
+        d={area}
+        fill={`url(#glow-fill-${id})`}
+        initial={shouldAnimate ? { opacity: 0 } : false}
+        animate={{ d: area, opacity: 1 }}
+        transition={{ d: { duration: 0.8, ease }, opacity: { duration: 0.7, delay: 0.35 } }}
+      />
+
+      <motion.path
         key={`glow-line-${chartKey}`}
         d={line}
         fill="none"
-        stroke="var(--foreground)"
-        strokeWidth="1"
+        stroke={`url(#glow-stroke-${id})`}
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
+        filter={`url(#glow-filter-${id})`}
         initial={shouldAnimate ? { pathLength: 0, opacity: 0.5 } : false}
         animate={{ d: line, pathLength: 1, opacity: 1 }}
         transition={{
@@ -430,7 +455,7 @@ export function GlowLineChart({
         <motion.circle
           cx={last[0]}
           r="8"
-          fill="oklch(0.62 0.24 25)"
+          fill={stroke}
           initial={shouldAnimate ? { cy: lastY, opacity: 0 } : false}
           animate={{ cy: lastY, opacity: [0.22, 0.5, 0.22] }}
           transition={{
@@ -441,7 +466,7 @@ export function GlowLineChart({
         <motion.circle
           cx={last[0]}
           r="3.5"
-          fill="oklch(0.62 0.24 25)"
+          fill={stroke}
           initial={shouldAnimate ? { cy: lastY, opacity: 0, scale: 0 } : false}
           animate={{ cy: lastY, opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 2.1, ease }}

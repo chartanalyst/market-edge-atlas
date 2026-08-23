@@ -19,6 +19,7 @@ const PAIR_MAP: Record<string, PairSource> = {
   US100: { provider: "yahoo", symbol: "^NDX" },
   NDX: { provider: "yahoo", symbol: "^NDX" },
   SPX: { provider: "yahoo", symbol: "^GSPC" },
+  SPX500: { provider: "yahoo", symbol: "^GSPC" },
   US500: { provider: "yahoo", symbol: "^GSPC" },
   WTI: { provider: "yahoo", symbol: "CL=F" },
   DAX: { provider: "yahoo", symbol: "^GDAXI" },
@@ -26,6 +27,10 @@ const PAIR_MAP: Record<string, PairSource> = {
   MSFT: { provider: "yahoo", symbol: "MSFT" },
   TSLA: { provider: "yahoo", symbol: "TSLA" },
   NVDA: { provider: "yahoo", symbol: "NVDA" },
+  NVIDIA: { provider: "yahoo", symbol: "NVDA" },
+  AMD: { provider: "yahoo", symbol: "AMD" },
+  GOLD: { provider: "yahoo", symbol: "GC=F" },
+  SILVER: { provider: "yahoo", symbol: "SI=F" },
 };
 
 export function resolvePairSource(pair: string): PairSource | null {

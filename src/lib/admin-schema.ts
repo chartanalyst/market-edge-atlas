@@ -84,7 +84,12 @@ export const adminSections: AdminSection[] = [
           t("panelBadge", "Chart panel badge"),
           { name: "panelSeries", label: "Chart panel series", type: "numberList" },
           img("panelImage", "Hero panel image (replaces chart when set)"),
-          { name: "panelMetrics", label: "Chart panel metrics", type: "objectList", fields: labelValue },
+          {
+            name: "panelMetrics",
+            label: "Chart panel metrics",
+            type: "objectList",
+            fields: labelValue,
+          },
           {
             name: "floatOne",
             label: "Floating card 1",
@@ -172,7 +177,11 @@ export const adminSections: AdminSection[] = [
     itemLabel: "Link",
     titleField: "label",
     fields: [
-      t("platform", "Platform", "Email | X | LinkedIn | Discord | Telegram | Instagram | TradingView | GitHub"),
+      t(
+        "platform",
+        "Platform",
+        "Email | X | LinkedIn | Discord | Telegram | Instagram | TradingView | GitHub",
+      ),
       t("label", "Label"),
       t("href", "URL", "https://…"),
     ],
@@ -243,7 +252,12 @@ export const adminSections: AdminSection[] = [
     blurb: "Quotes shown in the testimonial carousel.",
     itemLabel: "Testimonial",
     titleField: "name",
-    fields: [area("quote", "Quote"), t("name", "Name"), t("role", "Role"), num("rating", "Rating (1-5)")],
+    fields: [
+      area("quote", "Quote"),
+      t("name", "Name"),
+      t("role", "Role"),
+      num("rating", "Rating (1-5)"),
+    ],
   },
   {
     kind: "list",
@@ -257,17 +271,23 @@ export const adminSections: AdminSection[] = [
   {
     kind: "list",
     key: "stats",
-    label: "Performance KPIs",
-    blurb: "Animated counters in the performance dashboard.",
+    label: "Hero KPIs",
+    blurb: "Stats displayed in the hero metrics panel.",
     itemLabel: "KPI",
     titleField: "label",
-    fields: [num("value", "Value"), t("suffix", "Suffix"), t("label", "Label"), t("detail", "Detail")],
+    fields: [
+      num("value", "Value"),
+      t("suffix", "Suffix"),
+      t("label", "Label"),
+      t("detail", "Detail"),
+    ],
   },
   {
     kind: "list",
     key: "tickerItems",
     label: "Market ticker",
-    blurb: "Instruments in the scrolling bar above the navigation. Live prices overlay BTC/ETH/SOL/XAU when available.",
+    blurb:
+      "Instruments in the scrolling bar above the navigation. Live prices overlay BTC/ETH/SOL/XAU when available.",
     itemLabel: "Instrument",
     titleField: "symbol",
     fields: [

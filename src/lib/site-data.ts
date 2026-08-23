@@ -32,7 +32,8 @@ export const analyses: Analysis[] = [
       "The sweep of the quarterly low cleared resting sell-side liquidity, providing the fuel for an expansion leg.",
       "Daily order flow confirmed with a displacement candle closing above the previous internal structure high.",
     ],
-    invalidation: "Weekly close below the swept quarterly low invalidates the re-accumulation read.",
+    invalidation:
+      "Weekly close below the swept quarterly low invalidates the re-accumulation read.",
     levels: [
       { label: "Entry zone", value: "Weekly demand block" },
       { label: "Invalidation", value: "Below quarterly low" },
@@ -321,13 +322,41 @@ export const services = [
 ];
 
 export const processSteps = [
-  { n: "01", title: "Market Structure", desc: "Establish higher-timeframe trend, ranges and internal shifts before anything else." },
-  { n: "02", title: "Supply & Demand", desc: "Locate unmitigated institutional zones and grade them on quality and origin." },
-  { n: "03", title: "Liquidity", desc: "Map resting liquidity, equal highs and lows, and probable engineering targets." },
-  { n: "04", title: "Confirmation", desc: "Wait for displacement, change of character or volume confirmation at the level." },
-  { n: "05", title: "Risk Assessment", desc: "Define invalidation first, then size the position to a fixed portfolio risk." },
-  { n: "06", title: "Execution", desc: "Enter mechanically, manage in stages, and never negotiate with the invalidation." },
-  { n: "07", title: "Review", desc: "Log outcome versus thesis and feed the statistics back into the model." },
+  {
+    n: "01",
+    title: "Market Structure",
+    desc: "Establish higher-timeframe trend, ranges and internal shifts before anything else.",
+  },
+  {
+    n: "02",
+    title: "Supply & Demand",
+    desc: "Locate unmitigated institutional zones and grade them on quality and origin.",
+  },
+  {
+    n: "03",
+    title: "Liquidity",
+    desc: "Map resting liquidity, equal highs and lows, and probable engineering targets.",
+  },
+  {
+    n: "04",
+    title: "Confirmation",
+    desc: "Wait for displacement, change of character or volume confirmation at the level.",
+  },
+  {
+    n: "05",
+    title: "Risk Assessment",
+    desc: "Define invalidation first, then size the position to a fixed portfolio risk.",
+  },
+  {
+    n: "06",
+    title: "Execution",
+    desc: "Enter mechanically, manage in stages, and never negotiate with the invalidation.",
+  },
+  {
+    n: "07",
+    title: "Review",
+    desc: "Log outcome versus thesis and feed the statistics back into the model.",
+  },
 ];
 
 export const timeline = [
@@ -476,10 +505,25 @@ export const differentiators = [
 
 export const stats = [
   { value: 2400, suffix: "+", label: "Charts Published", detail: "Public and private, since 2021" },
-  { value: 5, suffix: "", label: "Markets Covered", detail: "Crypto, FX, Stocks, Commodities, Indices" },
-  { value: 6, suffix: "", label: "Communities Worked With", detail: "From 10,000 to 100,000+ members" },
+  {
+    value: 5,
+    suffix: "",
+    label: "Markets Covered",
+    detail: "Crypto, FX, Stocks, Commodities, Indices",
+  },
+  {
+    value: 6,
+    suffix: "",
+    label: "Communities Worked With",
+    detail: "From 10,000 to 100,000+ members",
+  },
   { value: 5, suffix: "yrs", label: "Years of Experience", detail: "Full-time technical research" },
-  { value: 90, suffix: "%", label: "Thesis Hit Rate", detail: "Target reached before invalidation" },
+  {
+    value: 90,
+    suffix: "%",
+    label: "Thesis Hit Rate",
+    detail: "Target reached before invalidation",
+  },
 ];
 
 export const assetDistribution = [
@@ -494,14 +538,11 @@ export const tickerItems = [
   { symbol: "ETH/USD", price: "4,218", change: "+2.31%", up: true },
   { symbol: "EUR/USD", price: "1.0942", change: "-0.21%", up: false },
   { symbol: "GBP/USD", price: "1.2814", change: "+0.12%", up: true },
+  { symbol: "NVDA", price: "132.84", change: "+0.96%", up: true },
+  { symbol: "AMD", price: "167.42", change: "+0.42%", up: true },
+  { symbol: "SPX500", price: "5,684", change: "+0.42%", up: true },
   { symbol: "XAU/USD", price: "2,431.60", change: "+0.74%", up: true },
-  { symbol: "WTI", price: "78.14", change: "-1.02%", up: false },
-  { symbol: "SPX", price: "5,684", change: "+0.42%", up: true },
-  { symbol: "NAS100", price: "20,118", change: "+0.63%", up: true },
-  { symbol: "DAX", price: "18,742", change: "-0.18%", up: false },
-  { symbol: "AAPL", price: "232.18", change: "+0.96%", up: true },
-  { symbol: "USD/JPY", price: "148.32", change: "+0.35%", up: true },
-  { symbol: "SOL/USD", price: "196.42", change: "+3.11%", up: true },
+  { symbol: "XAG/USD", price: "30.14", change: "+0.31%", up: true },
 ];
 
 export const coverageMap = [

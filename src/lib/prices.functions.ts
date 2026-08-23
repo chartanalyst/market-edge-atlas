@@ -38,6 +38,62 @@ function formatChange(pct: number): string {
   return `${sign}${pct.toFixed(2)}%`;
 }
 
+const TWELVE_DATA_SYMBOLS: Record<string, string> = {
+  "BTC/USD": "BTC/USD",
+  "ETH/USD": "ETH/USD",
+  "EUR/USD": "EUR/USD",
+  "GBP/USD": "GBP/USD",
+  NVDA: "NVDA",
+  NVIDIA: "NVDA",
+  AMD: "AMD",
+  SPX500: "SPX",
+  SPX: "SPX",
+  "XAU/USD": "XAU/USD",
+  GOLD: "XAU/USD",
+  "XAG/USD": "XAG/USD",
+  SILVER: "XAG/USD",
+};
+
+async function fetchTwelveDataQuotes(symbols: string[]): Promise<Record<string, LiveQuote>> {
+  const apiKey = process.env.TWELVE_DATA_API_KEY || process.env.VITE_TWELVE_DATA_API_KEY || "";
+  if (!apiKey) return {};
+
+  const mapped = symbols
+    .map((symbol) => ({ symbol, apiSymbol: TWELVE_DATA_SYMBOLS[symbol] }))
+    .filter((entry): entry is { symbol: string; apiSymbol: string } => Boolean(entry.apiSymbol));
+  if (!mapped.length) return {};
+
+  const apiSymbols = [...new Set(mapped.map((entry) => entry.apiSymbol))].join(",");
+  const res = await fetch(
+    `https://api.twelvedata.com/quote?symbol=${encodeURIComponent(apiSymbols)}&apikey=${encodeURIComponent(apiKey)}`,
+    { headers: { Accept: "application/json" } },
+  );
+  if (!res.ok) throw new Error(`Twelve Data ${res.status}`);
+
+  const json = (await res.json()) as Record<
+    string,
+    { close?: string; percent_change?: string; code?: number; message?: string }
+  >;
+  const quoteByApiSymbol =
+    mapped.length === 1 && !json[mapped[0].apiSymbol] ? { [mapped[0].apiSymbol]: json } : json;
+  const out: Record<string, LiveQuote> = {};
+
+  for (const { symbol, apiSymbol } of mapped) {
+    const row = quoteByApiSymbol[apiSymbol];
+    const price = Number(row?.close);
+    const change = Number(row?.percent_change);
+    if (!Number.isFinite(price)) continue;
+    out[symbol] = {
+      symbol,
+      price: formatPrice(price),
+      change: formatChange(Number.isFinite(change) ? change : 0),
+      up: !Number.isFinite(change) || change >= 0,
+    };
+  }
+
+  return out;
+}
+
 async function fetchCrypto(symbols: string[]): Promise<Record<string, LiveQuote>> {
   const entries = symbols
     .map((symbol) => {
@@ -79,6 +135,62 @@ async function fetchYahooQuotes(symbols: string[]): Promise<Record<string, LiveQ
     .filter((entry): entry is { symbol: string; yahooSymbol: string } => Boolean(entry));
   if (!entries.length) return {};
 
+  const out: Record<string, LiveQuote> = {};
+
+  await Promise.all(
+    entries.map(async ({ symbol, yahooSymbol }) => {
+      const res = await fetch(
+        `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=1d&interval=1d`,
+        {
+          headers: {
+            Accept: "application/json",
+            "User-Agent": "Mozilla/5.0 (compatible; MarketEdgeAtlas/1.0)",
+          },
+        },
+      );
+      if (!res.ok) return;
+
+      const json = (await res.json()) as {
+        chart?: {
+          result?: Array<{
+            meta?: {
+              regularMarketPrice?: number;
+              chartPreviousClose?: number;
+              previousClose?: number;
+              regularMarketPreviousClose?: number;
+            };
+          }>;
+        };
+      };
+      const meta = json.chart?.result?.[0]?.meta;
+      const price = meta?.regularMarketPrice;
+      const previous =
+        meta?.chartPreviousClose ?? meta?.regularMarketPreviousClose ?? meta?.previousClose;
+      if (typeof price !== "number") return;
+      const change =
+        typeof previous === "number" && previous > 0 ? ((price - previous) / previous) * 100 : 0;
+
+      out[symbol] = {
+        symbol,
+        price: formatPrice(price),
+        change: formatChange(change),
+        up: change >= 0,
+      };
+    }),
+  );
+
+  return out;
+}
+
+async function fetchYahooQuoteBatch(symbols: string[]): Promise<Record<string, LiveQuote>> {
+  const entries = symbols
+    .map((symbol) => {
+      const source = resolvePairSource(symbol);
+      return source?.provider === "yahoo" ? { symbol, yahooSymbol: source.symbol } : null;
+    })
+    .filter((entry): entry is { symbol: string; yahooSymbol: string } => Boolean(entry));
+  if (!entries.length) return {};
+
   const yahooSymbols = [...new Set(entries.map((entry) => entry.yahooSymbol))].join(",");
   const res = await fetch(
     `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}`,
@@ -89,7 +201,7 @@ async function fetchYahooQuotes(symbols: string[]): Promise<Record<string, LiveQ
       },
     },
   );
-  if (!res.ok) throw new Error(`Yahoo quotes ${res.status}`);
+  if (!res.ok) return {};
 
   const json = (await res.json()) as {
     quoteResponse?: {
@@ -134,11 +246,21 @@ export const getLivePrices = createServerFn({ method: "GET" })
     }
 
     try {
-      const [crypto, yahoo] = await Promise.all([
+      const [twelveData, crypto, yahoo] = await Promise.all([
+        fetchTwelveDataQuotes(symbols).catch(() => ({}) as Record<string, LiveQuote>),
         fetchCrypto(symbols).catch(() => ({}) as Record<string, LiveQuote>),
-        fetchYahooQuotes(symbols).catch(() => ({}) as Record<string, LiveQuote>),
+        fetchYahooQuoteBatch(symbols)
+          .then(async (batch) => {
+            const missing = symbols.filter(
+              (symbol) => resolvePairSource(symbol)?.provider === "yahoo" && !batch[symbol],
+            );
+            if (!missing.length) return batch;
+            const chartQuotes = await fetchYahooQuotes(missing);
+            return { ...batch, ...chartQuotes };
+          })
+          .catch(() => ({}) as Record<string, LiveQuote>),
       ]);
-      const quotes = { ...crypto, ...yahoo };
+      const quotes = { ...crypto, ...yahoo, ...twelveData };
       cache = { at: Date.now(), key, quotes };
       return { quotes, cached: false as const };
     } catch (err) {

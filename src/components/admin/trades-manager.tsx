@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, FileUp, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, FileUp, Plus, Save, Trash2 } from "lucide-react";
 import {
   deleteTrade,
   emptyTrade,
@@ -132,9 +132,15 @@ export function TradesManager() {
     if (!file) return;
     const name = file.name.toLowerCase();
     if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
-      toast.error("Please export the Excel sheet as CSV or TSV first.", {
-        description: "CSV keeps imports auditable and avoids browser workbook parsing issues.",
-      });
+      const XLSX = await import("xlsx");
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = sheetName ? workbook.Sheets[sheetName] : null;
+      if (!worksheet) {
+        toast.error("No worksheet found in that Excel file.");
+        return;
+      }
+      importMutation.mutate(XLSX.utils.sheet_to_csv(worksheet));
       return;
     }
     importMutation.mutate(await file.text());
@@ -162,12 +168,16 @@ export function TradesManager() {
         description="Add trades here — the public equity curve and metrics stay in sync."
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <a href="/transaction-template.xlsx" download className={adminBtn}>
+              <Download className="h-3.5 w-3.5" />
+              Excel template
+            </a>
             <label className={adminBtn}>
               <FileUp className="h-3.5 w-3.5" />
               Import CSV
               <input
                 type="file"
-                accept=".csv,.tsv,text/csv,text/tab-separated-values"
+                accept=".xlsx,.xls,.csv,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/tab-separated-values"
                 className="sr-only"
                 disabled={importMutation.isPending}
                 onChange={(event) => {
@@ -194,7 +204,8 @@ export function TradesManager() {
             <p className="font-display text-sm font-semibold">Excel transaction sync</p>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               Export Excel as CSV/TSV with date, instrument, direction, entry, exit, r_multiple,
-              percentage and optional external_id. Matching external_id rows update automatically.
+              percentage and optional external_id. Configure TRANSACTION_CSV_URL for automatic
+              live-site sync; matching external_id rows update cleanly when imported.
             </p>
           </div>
           <label className="flex items-center gap-2 text-xs text-muted-foreground">

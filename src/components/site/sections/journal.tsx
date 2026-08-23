@@ -56,7 +56,7 @@ export function TradingJournal() {
         <SectionHeading
           eyebrow="Trading journal"
           title="Performance tracked in risk multiples."
-          description="Every published trade feeds the equity curve automatically. Add or edit trades in the admin panel and this section stays in sync."
+          description="Every published transaction feeds the equity curve automatically from the admin journal or the configured Excel CSV sync."
         />
 
         <Stagger className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -77,13 +77,24 @@ export function TradingJournal() {
               <p className="mt-1.5 text-xs text-muted-foreground">
                 {chart.fromSeed
                   ? "Waiting for synced transaction data"
-                  : "Cumulative R from published trades or the configured transaction CSV feed · starting at 0R"}
+                  : "Cumulative R from synced transactions · auto-refreshes every 45 seconds · starting at 0R"}
               </p>
             </div>
-            <p className="num text-xl font-semibold text-emerald">
-              {chart.endR >= 0 ? "+" : ""}
-              {chart.endR}R
-            </p>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span
+                className={`border px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-[0.14em] ${
+                  chart.fromSeed
+                    ? "border-border bg-surface text-muted-foreground"
+                    : "border-emerald/30 bg-emerald/5 text-emerald"
+                }`}
+              >
+                {chart.fromSeed ? "Waiting" : "Synced"}
+              </span>
+              <p className="num text-xl font-semibold text-emerald">
+                {chart.endR >= 0 ? "+" : ""}
+                {chart.endR}R
+              </p>
+            </div>
           </div>
           <div className="mt-4 overflow-hidden border border-border bg-white px-2 py-3 sm:px-3">
             {isLoading ? (

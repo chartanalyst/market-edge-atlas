@@ -71,6 +71,26 @@ export type JournalMetrics = {
 
 let transactionCsvCache: { at: number; url: string; trades: TradeRecord[] } | null = null;
 
+const DEMO_TRANSACTION_CSV = `external_id,date,market,instrument,direction,entry,exit,r_multiple,percentage,result,published,notes,screenshot
+demo-2026-001,2026-07-01,Crypto,BTC/USD,Long,64250,66120,1.35,2.91,Win,true,Demo trend continuation from daily demand,
+demo-2026-002,2026-07-03,Forex,EUR/USD,Short,1.0924,1.0961,-0.75,-0.34,Loss,true,Demo invalidation after London reversal,
+demo-2026-003,2026-07-05,Stocks,NVDA,Long,128.40,134.90,2.1,5.06,Win,true,Demo earnings momentum continuation,
+demo-2026-004,2026-07-08,Commodities,XAU/USD,Long,2342.20,2368.80,1.65,1.14,Win,true,Demo gold demand reclaim,
+demo-2026-005,2026-07-11,Crypto,ETH/USD,Long,3380,3315,-0.9,-1.92,Loss,true,Demo failed breakout retest,
+demo-2026-006,2026-07-15,Indices,SPX500,Long,5488,5556,1.2,1.24,Win,true,Demo index continuation after range reclaim,
+demo-2026-007,2026-07-18,Stocks,AMD,Short,166.20,160.80,1.8,3.25,Win,true,Demo supply rejection,
+demo-2026-008,2026-07-22,Forex,GBP/USD,Long,1.2765,1.2828,1.4,0.49,Win,true,Demo session liquidity sweep,
+demo-2026-009,2026-07-25,Commodities,XAG/USD,Short,30.42,30.86,-0.6,-1.45,Loss,true,Demo silver failed breakdown,
+demo-2026-010,2026-07-29,Crypto,BTC/USD,Long,67400,69680,2.25,3.38,Win,true,Demo higher-low continuation,
+demo-2026-011,2026-08-02,Stocks,NVDA,Long,137.20,136.10,-0.35,-0.80,Loss,true,Demo tight invalidation hit,
+demo-2026-012,2026-08-06,Commodities,XAU/USD,Long,2388.50,2426.40,2.6,1.59,Win,true,Demo expansion after liquidity sweep,`;
+
+function cacheBustedUrl(url: string) {
+  const next = new URL(url);
+  next.searchParams.set("_sync", String(Date.now()));
+  return next.toString();
+}
+
 export function computeMetrics(trades: TradeRecord[]): JournalMetrics {
   const sorted = [...trades].sort(
     (a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id),
@@ -107,10 +127,11 @@ export function equitySeriesForChart(trades: TradeRecord[]): {
 } {
   const metrics = computeMetrics(trades);
   const live = metrics.equityCurve.map((p) => p.equity);
+  const empty = trades.length === 0;
   return {
     series: live[0] === 0 ? live : [0, ...live],
     endR: metrics.netPerformanceR,
-    fromSeed: false,
+    fromSeed: empty,
   };
 }
 
@@ -286,6 +307,13 @@ function payloadToTrade(payload: TradePayload, index: number): TradeRecord {
   };
 }
 
+function loadDemoTrades(): TradeRecord[] {
+  return parseTradeCsv(DEMO_TRANSACTION_CSV)
+    .map(payloadToTrade)
+    .filter((trade) => trade.published)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+}
+
 async function loadTradesFromTransactionCsv(): Promise<TradeRecord[] | null> {
   const url = process.env.TRANSACTION_CSV_URL || process.env.VITE_TRANSACTION_CSV_URL || "";
   if (!url) return null;
@@ -297,12 +325,19 @@ async function loadTradesFromTransactionCsv(): Promise<TradeRecord[] | null> {
     return transactionCsvCache.trades;
   }
 
-  const res = await fetch(url, { headers: { Accept: "text/csv,text/plain,*/*" } });
+  const res = await fetch(cacheBustedUrl(url), {
+    cache: "no-store",
+    headers: {
+      Accept: "text/csv,text/plain,*/*",
+      "Cache-Control": "no-cache",
+    },
+  });
   if (!res.ok) throw new Error(`Transaction CSV ${res.status}`);
   const text = await res.text();
   const trades = parseTradeCsv(text)
     .map(payloadToTrade)
-    .filter((trade) => trade.published);
+    .filter((trade) => trade.published)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
   transactionCsvCache = { at: Date.now(), url, trades };
   return trades;
 }
@@ -345,10 +380,13 @@ export const getJournalMetrics = createServerFn({ method: "GET" })
 /** Published journal metrics for the public site. */
 export const getPublishedJournalMetrics = createServerFn({ method: "GET" }).handler(
   async (): Promise<JournalMetrics> => {
-    try {
-      const syncedTrades = await loadTradesFromTransactionCsv();
-      if (syncedTrades) return computeMetrics(syncedTrades);
+    const syncedTrades = await loadTradesFromTransactionCsv().catch((error) => {
+      console.error("[transactions:csv]", error);
+      return null;
+    });
+    if (syncedTrades) return computeMetrics(syncedTrades);
 
+    try {
       const supabase = createPublicSupabase();
       const { data, error } = await supabase
         .from("trading_results")
@@ -356,9 +394,10 @@ export const getPublishedJournalMetrics = createServerFn({ method: "GET" }).hand
         .eq("published", true)
         .order("date", { ascending: true });
       if (error) throw new Error(error.message);
-      return computeMetrics((data ?? []).map((r) => tradeFromRow(r as Record<string, unknown>)));
+      const trades = (data ?? []).map((r) => tradeFromRow(r as Record<string, unknown>));
+      return computeMetrics(trades.length > 0 ? trades : loadDemoTrades());
     } catch {
-      return computeMetrics([]);
+      return computeMetrics(loadDemoTrades());
     }
   },
 );
@@ -366,10 +405,13 @@ export const getPublishedJournalMetrics = createServerFn({ method: "GET" }).hand
 /** Published trades for the public journal. */
 export const listPublishedTrades = createServerFn({ method: "GET" }).handler(
   async (): Promise<TradeRecord[]> => {
-    try {
-      const syncedTrades = await loadTradesFromTransactionCsv();
-      if (syncedTrades) return syncedTrades;
+    const syncedTrades = await loadTradesFromTransactionCsv().catch((error) => {
+      console.error("[transactions:csv]", error);
+      return null;
+    });
+    if (syncedTrades) return syncedTrades;
 
+    try {
       const supabase = createPublicSupabase();
       const { data, error } = await supabase
         .from("trading_results")
@@ -377,9 +419,10 @@ export const listPublishedTrades = createServerFn({ method: "GET" }).handler(
         .eq("published", true)
         .order("date", { ascending: true });
       if (error) throw new Error(error.message);
-      return (data ?? []).map((row) => tradeFromRow(row as Record<string, unknown>));
+      const trades = (data ?? []).map((row) => tradeFromRow(row as Record<string, unknown>));
+      return trades.length > 0 ? trades : loadDemoTrades();
     } catch {
-      return [];
+      return loadDemoTrades();
     }
   },
 );
