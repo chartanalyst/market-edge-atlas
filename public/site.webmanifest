@@ -1,0 +1,21 @@
+{
+  "name": "Chart Analyst",
+  "short_name": "Chart Analyst",
+  "description": "Institutional-grade technical analysis across crypto, forex, stocks, commodities and indices.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f5ef",
+  "theme_color": "#f8f5ef",
+  "icons": [
+    {
+      "src": "/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

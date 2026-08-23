@@ -20,7 +20,15 @@ import { ChatWidget } from "@/components/site/chat-widget";
 import { SiteContentProvider } from "@/components/site/content-context";
 import { getSiteContent } from "@/lib/content.functions";
 import { defaultSiteContent } from "@/lib/site-content";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/site-meta";
+import {
+  absoluteUrl,
+  jsonLd,
+  SITE_DESCRIPTION,
+  SITE_IMAGE,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/lib/site-meta";
 
 function NotFoundComponent() {
   return (
@@ -90,19 +98,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: SITE_TITLE },
       { name: "description", content: SITE_DESCRIPTION },
       { name: "author", content: SITE_NAME },
+      { name: "robots", content: "index, follow" },
+      {
+        name: "keywords",
+        content:
+          "technical analysis, market research, crypto analysis, forex analysis, stock analysis, weekly market reports, trading journal",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: SITE_NAME },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:url", content: SITE_URL },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#F8F5EF" },
       { property: "og:title", content: SITE_TITLE },
       { name: "twitter:title", content: SITE_TITLE },
       { property: "og:description", content: SITE_DESCRIPTION },
       { name: "twitter:description", content: SITE_DESCRIPTION },
-      { property: "og:image", content: "/market-logo.svg" },
-      { name: "twitter:image", content: "/market-logo.svg" },
+      { property: "og:image", content: SITE_IMAGE },
+      { property: "og:image:alt", content: `${SITE_NAME} logo` },
+      { name: "twitter:image", content: SITE_IMAGE },
+      { "script:ld+json": jsonLd() },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "canonical", href: absoluteUrl("/") },
+      { rel: "manifest", href: "/site.webmanifest" },
       { rel: "icon", href: "/market-logo.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", href: "/market-logo.svg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

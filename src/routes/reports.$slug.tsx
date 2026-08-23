@@ -4,6 +4,7 @@ import { Reveal } from "@/components/site/primitives";
 import { getSiteContent } from "@/lib/content.functions";
 import type { ReportRecord } from "@/lib/report-model";
 import { formatReportDate } from "@/components/site/sections/reports";
+import { absoluteUrl, SITE_IMAGE } from "@/lib/site-meta";
 
 export const Route = createFileRoute("/reports/$slug")({
   loader: async ({ params }) => {
@@ -25,13 +26,17 @@ export const Route = createFileRoute("/reports/$slug")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "article" },
+      { property: "og:url", content: absoluteUrl(`/reports/${r.slug}`) },
       { name: "twitter:card", content: "summary_large_image" },
     ];
     if (r.coverImage.startsWith("https://")) {
       meta.push({ property: "og:image", content: r.coverImage });
       meta.push({ name: "twitter:image", content: r.coverImage });
+    } else {
+      meta.push({ property: "og:image", content: SITE_IMAGE });
+      meta.push({ name: "twitter:image", content: SITE_IMAGE });
     }
-    return { meta };
+    return { meta, links: [{ rel: "canonical", href: absoluteUrl(`/reports/${r.slug}`) }] };
   },
   errorComponent: () => (
     <main className="mx-auto w-[min(900px,92vw)] py-40">
@@ -102,7 +107,7 @@ function ReportDetail() {
           </Reveal>
         ) : null}
 
-        {(r.tradingviewUrl || r.pdfUrl) ? (
+        {r.tradingviewUrl || r.pdfUrl ? (
           <Reveal delay={0.1} className="mt-8 flex flex-wrap gap-3">
             {r.tradingviewUrl ? (
               <a

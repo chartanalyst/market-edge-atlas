@@ -9,7 +9,7 @@ import { useSiteContent } from "@/components/site/content-context";
 import { formatReportDate } from "@/components/site/sections/reports";
 import { listPublishedReports } from "@/lib/reports.functions";
 import { liveQueryOptions } from "@/lib/live-poll";
-import { SITE_NAME } from "@/lib/site-meta";
+import { absoluteUrl, SITE_IMAGE, SITE_NAME } from "@/lib/site-meta";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({
@@ -19,7 +19,18 @@ export const Route = createFileRoute("/reports")({
         name: "description",
         content: "Browse all published weekly market reports and research notes.",
       },
+      { property: "og:title", content: `Weekly Reports | ${SITE_NAME}` },
+      {
+        property: "og:description",
+        content: "Browse all published weekly market reports and research notes.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/reports") },
+      { property: "og:image", content: SITE_IMAGE },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: SITE_IMAGE },
     ],
+    links: [{ rel: "canonical", href: absoluteUrl("/reports") }],
   }),
   component: ReportsLibrary,
 });

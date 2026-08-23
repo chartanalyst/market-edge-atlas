@@ -11,7 +11,7 @@ import type { AnalysisRecord } from "@/lib/analysis-model";
 import { listPublishedAnalyses } from "@/lib/analyses.functions";
 import { getChartForPair, useMarketCharts } from "@/hooks/use-market-charts";
 import { liveQueryOptions } from "@/lib/live-poll";
-import { SITE_NAME } from "@/lib/site-meta";
+import { absoluteUrl, SITE_IMAGE, SITE_NAME } from "@/lib/site-meta";
 
 export const Route = createFileRoute("/analysis")({
   head: () => ({
@@ -21,7 +21,18 @@ export const Route = createFileRoute("/analysis")({
         name: "description",
         content: "Browse the full library of published market analysis and chart case studies.",
       },
+      { property: "og:title", content: `Analysis Library | ${SITE_NAME}` },
+      {
+        property: "og:description",
+        content: "Browse the full library of published market analysis and chart case studies.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/analysis") },
+      { property: "og:image", content: SITE_IMAGE },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: SITE_IMAGE },
     ],
+    links: [{ rel: "canonical", href: absoluteUrl("/analysis") }],
   }),
   component: AnalysisLibrary,
 });

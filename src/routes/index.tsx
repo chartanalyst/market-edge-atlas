@@ -10,7 +10,7 @@ import { Certifications } from "@/components/site/sections/certifications";
 import { WeeklyReports } from "@/components/site/sections/reports";
 import { Contact } from "@/components/site/sections/contact";
 import { useSiteContent } from "@/components/site/content-context";
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-meta";
+import { absoluteUrl, SITE_DESCRIPTION, SITE_IMAGE, SITE_TITLE } from "@/lib/site-meta";
 
 import { HomePageSkeleton } from "@/components/site/skeletons";
 
@@ -27,8 +27,13 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/") },
+      { property: "og:image", content: SITE_IMAGE },
+      { property: "og:image:alt", content: title },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: SITE_IMAGE },
     ],
+    links: [{ rel: "canonical", href: absoluteUrl("/") }],
   }),
   component: Index,
 });

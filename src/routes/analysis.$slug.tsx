@@ -8,6 +8,7 @@ import type { AnalysisRecord } from "@/lib/analysis-model";
 import { listPublishedAnalyses } from "@/lib/analyses.functions";
 import { getChartForPair, useMarketCharts } from "@/hooks/use-market-charts";
 import { liveQueryOptions } from "@/lib/live-poll";
+import { absoluteUrl, SITE_IMAGE } from "@/lib/site-meta";
 
 export const Route = createFileRoute("/analysis/$slug")({
   loader: async ({ params }) => {
@@ -31,8 +32,18 @@ export const Route = createFileRoute("/analysis/$slug")({
         { property: "og:title", content: title },
         { property: "og:description", content: a.summary },
         { property: "og:type", content: "article" },
+        { property: "og:url", content: absoluteUrl(`/analysis/${a.slug}`) },
+        {
+          property: "og:image",
+          content: a.coverImage.startsWith("https://") ? a.coverImage : SITE_IMAGE,
+        },
         { name: "twitter:card", content: "summary_large_image" },
+        {
+          name: "twitter:image",
+          content: a.coverImage.startsWith("https://") ? a.coverImage : SITE_IMAGE,
+        },
       ],
+      links: [{ rel: "canonical", href: absoluteUrl(`/analysis/${a.slug}`) }],
     };
   },
   component: AnalysisDetail,
@@ -84,10 +95,16 @@ function AnalysisDetail() {
             ) : null}
             <span className="num text-xs text-muted-foreground">{a.timeframe}</span>
             <span className="num text-xs text-muted-foreground">
-              {new Date(a.date).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}
+              {new Date(a.date).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
             </span>
           </div>
-          <h1 className="mt-6 text-balance text-3xl font-semibold leading-[1.08] sm:text-5xl">{a.title}</h1>
+          <h1 className="mt-6 text-balance text-3xl font-semibold leading-[1.08] sm:text-5xl">
+            {a.title}
+          </h1>
           <p className="mt-6 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
             {a.summary}
           </p>
@@ -95,12 +112,7 @@ function AnalysisDetail() {
 
         <Reveal delay={0.1} className="mt-12 border border-border bg-card p-6">
           {a.coverImage ? (
-            <img
-              src={a.coverImage}
-              alt={a.title}
-              className="w-full object-cover"
-              loading="lazy"
-            />
+            <img src={a.coverImage} alt={a.title} className="w-full object-cover" loading="lazy" />
           ) : (
             <AreaChart series={series} height={220} accent="blue" chartKey={chartKey} />
           )}
@@ -141,7 +153,9 @@ function AnalysisDetail() {
               <TriangleAlert className="h-5 w-5 shrink-0 text-emerald" />
               <div>
                 <p className="font-display text-sm font-semibold">Invalidation</p>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{a.invalidation}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  {a.invalidation}
+                </p>
               </div>
             </div>
 
@@ -159,7 +173,10 @@ function AnalysisDetail() {
               <p className="eyebrow">Trade parameters</p>
               <dl className="mt-6 grid gap-4">
                 {a.targets.map((l) => (
-                  <div key={l.label} className="flex items-center justify-between gap-4 border-b border-border pb-3">
+                  <div
+                    key={l.label}
+                    className="flex items-center justify-between gap-4 border-b border-border pb-3"
+                  >
                     <dt className="text-xs text-muted-foreground">{l.label}</dt>
                     <dd className="num text-xs font-semibold">{l.value}</dd>
                   </div>
@@ -198,12 +215,20 @@ function AnalysisDetail() {
                   <div className="flex items-center justify-between gap-2">
                     <span className="num text-xs font-semibold">{r.pair}</span>
                     {relLive ? (
-                      <span className={`num text-[0.65rem] ${relLive.up ? "text-emerald" : "text-destructive"}`}>
+                      <span
+                        className={`num text-[0.65rem] ${relLive.up ? "text-emerald" : "text-destructive"}`}
+                      >
                         {relLive.change}
                       </span>
                     ) : null}
                   </div>
-                  <AreaChart series={relSeries} height={80} showGrid={false} chartKey={relKey} accent="blue" />
+                  <AreaChart
+                    series={relSeries}
+                    height={80}
+                    showGrid={false}
+                    chartKey={relKey}
+                    accent="blue"
+                  />
                   <h3 className="mt-4 text-sm font-semibold leading-snug">{r.title}</h3>
                   <p className="num mt-3 text-xs text-emerald">{r.rr}</p>
                 </Link>
