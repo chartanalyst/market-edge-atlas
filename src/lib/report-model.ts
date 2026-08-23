@@ -1,3 +1,5 @@
+import dummyReports from "@/lib/dummy-reports.json";
+
 export type ReportRecord = {
   id: string;
   slug: string;
@@ -69,6 +71,20 @@ export function sortReports(items: ReportRecord[]): ReportRecord[] {
   );
 }
 
+export const dummyReportRecords: ReportRecord[] = (dummyReports as ReportRecord[]).map((item) => ({
+  ...emptyReport(),
+  ...item,
+  published: true,
+}));
+
+export function withDummyReports(items: ReportRecord[], minimum = 72): ReportRecord[] {
+  const seen = new Set(items.map((item) => item.slug));
+  const needed = Math.max(0, minimum - items.length);
+  const fillers = dummyReportRecords.filter((item) => !seen.has(item.slug)).slice(0, needed);
+
+  return [...items, ...fillers];
+}
+
 /** Fallback weekly reports when the database has none yet. */
 export const defaultReportRecords: ReportRecord[] = [
   {
@@ -129,4 +145,3 @@ export const defaultReportRecords: ReportRecord[] = [
     sortOrder: 2,
   },
 ];
-

@@ -1,7 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { reportFromRow, sortReports, defaultReportRecords, type ReportRecord } from "@/lib/report-model";
+import {
+  reportFromRow,
+  sortReports,
+  defaultReportRecords,
+  type ReportRecord,
+  withDummyReports,
+} from "@/lib/report-model";
 
 import { adminContextFromHandler, ensureAdminAccess, loadAdminDb } from "@/lib/admin-guard";
 import { createPublicSupabase } from "@/lib/content.server";
@@ -61,12 +67,14 @@ export const listPublishedReports = createServerFn({ method: "GET" }).handler(
         .order("date", { ascending: false });
       if (error) throw new Error(error.message);
       if (data && data.length > 0) {
-        return sortReports(data.map((row) => reportFromRow(row as Record<string, unknown>)));
+        return sortReports(
+          withDummyReports(data.map((row) => reportFromRow(row as Record<string, unknown>))),
+        );
       }
     } catch {
       /* fall through to defaults */
     }
-    return sortReports(defaultReportRecords);
+    return sortReports(withDummyReports(defaultReportRecords));
   },
 );
 

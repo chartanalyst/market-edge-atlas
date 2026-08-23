@@ -25,6 +25,7 @@ import {
   sortReports,
   defaultReportRecords,
   type ReportRecord,
+  withDummyReports,
 } from "@/lib/report-model";
 import {
   defaultLinks,
@@ -60,7 +61,7 @@ export const defaultSiteContent: SiteContent = {
   analyses: sortAnalyses(withDummyAnalyses(defaultAnalysisRecords)),
   insights,
   certifications,
-  reports: defaultReportRecords,
+  reports: sortReports(withDummyReports(defaultReportRecords)),
   markets,
   services,
   processSteps,
@@ -123,8 +124,8 @@ export function mergeSiteContent(
 
   merged.reports =
     reportRows && reportRows.length > 0
-      ? sortReports(reportRows.map((r) => reportFromRow(r)))
-      : sortReports(defaultReportRecords);
+      ? sortReports(withDummyReports(reportRows.map((r) => reportFromRow(r))))
+      : sortReports(withDummyReports(defaultReportRecords));
 
   return merged as SiteContent;
 }

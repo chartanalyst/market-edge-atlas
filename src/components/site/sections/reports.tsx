@@ -7,7 +7,7 @@ import { useSiteContent } from "@/components/site/content-context";
 import { listPublishedReports } from "@/lib/reports.functions";
 import { liveQueryOptions } from "@/lib/live-poll";
 
-const HOME_REPORT_LIMIT = 3;
+const HOME_REPORT_LIMIT = 6;
 
 export function formatReportDate(value: string) {
   if (!value) return "";
@@ -77,7 +77,7 @@ export function WeeklyReports() {
           ))}
         </Stagger>
 
-        {items.length > HOME_REPORT_LIMIT ? (
+        {items.length > 0 ? (
           <Reveal delay={0.12} className="mt-10 flex justify-center">
             <Link
               to="/reports"
