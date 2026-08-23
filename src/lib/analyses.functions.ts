@@ -7,6 +7,7 @@ import {
   defaultAnalysisRecords,
   sortAnalyses,
   type AnalysisRecord,
+  withDummyAnalyses,
 } from "@/lib/analysis-model";
 import { adminContextFromHandler, ensureAdminAccess, loadAdminDb } from "@/lib/admin-guard";
 
@@ -78,12 +79,13 @@ export const listPublishedAnalyses = createServerFn({ method: "GET" }).handler(
         .order("date", { ascending: false });
       if (error) throw new Error(error.message);
       if (data && data.length > 0) {
-        return sortAnalyses(data.map((row) => analysisFromRow(row as Record<string, unknown>)));
+        const published = data.map((row) => analysisFromRow(row as Record<string, unknown>));
+        return sortAnalyses(withDummyAnalyses(published));
       }
     } catch (err) {
       console.error("[analyses] published", err);
     }
-    return sortAnalyses(defaultAnalysisRecords);
+    return sortAnalyses(withDummyAnalyses(defaultAnalysisRecords));
   },
 );
 

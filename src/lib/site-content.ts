@@ -18,8 +18,14 @@ import {
   defaultAnalysisRecords,
   sortAnalyses,
   type AnalysisRecord,
+  withDummyAnalyses,
 } from "@/lib/analysis-model";
-import { reportFromRow, sortReports, defaultReportRecords, type ReportRecord } from "@/lib/report-model";
+import {
+  reportFromRow,
+  sortReports,
+  defaultReportRecords,
+  type ReportRecord,
+} from "@/lib/report-model";
 import {
   defaultLinks,
   defaultSections,
@@ -51,7 +57,7 @@ export type SiteContentKey = keyof SiteContent;
 
 export const defaultSiteContent: SiteContent = {
   copy: defaultCopy,
-  analyses: defaultAnalysisRecords,
+  analyses: sortAnalyses(withDummyAnalyses(defaultAnalysisRecords)),
   insights,
   certifications,
   reports: defaultReportRecords,
@@ -110,9 +116,9 @@ export function mergeSiteContent(
   }
 
   if (analysisRows && analysisRows.length > 0) {
-    merged.analyses = sortAnalyses(analysisRows.map((r) => analysisFromRow(r)));
+    merged.analyses = sortAnalyses(withDummyAnalyses(analysisRows.map((r) => analysisFromRow(r))));
   } else {
-    merged.analyses = sortAnalyses(defaultAnalysisRecords);
+    merged.analyses = sortAnalyses(withDummyAnalyses(defaultAnalysisRecords));
   }
 
   merged.reports =

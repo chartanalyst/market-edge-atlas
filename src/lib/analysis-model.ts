@@ -1,4 +1,5 @@
 import { analyses as staticAnalyses } from "@/lib/site-data";
+import dummyAnalyses from "@/lib/dummy-analyses.json";
 
 export type Level = { label: string; value: string };
 
@@ -168,6 +169,23 @@ export const defaultAnalysisRecords: AnalysisRecord[] = staticAnalyses.map((a, i
   published: true,
   sortOrder: i,
 }));
+
+export const dummyAnalysisRecords: AnalysisRecord[] = (dummyAnalyses as AnalysisRecord[]).map(
+  (item) => ({
+    ...emptyAnalysis(),
+    ...item,
+    published: true,
+  }),
+);
+
+export function withDummyAnalyses(list: AnalysisRecord[], minimum = 120): AnalysisRecord[] {
+  const bySlug = new Map(list.map((item) => [item.slug, item]));
+  for (const item of dummyAnalysisRecords) {
+    if (bySlug.size >= minimum) break;
+    if (!bySlug.has(item.slug)) bySlug.set(item.slug, item);
+  }
+  return [...bySlug.values()];
+}
 
 export function sortAnalyses(list: AnalysisRecord[]): AnalysisRecord[] {
   return [...list].sort((a, b) => {
