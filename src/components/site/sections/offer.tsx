@@ -15,7 +15,8 @@ export function Services() {
 
         <Stagger className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s) => {
-            const Icon = (Icons[s.icon as keyof typeof Icons] ?? Icons.Activity) as Icons.LucideIcon;
+            const Icon = (Icons[s.icon as keyof typeof Icons] ??
+              Icons.Activity) as Icons.LucideIcon;
             return (
               <StaggerItem key={s.title}>
                 <TiltCard className="h-full">
@@ -24,7 +25,9 @@ export function Services() {
                       <Icon className="h-5 w-5" />
                     </span>
                     <h3 className="relative mt-6 text-lg font-semibold">{s.title}</h3>
-                    <p className="relative mt-2.5 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+                    <p className="relative mt-2.5 text-sm leading-relaxed text-muted-foreground">
+                      {s.desc}
+                    </p>
                     <a
                       href="#contact"
                       className="relative mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors group-hover:text-emerald"
@@ -39,20 +42,23 @@ export function Services() {
           })}
 
           <StaggerItem>
-            <div className="flex h-full flex-col justify-between border border-border bg-navy p-8 text-navy-foreground">
+            <div className="surface-card group flex h-full flex-col justify-between overflow-hidden p-7">
               <div>
-                <p className="eyebrow text-navy-foreground/60">Not sure which fits?</p>
+                <span className="grid h-11 w-11 place-items-center border border-border bg-surface text-emerald">
+                  <Icons.CalendarCheck className="h-5 w-5" />
+                </span>
+                <p className="eyebrow mt-6 text-muted-foreground">Not sure which fits?</p>
                 <h3 className="mt-4 text-xl font-semibold leading-snug">
                   Start with a 45-minute consultation.
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-navy-foreground/70">
-                  We review your markets, current process and objectives, then I send a written summary
-                  with recommendations.
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  We review your markets, current process and objectives, then I send a written
+                  summary with recommendations.
                 </p>
               </div>
               <a
                 href="#contact"
-                className="mt-8 inline-flex items-center justify-center gap-2 border border-emerald bg-emerald px-5 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground transition-colors hover:bg-transparent hover:text-emerald"
+                className="mt-8 inline-flex items-center justify-center gap-2 border border-border bg-navy px-5 py-3.5 font-mono text-[0.72rem] uppercase tracking-[0.16em] text-navy-foreground transition-all hover:bg-emerald hover:shadow-[4px_4px_0_0_var(--border)]"
               >
                 Book a consultation
                 <Icons.ArrowUpRight className="h-4 w-4" />
@@ -78,7 +84,8 @@ export function WhyWorkWithMe() {
 
         <Stagger className="mt-14 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
           {differentiators.map((d) => {
-            const Icon = (Icons[d.icon as keyof typeof Icons] ?? Icons.Activity) as Icons.LucideIcon;
+            const Icon = (Icons[d.icon as keyof typeof Icons] ??
+              Icons.Activity) as Icons.LucideIcon;
             return (
               <StaggerItem key={d.title} className="bg-card">
                 <div className="group h-full p-8 transition-colors duration-500 hover:bg-surface">
