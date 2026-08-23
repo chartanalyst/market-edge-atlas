@@ -527,10 +527,10 @@ export const stats = [
 ];
 
 export const assetDistribution = [
-  { label: "Crypto", pct: 40, color: "oklch(0.55 0.14 250)" },
-  { label: "Stocks & Indices", pct: 30, color: "oklch(0.58 0.16 145)" },
-  { label: "Commodities", pct: 20, color: "oklch(0.68 0.14 65)" },
-  { label: "Forex", pct: 10, color: "oklch(0.75 0.12 85)" },
+  { label: "Crypto", pct: 40, color: "oklch(0.15 0.004 85)" },
+  { label: "Stocks & Indices", pct: 30, color: "oklch(0.31 0.004 85)" },
+  { label: "Commodities", pct: 20, color: "oklch(0.48 0.004 85)" },
+  { label: "Forex", pct: 10, color: "oklch(0.72 0.004 85)" },
 ];
 
 export const tickerItems = [

@@ -16,7 +16,10 @@ export function About() {
             description={about.description}
           />
 
-          <Reveal delay={0.1} className="mt-8 grid gap-5 text-sm leading-relaxed text-muted-foreground">
+          <Reveal
+            delay={0.1}
+            className="mt-8 grid gap-5 text-sm leading-relaxed text-muted-foreground"
+          >
             {about.paragraphs.map((p) => (
               <p key={p}>{p}</p>
             ))}
@@ -47,20 +50,21 @@ export function About() {
               ))}
             </ul>
 
-            <div className="mt-8 border border-border bg-surface p-4">
+            <div className="mt-8 overflow-hidden border border-border bg-surface p-4 shadow-[0_14px_32px_rgba(0,0,0,0.12)]">
               <div className="flex items-center justify-between">
                 <p className="eyebrow text-[0.6rem]">Research universe</p>
-                <p className="num text-sm font-semibold text-emerald">
+                <p className="num text-sm font-semibold text-foreground">
                   {assetDistribution.length} classes
                 </p>
               </div>
               <DonutChart
                 segments={assetDistribution}
                 chartKey="about-research-universe"
-                className="mt-4 max-w-[210px]"
+                className="mt-4 max-w-[300px]"
+                showLegend={false}
+                showCallouts
               />
             </div>
-
           </div>
         </Reveal>
       </div>
@@ -78,7 +82,10 @@ export function Markets() {
           description="Published analysis by asset class — distribution of market research across the coverage universe."
         />
 
-        <Reveal delay={0.1} className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center">
+        <Reveal
+          delay={0.1}
+          className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-center"
+        >
           <div className="border border-border bg-card p-8 sm:p-10">
             <DonutChart segments={assetDistribution} chartKey="research-universe" />
           </div>
