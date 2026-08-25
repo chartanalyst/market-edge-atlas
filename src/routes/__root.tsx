@@ -122,8 +122,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "canonical", href: absoluteUrl("/") },
       { rel: "manifest", href: "/site.webmanifest" },
-      { rel: "icon", href: "/market-logo.svg", type: "image/svg+xml" },
-      { rel: "apple-touch-icon", href: "/market-logo.svg" },
+      { rel: "icon", href: "/market-logo.png", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/market-logo.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/site-meta";
 
-const LOGO_SRC = "/market-logo.svg";
+const LOGO_SRC = "/market-logo.png";
 
 export function BrandLogo({
   className,

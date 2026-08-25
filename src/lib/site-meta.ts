@@ -7,7 +7,7 @@ export const SITE_DESCRIPTION =
 export const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "") ||
   "https://chart-analyst.vercel.app";
-export const SITE_IMAGE = `${SITE_URL}/market-logo.svg`;
+export const SITE_IMAGE = `${SITE_URL}/market-logo.png`;
 
 export function absoluteUrl(path = "/") {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
