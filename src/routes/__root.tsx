@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BackToTop, ScrollProgress, SiteNav } from "@/components/site/nav";
+import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { SiteFooter } from "@/components/site/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ChatWidget } from "@/components/site/chat-widget";
@@ -164,6 +165,7 @@ function RootComponent() {
       <SiteContentProvider value={content}>
         {isChrome ? (
           <>
+            <SmoothScroll />
             <ScrollProgress />
             <SiteNav />
           </>

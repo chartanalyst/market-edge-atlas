@@ -118,6 +118,7 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 8.5rem;
+    overscroll-behavior-y: none;
   }
 
   body {
@@ -125,6 +126,7 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
   }
 
   h1,
