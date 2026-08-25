@@ -396,19 +396,20 @@ export function DonutChart({
                   />
                   <circle cx={dot.x} cy={dot.y} r="3.5" fill="var(--card)" stroke={arc.color} />
                   <rect
-                    x={label.x - 47}
-                    y={label.y - 15}
-                    width="94"
-                    height="28"
-                    rx="5"
+                    x={label.x - 70}
+                    y={label.y - 20}
+                    width="140"
+                    height="40"
+                    rx="6"
                     fill={arc.color}
                     stroke="var(--border)"
+                    strokeWidth="1.25"
                   />
                   <text
                     x={label.x}
-                    y={label.y + 4}
+                    y={label.y + 5}
                     textAnchor={label.anchor}
-                    className="font-mono text-[8px] font-semibold"
+                    className="font-mono text-[12px] font-bold"
                     fill={isLight ? "var(--foreground)" : "white"}
                   >
                     {labelText(arc.label)} {Math.round(arc.pct)}%
