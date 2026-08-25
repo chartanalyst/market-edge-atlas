@@ -58,8 +58,7 @@ export const defaultCopy: SiteCopy = {
     name: "Chart Analyst",
     tagline:
       "Institutional-grade technical research across crypto, forex, equities, commodities and indices. Structure first, risk always.",
-    disclaimer:
-      "Research and education only. Nothing published here constitutes financial advice.",
+    disclaimer: "Research and education only. Nothing published here constitutes financial advice.",
   },
   hero: {
     indexLabel: "001 — Overview",
@@ -89,8 +88,9 @@ export const defaultCopy: SiteCopy = {
       { label: "R:R", value: "1 : 3.8" },
       { label: "Risk", value: "0.75%" },
     ],
-    floatOne: { title: "Invalidation defined", sub: "before every entry" },
-    floatTwo: { title: "Liquidity mapped", sub: "HTF → LTF confluence" },
+    floatOne: { title: "", sub: "" },
+
+    floatTwo: { title: "", sub: "" },
   },
   about: {
     eyebrow: "About",
@@ -104,7 +104,7 @@ export const defaultCopy: SiteCopy = {
     pillars: [
       { title: "Auditable", desc: "Public log of thesis vs. outcome since 2021." },
       { title: "Repeatable", desc: "One written seven-stage process for every market." },
-      { title: "Risk-first", desc: "Invalidation defined before position sizing." },
+      { title: "Risk-first", desc: "" },
       { title: "Multi-market", desc: "Cross-asset confirmation on every directional call." },
     ],
     asideTitle: "What makes the analysis different",

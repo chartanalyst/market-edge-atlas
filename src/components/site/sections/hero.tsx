@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { ArrowRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Counter } from "@/components/site/primitives";
 import { useSiteContent } from "@/components/site/content-context";
 
@@ -130,34 +130,6 @@ export function Hero() {
                 </motion.div>
               ))}
             </div>
-
-            <motion.div
-              className="absolute -left-4 top-[22%] hidden border border-border bg-card px-4 py-3 shadow-[4px_4px_0_0_var(--emerald)] sm:block"
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="h-4 w-4 text-emerald" />
-                <div>
-                  <p className="text-xs font-semibold">{hero.floatOne.title}</p>
-                  <p className="num text-[0.65rem] text-muted-foreground">{hero.floatOne.sub}</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="absolute -right-3 bottom-[18%] hidden border border-border bg-card px-4 py-3 shadow-[4px_4px_0_0_oklch(0.185_0_0_/_0.9)] sm:block"
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 9.5, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="h-4 w-4 text-emerald" />
-                <div>
-                  <p className="text-xs font-semibold">{hero.floatTwo.title}</p>
-                  <p className="num text-[0.65rem] text-muted-foreground">{hero.floatTwo.sub}</p>
-                </div>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </div>
