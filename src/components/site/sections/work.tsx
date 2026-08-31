@@ -162,8 +162,9 @@ export function FeaturedAnalysis() {
               return (
                 <motion.div key={a.slug} variants={revealVariants}>
                   <Link
-                    to="/analysis"
-                    className="surface-card group flex h-full flex-col overflow-hidden"
+                    to="/analysis/$slug"
+                    params={{ slug: a.slug }}
+                    className="surface-card group flex h-full flex-col overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald"
                   >
                     <AnalysisCardChart
                       analysis={a}
@@ -190,7 +191,7 @@ export function FeaturedAnalysis() {
                           </p>
                         </div>
                         <span className="inline-flex items-center gap-1 text-xs font-semibold transition-colors group-hover:text-emerald">
-                          View in library
+                          Read analysis
                           <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                         </span>
                       </div>

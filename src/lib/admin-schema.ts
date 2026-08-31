@@ -287,15 +287,10 @@ export const adminSections: AdminSection[] = [
     key: "tickerItems",
     label: "Market ticker",
     blurb:
-      "Instruments in the scrolling bar above the navigation. Live prices overlay BTC/ETH/SOL/XAU when available.",
+      "Instruments in the scrolling bar above the navigation. Prices and percentage changes are pulled live — use the exact symbol (for example BTC/USD, XAU/USD, NVDA, SPX500).",
     itemLabel: "Instrument",
     titleField: "symbol",
-    fields: [
-      t("symbol", "Symbol"),
-      t("price", "Fallback price"),
-      t("change", "Fallback change"),
-      { name: "up", label: "Positive change", type: "boolean" },
-    ],
+    fields: [t("symbol", "Symbol")],
   },
 ];
 

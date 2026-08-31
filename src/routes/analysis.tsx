@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
@@ -52,25 +52,6 @@ function isImageSource(src: string) {
   );
 }
 
-function fallbackQuote(analysis: AnalysisRecord) {
-  const series = analysis.series;
-  const last = series.at(-1) ?? 0;
-  const prev = series.at(-2) ?? last;
-  const change = prev === 0 ? 0 : ((last - prev) / Math.abs(prev)) * 100;
-  const price =
-    analysis.market === "Forex"
-      ? (last / 50 + 0.8).toFixed(2)
-      : last >= 100
-        ? last.toLocaleString(undefined, { maximumFractionDigits: 0 })
-        : last.toFixed(2);
-
-  return {
-    price,
-    change: `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`,
-    up: change >= 0,
-  };
-}
-
 function AnalysisChartVisual({ analysis, series }: { analysis: AnalysisRecord; series: number[] }) {
   const [imageFailed, setImageFailed] = useState(false);
   const coverImage = analysis.coverImage.trim();
@@ -112,20 +93,24 @@ function AnalysisChartHeader({
   liveChange?: string;
   liveUp?: boolean;
 }) {
-  const fallback = fallbackQuote(analysis);
   const series = liveSeries && liveSeries.length > 1 ? liveSeries : analysis.series;
-  const price = livePrice ?? fallback.price;
-  const change = liveChange ?? fallback.change;
-  const up = liveUp ?? fallback.up;
 
   return (
     <div className="relative overflow-hidden bg-surface p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="num text-sm font-semibold text-foreground">{analysis.pair}</p>
-          <p className="num mt-3 text-2xl font-semibold">
-            {price} <span className={up ? "text-emerald" : "text-destructive"}>{change}</span>
-          </p>
+          {/* Quotes render only from live data — never derived from the stored series. */}
+          {livePrice ? (
+            <p className="num mt-3 text-2xl font-semibold">
+              {livePrice}{" "}
+              {liveChange ? (
+                <span className={liveUp ? "text-emerald" : "text-destructive"}>{liveChange}</span>
+              ) : null}
+            </p>
+          ) : (
+            <p className="num mt-3 text-2xl font-semibold text-muted-foreground/50">—</p>
+          )}
         </div>
         <span className="shrink-0 border border-emerald px-4 py-2 text-[0.66rem] font-semibold uppercase tracking-[0.18em] text-emerald">
           {analysis.market}
@@ -260,7 +245,11 @@ function AnalysisLibrary() {
                   }}
                   transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <article className="surface-card group flex h-full flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1">
+                  <Link
+                    to="/analysis/$slug"
+                    params={{ slug: item.slug }}
+                    className="surface-card group flex h-full flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald"
+                  >
                     <AnalysisChartHeader
                       analysis={item}
                       liveSeries={live?.prices}
@@ -318,7 +307,7 @@ function AnalysisLibrary() {
                         </div>
                       </div>
                     </div>
-                  </article>
+                  </Link>
                 </motion.div>
               );
             })}

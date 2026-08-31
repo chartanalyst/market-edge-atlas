@@ -8,15 +8,48 @@ export type MarketChartSnapshot = {
   price: string;
   change: string;
   up: boolean;
+  /** Epoch ms the snapshot was last read from a provider. */
+  asOf: number;
+  /** True when served from cache because the latest refresh could not reach a provider. */
+  stale: boolean;
 };
 
-type ChartsCacheEntry = { at: number; key: string; data: Record<string, MarketChartSnapshot> };
-let chartsCache: ChartsCacheEntry | null = null;
-const TTL_MS = 45_000;
+type RawSnapshot = Omit<MarketChartSnapshot, "asOf" | "stale">;
+type CachedSnapshot = { snapshot: RawSnapshot; at: number };
 
-function formatPrice(n: number): string {
+/**
+ * Cached per pair rather than per request, so a page asking for a different set of
+ * pairs cannot evict another page's data and force a refetch.
+ */
+const snapshotCache = new Map<string, CachedSnapshot>();
+
+const FRESH_MS = 45_000;
+const STALE_MAX_MS = 30 * 60_000;
+const REQUEST_TIMEOUT_MS = 8_000;
+
+const FX_PAIR = /^[A-Z]{3}\/[A-Z]{3}$/;
+/** Quoted like commodities, not like currency pairs, despite the XXX/USD shape. */
+const METAL_CODES = new Set(["XAU", "XAG", "XPT", "XPD"]);
+
+function isFxPair(symbol: string): boolean {
+  if (!FX_PAIR.test(symbol)) return false;
+  if (METAL_CODES.has(symbol.slice(0, 3))) return false;
+  return resolvePairSource(symbol)?.provider === "yahoo";
+}
+
+/** FX majors need 4 decimals (3 for JPY crosses); 2 would read as a rounding error. */
+function formatPrice(n: number, symbol: string): string {
+  if (isFxPair(symbol)) {
+    const digits = n >= 50 ? 3 : 4;
+    return n.toLocaleString("en-US", {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    });
+  }
+
   if (n >= 1000) return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
-  if (n >= 1) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (n >= 1)
+    return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return n.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 }
 
@@ -31,6 +64,28 @@ function sampleSeries(values: number[], target = 36): number[] {
   return Array.from({ length: target }, (_, i) => values[Math.round(i * step)]);
 }
 
+/** Fetch with a hard timeout and one retry, so a hung upstream cannot stall the request. */
+async function fetchJson(url: string, headers: Record<string, string> = {}): Promise<unknown> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: "application/json", ...headers },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
+const YAHOO_HEADERS = { "User-Agent": "Mozilla/5.0 (compatible; MarketEdgeAtlas/1.0)" };
+
 type CoinGeckoMarketRow = {
   id: string;
   current_price?: number;
@@ -40,18 +95,16 @@ type CoinGeckoMarketRow = {
 
 async function fetchCoinGeckoBatch(
   entries: { pairKey: string; coinId: string }[],
-): Promise<Record<string, MarketChartSnapshot>> {
+): Promise<Record<string, RawSnapshot>> {
   if (!entries.length) return {};
-  const ids = [...new Set(entries.map((e) => e.coinId))].join(",");
-  const res = await fetch(
-    `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&sparkline=true&price_change_percentage=24h`,
-    { headers: { Accept: "application/json" } },
-  );
-  if (!res.ok) throw new Error(`CoinGecko markets ${res.status}`);
 
-  const rows = (await res.json()) as CoinGeckoMarketRow[];
-  const byId = new Map(rows.map((r) => [r.id, r]));
-  const out: Record<string, MarketChartSnapshot> = {};
+  const ids = [...new Set(entries.map((e) => e.coinId))].join(",");
+  const rows = (await fetchJson(
+    `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&sparkline=true&price_change_percentage=24h`,
+  )) as CoinGeckoMarketRow[];
+
+  const byId = new Map((Array.isArray(rows) ? rows : []).map((r) => [r.id, r]));
+  const out: Record<string, RawSnapshot> = {};
 
   for (const { pairKey, coinId } of entries) {
     const row = byId.get(coinId);
@@ -62,7 +115,7 @@ async function fetchCoinGeckoBatch(
     out[pairKey] = {
       pair: pairKey,
       prices,
-      price: formatPrice(row.current_price),
+      price: formatPrice(row.current_price, pairKey),
       change: formatChange(changePct),
       up: changePct >= 0,
     };
@@ -75,18 +128,10 @@ async function fetchYahooChart(
   symbol: string,
 ): Promise<{ prices: number[]; price: number; changePct: number } | null> {
   try {
-    const res = await fetch(
+    const json = (await fetchJson(
       `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=7d&interval=1h`,
-      {
-        headers: {
-          Accept: "application/json",
-          "User-Agent": "Mozilla/5.0 (compatible; MarketEdgeAtlas/1.0)",
-        },
-      },
-    );
-    if (!res.ok) return null;
-
-    const json = (await res.json()) as {
+      YAHOO_HEADERS,
+    )) as {
       chart?: {
         result?: Array<{
           meta?: { regularMarketPrice?: number; chartPreviousClose?: number };
@@ -114,12 +159,11 @@ async function fetchYahooChart(
   }
 }
 
-async function fetchChartsForPairs(pairs: string[]): Promise<Record<string, MarketChartSnapshot>> {
-  const unique = [...new Set(pairs.map(normalizePairKey).filter(Boolean))];
+async function fetchChartsForPairs(pairs: string[]): Promise<Record<string, RawSnapshot>> {
   const coingecko: { pairKey: string; coinId: string }[] = [];
   const yahoo: { pairKey: string; symbol: string }[] = [];
 
-  for (const pairKey of unique) {
+  for (const pairKey of pairs) {
     const source = resolvePairSource(pairKey);
     if (!source) continue;
     if (source.provider === "coingecko") {
@@ -130,7 +174,7 @@ async function fetchChartsForPairs(pairs: string[]): Promise<Record<string, Mark
   }
 
   const [cryptoCharts, yahooResults] = await Promise.all([
-    fetchCoinGeckoBatch(coingecko).catch(() => ({} as Record<string, MarketChartSnapshot>)),
+    fetchCoinGeckoBatch(coingecko).catch(() => ({}) as Record<string, RawSnapshot>),
     Promise.all(
       yahoo.map(async ({ pairKey, symbol }) => {
         const chart = await fetchYahooChart(symbol);
@@ -140,10 +184,10 @@ async function fetchChartsForPairs(pairs: string[]): Promise<Record<string, Mark
           {
             pair: pairKey,
             prices: chart.prices,
-            price: formatPrice(chart.price),
+            price: formatPrice(chart.price, pairKey),
             change: formatChange(chart.changePct),
             up: chart.changePct >= 0,
-          } satisfies MarketChartSnapshot,
+          } satisfies RawSnapshot,
         ] as const;
       }),
     ),
@@ -161,18 +205,41 @@ export const getMarketCharts = createServerFn({ method: "POST" })
     z.object({ pairs: z.array(z.string().trim().min(1).max(80)).max(24) }).parse(input),
   )
   .handler(async ({ data }): Promise<Record<string, MarketChartSnapshot>> => {
-    const cacheKey = [...new Set(data.pairs.map(normalizePairKey))].sort().join("|");
-    if (chartsCache && Date.now() - chartsCache.at < TTL_MS && chartsCache.key === cacheKey) {
-      return chartsCache.data;
+    const pairs = [...new Set(data.pairs.map(normalizePairKey).filter(Boolean))];
+
+    const needsRefresh = pairs.filter((pair) => {
+      const entry = snapshotCache.get(pair);
+      return !entry || Date.now() - entry.at >= FRESH_MS;
+    });
+
+    if (needsRefresh.length) {
+      try {
+        const fetched = await fetchChartsForPairs(needsRefresh);
+        const at = Date.now();
+        for (const [pair, snapshot] of Object.entries(fetched)) {
+          snapshotCache.set(pair, { snapshot, at });
+        }
+      } catch (err) {
+        console.error("[market-charts]", err);
+      }
     }
 
-    try {
-      const charts = await fetchChartsForPairs(data.pairs);
-      chartsCache = { at: Date.now(), key: cacheKey, data: charts };
-      return charts;
-    } catch (err) {
-      console.error("[market-charts]", err);
-      if (chartsCache?.key === cacheKey) return chartsCache.data;
-      return {};
+    const now = Date.now();
+    const out: Record<string, MarketChartSnapshot> = {};
+
+    for (const pair of pairs) {
+      const entry = snapshotCache.get(pair);
+      if (!entry) continue;
+
+      const age = now - entry.at;
+      // Too old to stand behind: drop it so the card shows a placeholder, not a wrong price.
+      if (age > STALE_MAX_MS) {
+        snapshotCache.delete(pair);
+        continue;
+      }
+
+      out[pair] = { ...entry.snapshot, asOf: entry.at, stale: age >= FRESH_MS };
     }
+
+    return out;
   });

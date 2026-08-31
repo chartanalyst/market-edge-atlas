@@ -8,6 +8,10 @@ export type LiveQuote = {
   price: string;
   change: string;
   up: boolean;
+  /** Epoch ms the quote was last read from a provider. */
+  asOf: number;
+  /** True when served from cache because the latest refresh could not reach a provider. */
+  stale: boolean;
 };
 
 export type BtcChartData = {
@@ -19,14 +23,49 @@ export type BtcChartData = {
   up: boolean;
 };
 
-type CacheEntry = { at: number; key: string; quotes: Record<string, LiveQuote> };
+/** A quote is refetched once it passes this age. */
+const FRESH_MS = 45_000;
+/**
+ * How long a last-known-good quote may still be shown while providers are failing.
+ * Past this the symbol is dropped entirely, so the site renders a placeholder
+ * rather than a price that no longer reflects the market.
+ */
+const STALE_MAX_MS = 30 * 60_000;
+const REQUEST_TIMEOUT_MS = 8_000;
+
+type RawQuote = Omit<LiveQuote, "asOf" | "stale">;
+type CachedQuote = { quote: RawQuote; at: number };
+
+const quoteCache = new Map<string, CachedQuote>();
+
 type ChartCacheEntry = { at: number; data: BtcChartData };
-
-let cache: CacheEntry | null = null;
 let chartCache: ChartCacheEntry | null = null;
-const TTL_MS = 45_000;
+const CHART_TTL_MS = 45_000;
 
-function formatPrice(n: number): string {
+const FX_PAIR = /^[A-Z]{3}\/[A-Z]{3}$/;
+/** Quoted like commodities, not like currency pairs, despite the XXX/USD shape. */
+const METAL_CODES = new Set(["XAU", "XAG", "XPT", "XPD"]);
+
+/**
+ * FX majors are quoted to 4 decimals (3 for JPY crosses); anything else would read
+ * as a rounding error to an analyst. Everything else keeps standard price formatting.
+ */
+function isFxPair(symbol: string): boolean {
+  if (!FX_PAIR.test(symbol)) return false;
+  if (METAL_CODES.has(symbol.slice(0, 3))) return false;
+  return resolvePairSource(symbol)?.provider === "yahoo";
+}
+
+function formatPrice(n: number, symbol: string): string {
+  if (isFxPair(symbol)) {
+    // JPY crosses trade near 150, where 4 decimals is spurious precision.
+    const digits = n >= 50 ? 3 : 4;
+    return n.toLocaleString("en-US", {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    });
+  }
+
   if (n >= 1000) return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
   if (n >= 1)
     return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -38,14 +77,41 @@ function formatChange(pct: number): string {
   return `${sign}${pct.toFixed(2)}%`;
 }
 
+/** Fetch with a hard timeout and one retry, so a hung upstream cannot stall the request. */
+async function fetchJson(url: string, headers: Record<string, string> = {}): Promise<unknown> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: "application/json", ...headers },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
+const YAHOO_HEADERS = { "User-Agent": "Mozilla/5.0 (compatible; MarketEdgeAtlas/1.0)" };
+
 const TWELVE_DATA_SYMBOLS: Record<string, string> = {
   "BTC/USD": "BTC/USD",
   "ETH/USD": "ETH/USD",
+  "SOL/USD": "SOL/USD",
   "EUR/USD": "EUR/USD",
   "GBP/USD": "GBP/USD",
+  "USD/JPY": "USD/JPY",
   NVDA: "NVDA",
   NVIDIA: "NVDA",
   AMD: "AMD",
+  AAPL: "AAPL",
+  MSFT: "MSFT",
+  TSLA: "TSLA",
   SPX500: "SPX",
   SPX: "SPX",
   "XAU/USD": "XAU/USD",
@@ -54,7 +120,8 @@ const TWELVE_DATA_SYMBOLS: Record<string, string> = {
   SILVER: "XAG/USD",
 };
 
-async function fetchTwelveDataQuotes(symbols: string[]): Promise<Record<string, LiveQuote>> {
+/** Preferred source when a key is configured: one batched request, licensed data. */
+async function fetchTwelveDataQuotes(symbols: string[]): Promise<Record<string, RawQuote>> {
   const apiKey = process.env.TWELVE_DATA_API_KEY || process.env.VITE_TWELVE_DATA_API_KEY || "";
   if (!apiKey) return {};
 
@@ -64,37 +131,33 @@ async function fetchTwelveDataQuotes(symbols: string[]): Promise<Record<string, 
   if (!mapped.length) return {};
 
   const apiSymbols = [...new Set(mapped.map((entry) => entry.apiSymbol))].join(",");
-  const res = await fetch(
+  const json = (await fetchJson(
     `https://api.twelvedata.com/quote?symbol=${encodeURIComponent(apiSymbols)}&apikey=${encodeURIComponent(apiKey)}`,
-    { headers: { Accept: "application/json" } },
-  );
-  if (!res.ok) throw new Error(`Twelve Data ${res.status}`);
+  )) as Record<string, unknown>;
 
-  const json = (await res.json()) as Record<
-    string,
-    { close?: string; percent_change?: string; code?: number; message?: string }
-  >;
-  const quoteByApiSymbol =
+  // A single-symbol request returns the quote object directly rather than keyed by symbol.
+  const bySymbol =
     mapped.length === 1 && !json[mapped[0].apiSymbol] ? { [mapped[0].apiSymbol]: json } : json;
-  const out: Record<string, LiveQuote> = {};
+  const out: Record<string, RawQuote> = {};
 
   for (const { symbol, apiSymbol } of mapped) {
-    const row = quoteByApiSymbol[apiSymbol];
+    const row = bySymbol[apiSymbol] as { close?: string; percent_change?: string } | undefined;
     const price = Number(row?.close);
-    const change = Number(row?.percent_change);
     if (!Number.isFinite(price)) continue;
+    const change = Number(row?.percent_change);
+    const pct = Number.isFinite(change) ? change : 0;
     out[symbol] = {
       symbol,
-      price: formatPrice(price),
-      change: formatChange(Number.isFinite(change) ? change : 0),
-      up: !Number.isFinite(change) || change >= 0,
+      price: formatPrice(price, symbol),
+      change: formatChange(pct),
+      up: pct >= 0,
     };
   }
 
   return out;
 }
 
-async function fetchCrypto(symbols: string[]): Promise<Record<string, LiveQuote>> {
+async function fetchCrypto(symbols: string[]): Promise<Record<string, RawQuote>> {
   const entries = symbols
     .map((symbol) => {
       const source = resolvePairSource(symbol);
@@ -104,21 +167,18 @@ async function fetchCrypto(symbols: string[]): Promise<Record<string, LiveQuote>
   if (!entries.length) return {};
 
   const ids = [...new Set(entries.map((entry) => entry.coinId))].join(",");
-  const res = await fetch(
+  const data = (await fetchJson(
     `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`,
-    { headers: { Accept: "application/json" } },
-  );
-  if (!res.ok) throw new Error(`CoinGecko ${res.status}`);
-  const data = (await res.json()) as Record<string, { usd: number; usd_24h_change?: number }>;
+  )) as Record<string, { usd?: number; usd_24h_change?: number }>;
 
-  const out: Record<string, LiveQuote> = {};
+  const out: Record<string, RawQuote> = {};
   for (const { symbol, coinId } of entries) {
     const row = data[coinId];
-    if (!row?.usd) continue;
+    if (typeof row?.usd !== "number") continue;
     const change = row.usd_24h_change ?? 0;
     out[symbol] = {
       symbol,
-      price: formatPrice(row.usd),
+      price: formatPrice(row.usd, symbol),
       change: formatChange(change),
       up: change >= 0,
     };
@@ -126,7 +186,11 @@ async function fetchCrypto(symbols: string[]): Promise<Record<string, LiveQuote>
   return out;
 }
 
-async function fetchYahooQuotes(symbols: string[]): Promise<Record<string, LiveQuote>> {
+/**
+ * Yahoo's v7 `/finance/quote` batch endpoint now answers 401 for unauthenticated
+ * callers, so every quote goes through the v8 chart endpoint, which is still open.
+ */
+async function fetchYahooQuotes(symbols: string[]): Promise<Record<string, RawQuote>> {
   const entries = symbols
     .map((symbol) => {
       const source = resolvePairSource(symbol);
@@ -135,96 +199,67 @@ async function fetchYahooQuotes(symbols: string[]): Promise<Record<string, LiveQ
     .filter((entry): entry is { symbol: string; yahooSymbol: string } => Boolean(entry));
   if (!entries.length) return {};
 
-  const out: Record<string, LiveQuote> = {};
+  const out: Record<string, RawQuote> = {};
 
   await Promise.all(
     entries.map(async ({ symbol, yahooSymbol }) => {
-      const res = await fetch(
-        `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=1d&interval=1d`,
-        {
-          headers: {
-            Accept: "application/json",
-            "User-Agent": "Mozilla/5.0 (compatible; MarketEdgeAtlas/1.0)",
-          },
-        },
-      );
-      if (!res.ok) return;
-
-      const json = (await res.json()) as {
-        chart?: {
-          result?: Array<{
-            meta?: {
-              regularMarketPrice?: number;
-              chartPreviousClose?: number;
-              previousClose?: number;
-              regularMarketPreviousClose?: number;
-            };
-          }>;
+      try {
+        const json = (await fetchJson(
+          `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=1d&interval=1d`,
+          YAHOO_HEADERS,
+        )) as {
+          chart?: {
+            result?: Array<{
+              meta?: {
+                regularMarketPrice?: number;
+                chartPreviousClose?: number;
+                previousClose?: number;
+                regularMarketPreviousClose?: number;
+              };
+            }>;
+          };
         };
-      };
-      const meta = json.chart?.result?.[0]?.meta;
-      const price = meta?.regularMarketPrice;
-      const previous =
-        meta?.chartPreviousClose ?? meta?.regularMarketPreviousClose ?? meta?.previousClose;
-      if (typeof price !== "number") return;
-      const change =
-        typeof previous === "number" && previous > 0 ? ((price - previous) / previous) * 100 : 0;
 
-      out[symbol] = {
-        symbol,
-        price: formatPrice(price),
-        change: formatChange(change),
-        up: change >= 0,
-      };
+        const meta = json.chart?.result?.[0]?.meta;
+        const price = meta?.regularMarketPrice;
+        if (typeof price !== "number") return;
+
+        const previous =
+          meta?.chartPreviousClose ?? meta?.regularMarketPreviousClose ?? meta?.previousClose;
+        const change =
+          typeof previous === "number" && previous > 0 ? ((price - previous) / previous) * 100 : 0;
+
+        out[symbol] = {
+          symbol,
+          price: formatPrice(price, symbol),
+          change: formatChange(change),
+          up: change >= 0,
+        };
+      } catch {
+        // Leave the symbol out; the caller falls back to the last known good quote.
+      }
     }),
   );
 
   return out;
 }
 
-async function fetchYahooQuoteBatch(symbols: string[]): Promise<Record<string, LiveQuote>> {
-  const entries = symbols
-    .map((symbol) => {
-      const source = resolvePairSource(symbol);
-      return source?.provider === "yahoo" ? { symbol, yahooSymbol: source.symbol } : null;
-    })
-    .filter((entry): entry is { symbol: string; yahooSymbol: string } => Boolean(entry));
-  if (!entries.length) return {};
+/** Twelve Data covers what it can; the free sources fill in the rest. */
+async function fetchQuotes(symbols: string[]): Promise<Record<string, RawQuote>> {
+  const out: Record<string, RawQuote> = {};
 
-  const yahooSymbols = [...new Set(entries.map((entry) => entry.yahooSymbol))].join(",");
-  const res = await fetch(
-    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}`,
-    {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": "Mozilla/5.0 (compatible; MarketEdgeAtlas/1.0)",
-      },
-    },
+  const licensed = await fetchTwelveDataQuotes(symbols).catch(
+    () => ({}) as Record<string, RawQuote>,
   );
-  if (!res.ok) return {};
+  Object.assign(out, licensed);
 
-  const json = (await res.json()) as {
-    quoteResponse?: {
-      result?: Array<{
-        symbol?: string;
-        regularMarketPrice?: number;
-        regularMarketChangePercent?: number;
-      }>;
-    };
-  };
-  const bySymbol = new Map((json.quoteResponse?.result ?? []).map((row) => [row.symbol, row]));
-  const out: Record<string, LiveQuote> = {};
-
-  for (const { symbol, yahooSymbol } of entries) {
-    const row = bySymbol.get(yahooSymbol);
-    if (typeof row?.regularMarketPrice !== "number") continue;
-    const change = row.regularMarketChangePercent ?? 0;
-    out[symbol] = {
-      symbol,
-      price: formatPrice(row.regularMarketPrice),
-      change: formatChange(change),
-      up: change >= 0,
-    };
+  const remaining = symbols.filter((symbol) => !out[symbol]);
+  if (remaining.length) {
+    const [crypto, yahoo] = await Promise.all([
+      fetchCrypto(remaining).catch(() => ({}) as Record<string, RawQuote>),
+      fetchYahooQuotes(remaining).catch(() => ({}) as Record<string, RawQuote>),
+    ]);
+    Object.assign(out, crypto, yahoo);
   }
 
   return out;
@@ -239,35 +274,45 @@ export const getLivePrices = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const requested = data?.symbols?.length ? data.symbols : tickerItems.map((item) => item.symbol);
     const symbols = [...new Set(requested.map(normalizePairKey).filter(Boolean))];
-    const key = symbols.sort().join("|");
 
-    if (cache && Date.now() - cache.at < TTL_MS && cache.key === key) {
-      return { quotes: cache.quotes, cached: true as const };
+    const needsRefresh = symbols.filter((symbol) => {
+      const entry = quoteCache.get(symbol);
+      return !entry || Date.now() - entry.at >= FRESH_MS;
+    });
+
+    if (needsRefresh.length) {
+      try {
+        const fetched = await fetchQuotes(needsRefresh);
+        const at = Date.now();
+        for (const [symbol, quote] of Object.entries(fetched)) {
+          quoteCache.set(symbol, { quote, at });
+        }
+      } catch (err) {
+        console.error("[prices]", err);
+      }
     }
 
-    try {
-      const [twelveData, crypto, yahoo] = await Promise.all([
-        fetchTwelveDataQuotes(symbols).catch(() => ({}) as Record<string, LiveQuote>),
-        fetchCrypto(symbols).catch(() => ({}) as Record<string, LiveQuote>),
-        fetchYahooQuoteBatch(symbols)
-          .then(async (batch) => {
-            const missing = symbols.filter(
-              (symbol) => resolvePairSource(symbol)?.provider === "yahoo" && !batch[symbol],
-            );
-            if (!missing.length) return batch;
-            const chartQuotes = await fetchYahooQuotes(missing);
-            return { ...batch, ...chartQuotes };
-          })
-          .catch(() => ({}) as Record<string, LiveQuote>),
-      ]);
-      const quotes = { ...crypto, ...yahoo, ...twelveData };
-      cache = { at: Date.now(), key, quotes };
-      return { quotes, cached: false as const };
-    } catch (err) {
-      console.error("[prices]", err);
-      if (cache?.key === key) return { quotes: cache.quotes, cached: true as const };
-      return { quotes: {} as Record<string, LiveQuote>, cached: false as const };
+    const now = Date.now();
+    const quotes: Record<string, LiveQuote> = {};
+    let stale = false;
+
+    for (const symbol of symbols) {
+      const entry = quoteCache.get(symbol);
+      if (!entry) continue;
+
+      const age = now - entry.at;
+      // Too old to stand behind: drop it so the UI shows a placeholder, not a wrong price.
+      if (age > STALE_MAX_MS) {
+        quoteCache.delete(symbol);
+        continue;
+      }
+
+      const isStale = age >= FRESH_MS;
+      if (isStale) stale = true;
+      quotes[symbol] = { ...entry.quote, asOf: entry.at, stale: isStale };
     }
+
+    return { quotes, stale, asOf: now };
   });
 
 function sampleSeries(values: number[], target = 36): number[] {
@@ -277,30 +322,21 @@ function sampleSeries(values: number[], target = 36): number[] {
 }
 
 async function fetchBtcChart(): Promise<BtcChartData> {
-  const [chartRes, ohlcRes, spotRes] = await Promise.all([
-    fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7", {
-      headers: { Accept: "application/json" },
-    }),
-    fetch("https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=7", {
-      headers: { Accept: "application/json" },
-    }),
-    fetch(
+  const [chartJson, ohlcJson, spotJson] = await Promise.all([
+    fetchJson(
+      "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=7",
+    ) as Promise<{ prices?: [number, number][] }>,
+    fetchJson(
+      "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=7",
+    ) as Promise<[number, number, number, number, number][]>,
+    fetchJson(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
-      { headers: { Accept: "application/json" } },
-    ),
+    ).catch(() => ({})) as Promise<{ bitcoin?: { usd?: number; usd_24h_change?: number } }>,
   ]);
-
-  if (!chartRes.ok || !ohlcRes.ok) throw new Error(`CoinGecko chart ${chartRes.status}`);
-
-  const chartJson = (await chartRes.json()) as { prices?: [number, number][] };
-  const ohlcJson = (await ohlcRes.json()) as [number, number, number, number, number][];
-  const spotJson = (await spotRes.json().catch(() => ({}))) as {
-    bitcoin?: { usd?: number; usd_24h_change?: number };
-  };
 
   const rawPrices = (chartJson.prices ?? []).map(([, p]) => p);
   const prices = sampleSeries(rawPrices);
-  const candles = ohlcJson.map(
+  const candles = (Array.isArray(ohlcJson) ? ohlcJson : []).map(
     (row) => [row[1], row[2], row[3], row[4]] as [number, number, number, number],
   );
 
@@ -310,7 +346,7 @@ async function fetchBtcChart(): Promise<BtcChartData> {
   return {
     prices: prices.length > 1 ? prices : rawPrices,
     candles: candles.length > 0 ? candles.slice(-14) : [],
-    price: formatPrice(usd),
+    price: formatPrice(usd, "BTC/USD"),
     change: formatChange(changePct),
     up: changePct >= 0,
   };
@@ -318,7 +354,7 @@ async function fetchBtcChart(): Promise<BtcChartData> {
 
 export const getBtcMarketChart = createServerFn({ method: "GET" }).handler(
   async (): Promise<BtcChartData> => {
-    if (chartCache && Date.now() - chartCache.at < TTL_MS) {
+    if (chartCache && Date.now() - chartCache.at < CHART_TTL_MS) {
       return chartCache.data;
     }
 

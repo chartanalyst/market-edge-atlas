@@ -533,16 +533,21 @@ export const assetDistribution = [
   { label: "Forex", pct: 10, color: "oklch(0.72 0.004 85)" },
 ];
 
+/**
+ * Instruments shown in the market bar. Prices and percentage changes are never stored
+ * here — they come from the live feed at render time, and an instrument without a
+ * live quote shows a placeholder instead of a stored number.
+ */
 export const tickerItems = [
-  { symbol: "BTC/USD", price: "112,480", change: "+1.84%", up: true },
-  { symbol: "ETH/USD", price: "4,218", change: "+2.31%", up: true },
-  { symbol: "EUR/USD", price: "1.0942", change: "-0.21%", up: false },
-  { symbol: "GBP/USD", price: "1.2814", change: "+0.12%", up: true },
-  { symbol: "NVDA", price: "132.84", change: "+0.96%", up: true },
-  { symbol: "AMD", price: "167.42", change: "+0.42%", up: true },
-  { symbol: "SPX500", price: "5,684", change: "+0.42%", up: true },
-  { symbol: "XAU/USD", price: "2,431.60", change: "+0.74%", up: true },
-  { symbol: "XAG/USD", price: "30.14", change: "+0.31%", up: true },
+  { symbol: "BTC/USD" },
+  { symbol: "ETH/USD" },
+  { symbol: "EUR/USD" },
+  { symbol: "GBP/USD" },
+  { symbol: "NVDA" },
+  { symbol: "AMD" },
+  { symbol: "SPX500" },
+  { symbol: "XAU/USD" },
+  { symbol: "XAG/USD" },
 ];
 
 export const coverageMap = [

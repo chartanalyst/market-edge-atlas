@@ -13,7 +13,6 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BackToTop, ScrollProgress, SiteNav } from "@/components/site/nav";
-import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { SiteFooter } from "@/components/site/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ChatWidget } from "@/components/site/chat-widget";
@@ -123,8 +122,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "canonical", href: absoluteUrl("/") },
       { rel: "manifest", href: "/site.webmanifest" },
-      { rel: "icon", href: "/market-logo.png", type: "image/svg+xml" },
-      { rel: "apple-touch-icon", href: "/market-logo.png" },
+      { rel: "icon", href: "/market-logo-removebg-preview.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/market-logo-removebg-preview.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -165,7 +164,6 @@ function RootComponent() {
       <SiteContentProvider value={content}>
         {isChrome ? (
           <>
-            <SmoothScroll />
             <ScrollProgress />
             <SiteNav />
           </>

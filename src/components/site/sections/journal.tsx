@@ -56,7 +56,7 @@ export function TradingJournal() {
         <SectionHeading
           eyebrow="Trading journal"
           title="Performance tracked in risk multiples."
-          description="Every published transaction feeds the equity curve automatically from the admin journal or the configured Excel CSV sync."
+          description="Every published trade feeds the equity curve automatically from the admin journal."
         />
 
         <Stagger className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -76,8 +76,8 @@ export function TradingJournal() {
               <p className="eyebrow">Equity curve</p>
               <p className="mt-1.5 text-xs text-muted-foreground">
                 {chart.fromSeed
-                  ? "Waiting for synced transaction data"
-                  : "Cumulative R from synced transactions · auto-refreshes every 45 seconds · starting at 0R"}
+                  ? "Waiting for the first published trade"
+                  : "Cumulative R from published trades · auto-refreshes every 45 seconds · starting at 0R"}
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
@@ -88,7 +88,7 @@ export function TradingJournal() {
                     : "border-emerald/30 bg-emerald/5 text-emerald"
                 }`}
               >
-                {chart.fromSeed ? "Waiting" : "Synced"}
+                {chart.fromSeed ? "No trades" : "Live"}
               </span>
               <p className="num text-xl font-semibold text-emerald">
                 {chart.endR >= 0 ? "+" : ""}

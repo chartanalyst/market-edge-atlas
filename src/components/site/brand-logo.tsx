@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/site-meta";
 
-const LOGO_SRC = "/market-logo.png";
+/** Transparent-background master (RGBA, 500x500) so the mark sits on any surface. */
+const LOGO_SRC = "/market-logo-removebg-preview.png";
 
 export function BrandLogo({
   className,
